@@ -12,7 +12,7 @@ import {
   WarningIcon,
 } from "phosphor-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { inFlight, MAX_RETRIES } from "../car/command";
 import { freshness } from "../car/freshness";
 import { useCommand } from "../car/use-command";
@@ -22,6 +22,7 @@ import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Appear } from "../ui/appear";
 import { BusyRing } from "../ui/busy-ring";
+import { GlassButton } from "../ui/glass";
 import { HoldButton } from "../ui/hold-button";
 import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
@@ -71,20 +72,14 @@ export default function Doors() {
   return (
     <Screen>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.backToCar}
+        <GlassButton
+          label={t.backToCar}
+          symbol="chevron.left"
           onPress={() => router.back()}
-          style={{
-            width: 44,
-            height: 44,
-            justifyContent: "center",
-            alignItems: "center",
-            marginLeft: -10,
-          }}
+          style={{ marginLeft: -4 }}
         >
           <CaretLeftIcon size={iconSize.md} color={c.fg} />
-        </Pressable>
+        </GlassButton>
         <Text variant="label" weight={600} accessibilityRole="header">
           {t.doors}
         </Text>

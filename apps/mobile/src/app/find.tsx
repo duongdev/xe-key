@@ -10,7 +10,7 @@ import {
   QuestionIcon,
 } from "phosphor-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,12 +20,12 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { useCar } from "../services/query";
 import { useDistance, usePhonePosition } from "../services/use-distance";
-import { haptics } from "../theme/haptics";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
-import { Glass } from "../ui/glass";
+import { GlassButton } from "../ui/glass";
 import { PageHeader } from "../ui/page-header";
+import { SolidPressable } from "../ui/press-glass";
 import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
@@ -66,14 +66,20 @@ export default function Find() {
       if (e.translationX > 60 || e.velocityX > 500) router.back();
     },
   });
-  useEffect(() => {
-    if (!ready || !loc || !me || framed.current) return;
-    framed.current = true;
+  const frame = () => {
+    if (!loc) return;
+    if (!me) return map.current?.animateToRegion(regionFor(loc), 400);
     // mapPadding already keeps the sheet and status bar clear; this is breathing room only.
     map.current?.fitToCoordinates([me, { latitude: loc.lat, longitude: loc.lng }], {
       edgePadding: { top: 60, right: 48, bottom: 48, left: 48 },
       animated: true,
     });
+  };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: frame reads the same loc and me
+  useEffect(() => {
+    if (!ready || !loc || !me || framed.current) return;
+    framed.current = true;
+    frame();
   }, [ready, loc, me]);
   useEffect(() => {
     if (loc && !framed.current) map.current?.animateToRegion(regionFor(loc), 400);
@@ -197,27 +203,27 @@ export default function Find() {
         <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 24 }} />
       </GestureDetector>
 
-      {/* Floats over the map: Liquid Glass on iOS 26+. */}
-      <Glass
-        interactive
-        style={{
-          position: "absolute",
-          top: insets.top + 6,
-          left: space.gutter - 4,
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-        }}
+      {/* Float over the map: Liquid Glass on iOS 26+. Icons stay fg to read on any map colour. */}
+      <GlassButton
+        label={t.backToCar}
+        symbol="chevron.left"
+        onPress={() => router.back()}
+        style={{ position: "absolute", top: insets.top + 6, left: space.gutter - 4 }}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.backToCar}
-          onPress={() => router.back()}
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        <CaretLeftIcon size={iconSize.md} color={c.fg} />
+      </GlassButton>
+      {loc && sheetH ? (
+        <GlassButton
+          label={t.recenter}
+          symbol="location"
+          onPress={() => {
+            frame();
+          }}
+          style={{ position: "absolute", bottom: sheetH + 12, right: space.gutter - 4 }}
         >
-          <CaretLeftIcon size={iconSize.md} color={c.fg} />
-        </Pressable>
-      </Glass>
+          <NavigationArrowIcon size={iconSize.md} color={c.fg} />
+        </GlassButton>
+      ) : null}
 
       <View
         onLayout={(e) => setSheetH(e.nativeEvent.layout.height)}
@@ -268,14 +274,13 @@ export default function Find() {
           </View>
         ) : null}
         <View style={{ flexDirection: "row", gap: 12 }}>
-          <Pressable
+          <SolidPressable
             accessibilityRole="button"
             disabled={locating}
             onPress={() => {
-              haptics.light();
               send("find");
             }}
-            style={({ pressed }) => ({
+            style={{
               flex: 1,
               height: 60,
               borderRadius: 30,
@@ -284,8 +289,7 @@ export default function Find() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              opacity: pressed ? 0.8 : 1,
-            })}
+            }}
           >
             {locating ? (
               <ActivityIndicator color={c.onacc} />
@@ -295,16 +299,15 @@ export default function Find() {
             <Text weight={600} color="onacc">
               {locating ? t.locating : t.update}
             </Text>
-          </Pressable>
-          <Pressable
+          </SolidPressable>
+          <SolidPressable
             accessibilityRole="button"
             disabled={!loc}
             onPress={() => {
               if (!loc) return;
-              haptics.light();
               Linking.openURL(`maps://?daddr=${loc.lat},${loc.lng}&dirflg=w`);
             }}
-            style={({ pressed }) => ({
+            style={{
               flex: 1,
               height: 60,
               borderRadius: 30,
@@ -313,12 +316,11 @@ export default function Find() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              opacity: pressed ? 0.7 : 1,
-            })}
+            }}
           >
             <NavigationArrowIcon size={20} color={c.fg} />
             <Text weight={600}>{t.go}</Text>
-          </Pressable>
+          </SolidPressable>
         </View>
       </View>
     </View>

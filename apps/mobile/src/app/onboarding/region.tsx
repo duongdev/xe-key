@@ -51,6 +51,7 @@ export default function Region() {
                 accessibilityLabel={r.name}
                 onPress={() => {
                   if (on) return;
+                  // haptics: radio list step; no shared list component (HANDOFF › Haptics).
                   haptics.selection();
                   setPicked(r.id);
                 }}

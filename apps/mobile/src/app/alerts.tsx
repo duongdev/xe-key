@@ -8,6 +8,7 @@ import {
   LockOpenIcon,
   MapPinIcon,
   PowerIcon,
+  ShieldCheckIcon,
   TrashIcon,
   WarningIcon,
   WrenchIcon,
@@ -32,6 +33,7 @@ import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Shimmer } from "../ui/appear";
 import { EmptyState } from "../ui/empty-state";
+import { GlassButton } from "../ui/glass";
 import { GLASS_TABS_H, GlassTabs } from "../ui/glass-tabs";
 import { PageHeader } from "../ui/page-header";
 import { Screen, useBottomPad } from "../ui/screen";
@@ -84,6 +86,7 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
       friction={1.6}
       rightThreshold={DELETE_W / 2}
       overshootRight={false}
+      // haptics: the swipe passing its delete threshold; no shared swipe row yet (HANDOFF › Haptics).
       onSwipeableWillOpen={() => haptics.selection()}
       renderRightActions={() => (
         <Pressable
@@ -201,7 +204,7 @@ export default function Alerts() {
   });
   const pull = usePullRefresh(refetch);
   const data = all?.filter((a) => inFilter(a, filter));
-  // Count badges match Home's: unread items only (commands are never unread).
+  // Count badge matches Home's: unread items only.
   const count = (f: Filter) => all?.filter((a) => a.unread && inFilter(a, f)).length ?? 0;
 
   const setAlerts = (fn: (list: CarAlert[]) => CarAlert[]) =>
@@ -209,7 +212,6 @@ export default function Alerts() {
 
   // Remove now, delete on the server only once the Undo window has passed.
   const remove = (alert: CarAlert) => {
-    haptics.light();
     setAlerts((list) => list.filter((a) => a.id !== alert.id));
     let undone = false;
     toast.show({
@@ -235,7 +237,7 @@ export default function Alerts() {
     });
   };
 
-  const unread = data?.some((a) => a.unread) ?? false;
+  const unread = all?.some((a) => a.unread) ?? false;
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const today = data?.filter((a) => a.at >= start.getTime()) ?? [];
@@ -261,20 +263,21 @@ export default function Alerts() {
           action={{ label: t.retry, onPress: () => refetch() }}
         />
       );
-    if (data.length === 0)
+    if (data.length === 0) {
+      const Icon = { all: BellIcon, warnings: ShieldCheckIcon, commands: LockIcon }[filter];
       return (
         <EmptyState
-          icon={<BellIcon size={56} color={c.fg2} />}
-          badge={<CheckIcon size={20} color={c.acc} />}
-          badgeTone="acc"
-          title={t.allQuiet}
+          icon={<Icon size={56} color={filter === "warnings" ? c.acc : c.fg2} />}
+          title={t.alertEmpty[filter].title}
+          text={t.alertEmpty[filter].text}
         />
       );
+    }
     // Honda keeps hundreds of alerts with no paging: a virtualized list keeps scrolling smooth.
     return (
       <SectionList
         style={{ flex: 1, marginHorizontal: -20 }}
-        contentContainerStyle={{ paddingBottom: bottomPad + GLASS_TABS_H + 12 }}
+        contentContainerStyle={{ paddingBottom: bottomPad + GLASS_TABS_H + 72 }}
         sections={[
           { key: "today", title: t.today, data: today },
           { key: "earlier", title: t.earlier, data: earlier },
@@ -311,28 +314,21 @@ export default function Alerts() {
       <PageHeader
         title={t.alerts}
         right={
-          unread ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t.markAllRead}
+          all?.length ? (
+            <GlassButton
+              label={t.markAllRead}
+              symbol="checkmark"
+              color={unread ? c.acc : c.fg2}
+              disabled={!unread}
               onPress={() => {
-                haptics.light();
-                const ids = all?.filter((a) => a.unread).map((a) => a.id) ?? [];
+                const ids = all.filter((a) => a.unread).map((a) => a.id);
                 void markSeen(ids);
                 setAlerts((list) => list.map((a) => ({ ...a, unread: false })));
                 qc.setQueryData<CarStatus>(CAR_KEY, (car) => (car ? { ...car, alerts: 0 } : car));
               }}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: c.s1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
             >
-              <CheckCircleIcon size={iconSize.md} color={c.acc} />
-            </Pressable>
+              <CheckIcon size={iconSize.md} color={unread ? c.acc : c.fg2} />
+            </GlassButton>
           ) : null
         }
       />
@@ -344,7 +340,8 @@ export default function Alerts() {
           tabs={FILTERS.map((f) => ({
             key: f,
             label: t.alertFilters[f],
-            badge: f === "all" ? undefined : count(f) || undefined,
+            // Commands are never unread, so only Warnings carries a badge.
+            badge: f === "warnings" ? count(f) : undefined,
           }))}
         />
       ) : null}

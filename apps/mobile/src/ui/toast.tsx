@@ -188,7 +188,6 @@ function ToastView({
         }[toast.kind];
   return (
     <Glass
-      interactive
       style={{
         minHeight: 52,
         maxWidth: 380,

@@ -1,32 +1,27 @@
 import { router } from "expo-router";
 import { CaretLeftIcon } from "phosphor-react-native";
 import type { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useT } from "../i18n";
 import { iconSize, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { GlassButton } from "./glass";
 import { Text } from "./text";
 
-/** Back chevron + large title, with an optional slot on the right. */
+/** Glass back circle + large title, with an optional slot on the right. */
 export function PageHeader({ title, right }: { title: string; right?: ReactNode }) {
   const { c } = useTheme();
   const t = useT();
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 12, minHeight: 56 }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t.backToCar}
+      <GlassButton
+        label={t.backToCar}
+        symbol="chevron.left"
         onPress={() => router.back()}
-        style={{
-          width: 44,
-          height: 44,
-          justifyContent: "center",
-          marginLeft: -10,
-          alignItems: "center",
-        }}
+        style={{ marginLeft: -4 }}
       >
         <CaretLeftIcon size={iconSize.md} color={c.fg} />
-      </Pressable>
+      </GlassButton>
       <Text accessibilityRole="header" style={{ ...textStyle("large"), flex: 1 }} numberOfLines={1}>
         {title}
       </Text>

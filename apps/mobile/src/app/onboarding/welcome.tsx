@@ -208,6 +208,7 @@ export default function Welcome() {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={(e) => {
           const k = Math.round(e.nativeEvent.contentOffset.x / width);
+          // haptics: carousel page change; no shared carousel (HANDOFF › Haptics).
           if (k !== i) haptics.selection();
           setI(k);
         }}

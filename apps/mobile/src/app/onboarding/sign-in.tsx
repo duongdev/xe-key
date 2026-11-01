@@ -58,6 +58,7 @@ export default function SignIn() {
   const submit = useCallback(async () => {
     if (!national) {
       setError("invalid-phone");
+      // haptics: rejected submit; no shared form submit helper yet (HANDOFF › Haptics).
       haptics.warning();
       return;
     }
@@ -68,7 +69,7 @@ export default function SignIn() {
     const res = await auth.signIn({ region: region.id, phone: national, password });
     setBusy(false);
     if (!res.ok) {
-      // Auto-retries while Honda is down stay silent: only a new failure buzzes.
+      // haptics: rejected submit. Auto-retries while Honda is down stay silent: only a new failure buzzes.
       if (errorRef.current !== res.error) haptics.warning();
       setError(res.error);
       setCode(res.code);

@@ -230,7 +230,6 @@ export const en = {
   yesterday: "Yest.",
   loadFailed: "Couldn't load",
   retry: "Retry",
-  allQuiet: "All quiet",
   today: "Today",
   earlier: "Earlier",
   delete: "Delete",
@@ -238,6 +237,13 @@ export const en = {
   undo: "Undo",
   markAllRead: "Mark all read",
   alertFilters: { all: "All", warnings: "Warnings", commands: "Commands" },
+  alertEmpty: {
+    all: { title: "No alerts", text: "Warning lights and command results show here." },
+    warnings: { title: "No warning lights", text: "Honda reports all clear." },
+    commands: { title: "No commands yet", text: "Lock, unlock and engine results show here." },
+  },
+  unreadCount: (n: number) => `${n} unread`,
+  recenter: "Show car and you",
   alertText: {
     unlocked: (n?: number) => `Unlocked ${n ?? 0} min`,
     "auto-off": () => "Engine auto-off",

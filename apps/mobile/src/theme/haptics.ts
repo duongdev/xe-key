@@ -1,15 +1,17 @@
 import * as Haptics from "expo-haptics";
 
 /**
- * One haptic per user action, only when something changed. iOS mutes these when the user
- * turns System Haptics off. Native controls (Switch, keyboard) bring their own; don't add more.
+ * Haptic kinds per design/HANDOFF.md › Tokens › Haptics. One per moment, fired at the change
+ * (touch down, threshold, new stop), never on lift, only on change. Shared components own these;
+ * a screen calls them only for a flow no component covers, with a `haptics:` comment (a test
+ * checks this). Native and glass controls bring their own. iOS System Haptics off mutes all.
  */
 export const haptics = {
-  /** Finger down on a Button (not links or rows); a pull that triggers a refresh. */
+  /** Touch down on a solid button (pairs with the glass press); pull-to-refresh threshold. */
   light: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
   /** A hold-to-arm action is armed. */
   medium: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),
-  /** A discrete value changed: radio pick, carousel page, slider or scrub stop. */
+  /** A step changed under the finger: stop, tab, page, swipe threshold, hold start and progress. */
   selection: () => Haptics.selectionAsync(),
   /** Final good result the user waited for: code verified, command confirmed. */
   success: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
