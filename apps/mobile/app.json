@@ -9,7 +9,8 @@
     "backgroundColor": "#0B0B0C",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "dev.duongdev.xekey"
+      "bundleIdentifier": "dev.duongdev.xekey",
+      "appleTeamId": "9F77J83SKT"
     },
     "plugins": [
       "expo-font",
