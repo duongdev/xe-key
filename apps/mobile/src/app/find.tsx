@@ -55,7 +55,8 @@ export default function Find() {
     if (loc) map.current?.animateToRegion(regionFor(loc), 400);
   }, [loc]);
 
-  if (car && !loc) {
+  // undefined = not fetched yet (never saved to disk): show the map area empty, not "no GPS".
+  if (car && car.location === null) {
     return (
       <Screen>
         <PageHeader title={t.findCar} />

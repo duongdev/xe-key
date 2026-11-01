@@ -4,6 +4,7 @@ import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persi
 import {
   focusManager,
   onlineManager,
+  QueryCache,
   QueryClient,
   type QueryKey,
   useQuery,
@@ -13,7 +14,8 @@ import { useFocusEffect } from "expo-router";
 import { type ReactNode, useCallback, useLayoutEffect, useRef } from "react";
 import { AppState } from "react-native";
 import { usePrefs } from "../prefs";
-import type { CarService } from "./car";
+import type { CarService, CarStatus } from "./car";
+import { SignedOut } from "./honda";
 import { liveCar } from "./live-car";
 import { mockCar } from "./mock-car";
 
@@ -27,11 +29,35 @@ focusManager.setEventListener((setFocused) => {
 });
 
 export const queryClient = new QueryClient({
+  // A session that cannot be restored takes the saved car data with it.
+  queryCache: new QueryCache({ onError: (e) => e instanceof SignedOut && wipeCache() }),
   // No polling while parked: each Honda read may wake the car's TCU (task 014, Q22).
   defaultOptions: { queries: { gcTime: 7 * 24 * 3_600_000, staleTime: 30_000, retry: 1 } },
 });
 
-const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: "query.v1" });
+// AsyncStorage is not encrypted and is in device backups: only the car snapshot is saved, and
+// without its GPS position (alerts and trips are re-fetched on open).
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: "query.v1",
+  serialize: (client) =>
+    JSON.stringify({
+      ...client,
+      clientState: {
+        ...client.clientState,
+        queries: client.clientState.queries.map((q) => {
+          const car = q.state.data as CarStatus | undefined;
+          return car ? { ...q, state: { ...q.state, data: { ...car, location: undefined } } } : q;
+        }),
+      },
+    }),
+});
+
+/** Sign-out and lost sessions: forget the car in memory and on disk. */
+export function wipeCache() {
+  queryClient.clear();
+  persister.removeClient();
+}
 
 let impl: CarService = __DEV__ ? mockCar : liveCar;
 
@@ -54,7 +80,7 @@ export const carService: CarService = {
   deleteAlert: (id) => impl.deleteAlert(id),
 };
 /** Bump when CarStatus changes shape so old cached data is dropped. */
-const CACHE_VERSION = "4";
+const CACHE_VERSION = "5";
 
 export const CAR_KEY = ["car"] as const;
 
@@ -62,7 +88,13 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, buster: CACHE_VERSION }}
+      persistOptions={{
+        persister,
+        buster: CACHE_VERSION,
+        dehydrateOptions: {
+          shouldDehydrateQuery: (q) => q.queryKey[0] === CAR_KEY[0] && q.state.status === "success",
+        },
+      }}
     >
       <CarServiceGate>{children}</CarServiceGate>
     </PersistQueryClientProvider>

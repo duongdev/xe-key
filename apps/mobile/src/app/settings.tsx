@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import * as LocalAuthentication from "expo-local-authentication";
 import { router } from "expo-router";
 import {
@@ -19,7 +18,7 @@ import { Alert, Pressable, ScrollView, Switch, View } from "react-native";
 import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
 import { resetLiveCar } from "../services/live-car";
-import { useCar } from "../services/query";
+import { useCar, wipeCache } from "../services/query";
 import { secret } from "../services/secret";
 import { useAuth } from "../services/use-auth";
 import { haptics } from "../theme/haptics";
@@ -131,7 +130,6 @@ function Group({ title, children }: { title: string; children: ReactNode[] }) {
 export default function Settings() {
   const { c } = useTheme();
   const t = useT();
-  const qc = useQueryClient();
   const { prefs, update } = usePrefs();
   const { data: car } = useCar();
   const auth = useAuth();
@@ -169,7 +167,7 @@ export default function Settings() {
         onPress: async () => {
           await auth.signOut();
           resetLiveCar();
-          qc.clear();
+          wipeCache();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
           router.replace("/onboarding/welcome");

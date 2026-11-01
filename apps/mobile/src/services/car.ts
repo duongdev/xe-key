@@ -22,8 +22,8 @@ export type CarStatus = {
   cabinC: number | null;
   fuelPct: number;
   rangeKm: number;
-  /** Last GPS fix; null when the car has no signal. */
-  location: CarLocation | null;
+  /** Last GPS fix; null when the car has no signal; undefined until fetched (never saved to disk). */
+  location?: CarLocation | null;
   batteryV: number | null;
   odometerKm: number | null;
   serviceInKm: number | null;

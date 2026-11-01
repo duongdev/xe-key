@@ -111,7 +111,7 @@ export const en = {
   notReached: "Couldn't reach car",
   tryAgain: "Try again",
   live: "Live",
-  waking: "Waking",
+  waking: "Updating",
   /** `app` null while a check is running. */
   reportedChecked: (car: string, app: string | null) =>
     `Car reported ${car} · ${app ? `Checked ${app}` : "Updating…"}`,
