@@ -10,7 +10,11 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "dev.duongdev.xekey",
-      "appleTeamId": "9F77J83SKT"
+      "appleTeamId": "9F77J83SKT",
+      "infoPlist": {
+        "CFBundleLocalizations": ["en", "vi"],
+        "CFBundleDevelopmentRegion": "en"
+      }
     },
     "plugins": [
       "expo-font",
@@ -30,7 +34,8 @@
       ],
       "expo-router",
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/without-push"
     ],
     "scheme": "xekey"
   }

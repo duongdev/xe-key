@@ -35,3 +35,6 @@ research/probe-report.html
 
 # bruno env with real values (local)
 bruno/environments/*.local.bru
+
+# unlazy gate ledgers (local)
+.unlazy/
