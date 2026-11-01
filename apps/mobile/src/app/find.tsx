@@ -11,14 +11,15 @@ import {
 } from "phosphor-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { inFlight } from "../car/command";
 import { freshness } from "../car/freshness";
 import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { useCar } from "../services/query";
-import { useDistance } from "../services/use-distance";
+import { useDistance, usePhonePosition } from "../services/use-distance";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
@@ -51,8 +52,29 @@ export default function Find() {
   const map = useRef<MapView>(null);
   // The map runs under the sheet (no black corners); padding keeps the car and Apple's legal label above it.
   const [sheetH, setSheetH] = useState(0);
+  const phone = usePhonePosition(loc, true);
+  const me = phone ? { latitude: phone.lat, longitude: phone.lng } : null;
+  // Frame you and the car together once your position is known (Find.png: both, joined by a line).
+  const framed = useRef(false);
+  const [ready, setReady] = useState(false);
+  const edgeBack = usePanGesture({
+    runOnJS: true,
+    activeOffsetX: 10,
+    onDeactivate: (e) => {
+      if (e.translationX > 60 || e.velocityX > 500) router.back();
+    },
+  });
   useEffect(() => {
-    if (loc) map.current?.animateToRegion(regionFor(loc), 400);
+    if (!ready || !loc || !me || framed.current) return;
+    framed.current = true;
+    // mapPadding already keeps the sheet and status bar clear; this is breathing room only.
+    map.current?.fitToCoordinates([me, { latitude: loc.lat, longitude: loc.lng }], {
+      edgePadding: { top: 60, right: 48, bottom: 48, left: 48 },
+      animated: true,
+    });
+  }, [ready, loc, me]);
+  useEffect(() => {
+    if (loc && !framed.current) map.current?.animateToRegion(regionFor(loc), 400);
   }, [loc]);
 
   // undefined = not fetched yet (never saved to disk): show the map area empty, not "no GPS".
@@ -116,11 +138,25 @@ export default function Find() {
           }}
           userInterfaceStyle={scheme}
           showsPointsOfInterests={false}
+          // Your own position; shows once location is allowed (asked on this screen).
+          showsUserLocation
+          showsMyLocationButton={false}
           pitchEnabled={false}
           ref={map}
-          onMapReady={() => map.current?.animateToRegion(regionFor(loc), 0)}
+          onMapReady={() => {
+            map.current?.animateToRegion(regionFor(loc), 0);
+            setReady(true);
+          }}
           initialRegion={regionFor(loc)}
         >
+          {me ? (
+            <Polyline
+              coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
+              strokeColor={c.acc}
+              strokeWidth={2}
+              lineDashPattern={[4, 6]}
+            />
+          ) : null}
           <Marker
             coordinate={{ latitude: loc.lat, longitude: loc.lng }}
             anchor={{ x: 0.5, y: 0.5 }}
@@ -154,6 +190,10 @@ export default function Find() {
         </MapView>
       ) : null}
       <View style={{ flex: 1 }} pointerEvents="none" />
+      {/* MapKit's pan swallows the iOS edge swipe, so the left edge gets its own swipe-back. */}
+      <GestureDetector gesture={edgeBack}>
+        <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 24 }} />
+      </GestureDetector>
 
       <Pressable
         accessibilityRole="button"

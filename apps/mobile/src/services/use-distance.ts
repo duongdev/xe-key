@@ -10,6 +10,14 @@ let me: { lat: number; lng: number } | null = null;
  * `ask` (Find screen, where the user wants directions) shows the permission prompt.
  */
 export function useDistance(loc: CarLocation | null | undefined, ask = false): number | null {
+  const pos = usePhonePosition(loc, ask);
+  if (!loc) return null;
+  if (loc.distanceKm !== null) return loc.distanceKm;
+  return pos ? distanceKm(pos, loc) : null;
+}
+
+/** The phone's position while a car location is shown; null until known or if not allowed. */
+export function usePhonePosition(loc: CarLocation | null | undefined, ask = false) {
   const [pos, setPos] = useState(me);
   useEffect(() => {
     if (!loc || loc.distanceKm !== null) return;
@@ -29,7 +37,5 @@ export function useDistance(loc: CarLocation | null | undefined, ask = false): n
       live = false;
     };
   }, [loc, ask]);
-  if (!loc) return null;
-  if (loc.distanceKm !== null) return loc.distanceKm;
-  return pos ? distanceKm(pos, loc) : null;
+  return pos;
 }

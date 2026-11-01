@@ -46,6 +46,7 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). App requests use `credentials: "omit"` so only our Keychain jar holds cookies (ADR 0008).
 - `@xekey/core` resolves to its `dist/`: run `pnpm --filter @xekey/core build` after changing core, before Metro.
 - Honda VN usernames are the local number with its leading 0.
+- Car place names come from Apple's on-device geocoder and follow the phone's system language, not the app's. Kept on purpose: an online geocoder (e.g. Nominatim) would send the car's position to a third party.
 - deviceId and stored credentials live in the Keychain ([ADR 0004](../../docs/adr/0004-keychain-device-id.md), [ADR 0005](../../docs/adr/0005-keychain-password-relogin.md)).
 - This package pins `typescript ~6.0` (Expo range); the repo root uses 7.
 - Be Vietnam Pro ignores `fontVariant: tabular-nums` on iOS: use `Digits` for any changing number (timers).
