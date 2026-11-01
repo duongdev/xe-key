@@ -1,6 +1,6 @@
 # 0009 — Waitlist storage: Postgres via Drizzle, own route handlers
 
-- **Status:** Accepted
+- **Status:** Accepted; the repeat sign-up rule is superseded by [0010](0010-uniform-signup-response.md)
 - **Date:** 2026-11-02
 
 ## Context

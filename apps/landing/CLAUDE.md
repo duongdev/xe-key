@@ -6,7 +6,7 @@ Pre-launch waitlist site for Xe Key. Next.js, prerendered pages served by a stan
 ## Layout
 - `src/app/(vi)/` and `src/app/(en)/en/` — one root layout per language (`<html lang>`), home and `privacy/` pages. `document.tsx` is the shared `<html>` shell (Be Vietnam Pro via `next/font`, `globals.css`, `viewport`).
 - `src/app/global-not-found.tsx` — the 404 (needed with two root layouts; `experimental.globalNotFound`).
-- `src/app/api/` — `signup` (Turnstile check, dedupe, survey token), `survey` (token-gated, first answers win), `admin/export` (Basic auth, CSV or `?summary`).
+- `src/app/api/` — `signup` (Turnstile check, dedupe, survey token; a repeat email gets the same answer, ADR 0010), `survey` (token-gated, first answers win), `admin/export` (Basic auth, CSV or `?summary`).
 - `src/db/` — Drizzle `schema.ts` and `client.ts` (`database()` migrates once, lazily); SQL migrations in `drizzle/` (`pnpm --filter @xekey/landing db:generate` after a schema change). `src/instrumentation.ts` tries them at start.
 - `src/server/` — server-only: `payload.ts` (validation, CSV, summary), `survey-token.ts`, `rate-limit.ts` (pure, tested); `turnstile.ts` (siteverify), `env.ts`, `http.ts`.
 - `src/app/robots.ts`, `sitemap.ts` — both from `SITE_URL`; the sitemap lists each URL with its hreflang pair.

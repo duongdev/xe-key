@@ -7,7 +7,7 @@ import s from "./registered.module.css";
 
 const COPIED_MS = 1800;
 
-/** `surveyToken` is null for a repeat sign-up: no survey then (ADR 0009). */
+/** `surveyToken` is null only when the server gave none; then the survey is hidden. */
 type Props = { t: Copy; email: string; platform: Platform; surveyToken: string | null };
 
 export function Registered({ t, email, platform, surveyToken }: Props) {

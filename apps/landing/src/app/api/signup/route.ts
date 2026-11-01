@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { database } from "../../../db/client";
 import { signups } from "../../../db/schema";
 import { SITE_URL } from "../../../lib/seo";
@@ -27,8 +28,9 @@ export async function POST(req: Request) {
       .values({ email, platform, language })
       .onConflictDoNothing({ target: signups.email })
       .returning({ id: signups.id });
-    // A repeat email gets the same success but no survey token (ADR 0009).
-    const surveyToken = row ? signSurveyToken(row.id, signingSecret(), Date.now()) : null;
+    // A repeat email must look the same as a new one (ADR 0010): its token is signed for a random
+    // id that matches no row, so a survey sent with it writes nothing.
+    const surveyToken = signSurveyToken(row?.id ?? randomUUID(), signingSecret(), Date.now());
     return json(200, { ok: true, surveyToken });
   } catch (e) {
     console.error("signup failed", errorSummary(e));
