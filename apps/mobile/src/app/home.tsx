@@ -35,6 +35,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Car } from "../car/car";
 import { MAX_RETRIES } from "../car/command";
+import { engineState, clock as formatClock } from "../car/engine";
 import { freshness } from "../car/freshness";
 import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
@@ -214,9 +215,10 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const { prefs } = usePrefs();
   const qc = useQueryClient();
-  const now = useNow();
   const online = useOnline();
   const { data: car, isPending } = useCar();
+  // Tick every second while the engine countdown shows; otherwise freshness only needs 30 s.
+  const now = useNow(car?.engine.on ? 1000 : 30_000);
   const { state: cmd, send } = useCommand();
   const wake = useMutation({
     mutationFn: () => carService.wake(),
@@ -248,9 +250,9 @@ export default function Home() {
 
   // Headline and picture follow the confirmed snapshot only.
   const unlocked = car?.doors === "unlocked";
-  const engineOn = car?.engine.on === true;
-  const left = car?.engine.on ? Math.max(0, Math.round((car.engine.endsAt - now) / 1000)) : 0;
-  const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  const engine = car ? engineState(car.engine, now) : null;
+  const engineOn = engine?.running === true;
+  const clock = engine?.running ? formatClock(engine.left) : "";
 
   const age = car ? freshness(car.updatedAt, now) : null;
   const freshText = wake.isPending
@@ -355,14 +357,20 @@ export default function Home() {
           {loading ? (
             <Skeleton w={160} h={44} />
           ) : (
-            <Text
-              variant="title"
-              color={unlocked ? "warn" : "fg"}
-              accessibilityRole="header"
-              accessibilityLiveRegion="polite"
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${unlocked ? t.unlocked : t.locked}. ${t.doors}`}
+              onPress={() => router.push("/doors")}
+              style={{ alignSelf: "flex-start" }}
             >
-              {unlocked ? t.unlocked : t.locked}
-            </Text>
+              <Text
+                variant="title"
+                color={unlocked ? "warn" : "fg"}
+                accessibilityLiveRegion="polite"
+              >
+                {unlocked ? t.unlocked : t.locked}
+              </Text>
+            </Pressable>
           )}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             {loading ? (

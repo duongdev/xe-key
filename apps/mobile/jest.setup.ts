@@ -1,4 +1,8 @@
 require("react-native-gesture-handler/jestSetup");
+jest.mock(
+  "react-native-safe-area-context",
+  () => require("react-native-safe-area-context/jest/mock").default,
+);
 
 // ponytail: hand mock of the Reanimated API we use. Reanimated 4's own Jest setup needs a DOM
 // (web build). Animations jump to their target; extend this when a test needs frame timing.

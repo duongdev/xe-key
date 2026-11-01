@@ -19,11 +19,17 @@ const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: "que
 
 // ponytail: one service until the live adapter lands (task 010 + Settings dev switch in 008).
 export const carService: CarService = mockCar;
+/** Bump when CarStatus changes shape so old cached data is dropped. */
+const CACHE_VERSION = "2";
+
 export const CAR_KEY = ["car"] as const;
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, buster: CACHE_VERSION }}
+    >
       {children}
     </PersistQueryClientProvider>
   );

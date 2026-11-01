@@ -26,6 +26,8 @@ type Props = {
   fill?: keyof Colors;
   disabled?: boolean;
   accessibilityHint?: string;
+  /** Finger down/up during a hold, e.g. to show "Keep holding". */
+  onHoldChange?: (holding: boolean) => void;
 };
 
 /**
@@ -43,6 +45,7 @@ export function HoldButton({
   fill = "warn",
   disabled,
   accessibilityHint,
+  onHoldChange,
 }: Props) {
   const { c } = useTheme();
   const progress = useSharedValue(0);
@@ -58,9 +61,11 @@ export function HoldButton({
       return;
     }
     haptics.selection();
+    onHoldChange?.(true);
     progress.value = withTiming(1, { duration: HOLD_MS, easing: Easing.linear });
     timer.current = setTimeout(() => {
       timer.current = null;
+      onHoldChange?.(false);
       haptics.medium();
       progress.value = withTiming(0, { duration: RELEASE_MS });
       onAction();
@@ -70,6 +75,7 @@ export function HoldButton({
   const end = () => {
     scale.value = withTiming(1, { duration: 90 });
     if (timer.current) {
+      onHoldChange?.(false);
       clearTimeout(timer.current);
       timer.current = null;
       progress.value = withTiming(0, { duration: RELEASE_MS, easing: Easing.out(Easing.quad) });

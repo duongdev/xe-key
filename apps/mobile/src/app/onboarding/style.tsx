@@ -14,12 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Car } from "../../car/car";
 import { BODIES, type Body } from "../../car/geometry";
 import { PAINTS } from "../../car/paints";
@@ -27,82 +22,19 @@ import { useT } from "../../i18n";
 import { next } from "../../onboarding/flow";
 import { type CarLook, usePrefs } from "../../prefs";
 import { haptics } from "../../theme/haptics";
-import { pop, useReducedMotion, useTiming } from "../../theme/motion";
+import { pop, useTiming } from "../../theme/motion";
 import { iconSize, radius, space, textStyle } from "../../theme/tokens";
 import { useTheme } from "../../theme/use-theme";
 import { Button } from "../../ui/button";
 import { Glow } from "../../ui/glow";
 import { Screen } from "../../ui/screen";
 import { ScrubRail } from "../../ui/scrub-rail";
+import { SegmentedSlider } from "../../ui/segmented-slider";
 import { Text } from "../../ui/text";
 import { TextButton } from "../../ui/text-button";
 
 const ORDER: Body[] = ["crossover", "city", "sedan", "suv", "mpv"];
 const LOOKS: CarLook["look"][] = ["shaded", "line", "photo"];
-
-function LookSlider({ value, onChange }: { value: number; onChange: (i: number) => void }) {
-  const { c } = useTheme();
-  const t = useT();
-  const timing = useTiming();
-  const reduced = useReducedMotion();
-  const [w, setW] = useState(0);
-  const x = useSharedValue(0);
-  const knob = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
-  const seg = (w - 8) / LOOKS.length;
-
-  useEffect(() => {
-    x.value = reduced
-      ? withTiming(value * seg, timing(150))
-      : withSpring(value * seg, { duration: 320, dampingRatio: 0.6 });
-  }, [value, seg, x, reduced, timing]);
-
-  return (
-    <View onLayout={(e) => setW(e.nativeEvent.layout.width)}>
-      <ScrubRail
-        count={LOOKS.length}
-        value={value}
-        onChange={onChange}
-        label={t.style}
-        valueText={t.looks[value] ?? ""}
-        style={{ height: 48, borderRadius: 24, backgroundColor: c.s1 }}
-      >
-        {() => (
-          <>
-            <View style={{ position: "absolute", inset: 0, flexDirection: "row" }}>
-              {t.looks.map((l) => (
-                <View key={l} style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                  <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
-                    {l}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <Animated.View
-              style={[
-                {
-                  position: "absolute",
-                  top: 4,
-                  bottom: 4,
-                  left: 4,
-                  width: seg,
-                  borderRadius: 20,
-                  backgroundColor: c.fg,
-                  alignItems: "center",
-                  justifyContent: "center",
-                },
-                knob,
-              ]}
-            >
-              <Text variant="caption" weight={600} color="bg" style={{ fontSize: 14 }}>
-                {t.looks[value]}
-              </Text>
-            </Animated.View>
-          </>
-        )}
-      </ScrubRail>
-    </View>
-  );
-}
 
 function Swatch({ hex, on, big }: { hex: string; on: boolean; big: boolean }) {
   const { c } = useTheme();
@@ -306,7 +238,7 @@ export default function Style() {
             {t.style}
           </Text>
         </View>
-        <LookSlider value={look} onChange={setLook} />
+        <SegmentedSlider options={t.looks} value={look} onChange={setLook} label={t.style} />
       </View>
 
       <View style={{ gap: 10, marginTop: 20 }}>

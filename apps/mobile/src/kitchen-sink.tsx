@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Car, type CarProps } from "./car/car";
 import type { Body } from "./car/geometry";
-import { getScenario, type Scenario, setScenario } from "./services/mock-car";
+import { getScenario, resetStarts, type Scenario, setScenario } from "./services/mock-car";
 import { CAR_KEY, queryClient } from "./services/query";
 import { haptics } from "./theme/haptics";
 import { pop, settle, useTiming } from "./theme/motion";
@@ -171,6 +171,16 @@ function MockScenarios() {
           }}
         />
       ))}
+      <Button
+        tone="secondary"
+        label="drive (reset starts)"
+        height={64}
+        style={{ minHeight: 44, paddingHorizontal: 16 }}
+        onPress={() => {
+          resetStarts();
+          queryClient.invalidateQueries({ queryKey: CAR_KEY });
+        }}
+      />
       <Button
         tone="secondary"
         label="clear cache"

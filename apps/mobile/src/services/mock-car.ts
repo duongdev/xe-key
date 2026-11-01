@@ -1,4 +1,5 @@
 import type { CommandKind } from "../car/command";
+import { RUN_S } from "../car/engine";
 import type { CarService, CarStatus } from "./car";
 
 /** Dev-only knob to drive every Home state from the kitchen sink. */
@@ -8,14 +9,22 @@ export const setScenario = (s: Scenario) => {
   scenario = s;
 };
 export const getScenario = () => scenario;
+/** Dev: pretend the car was driven, which re-arms the remote starts. */
+export const resetStarts = () => {
+  car = { ...car, startsLeft: 2 };
+};
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Gap between wake attempts while the car is asleep. */
+const RETRY_MS = 4000;
 
 let car: CarStatus = {
   model: "HR-V e:HEV",
   plate: "51K-123.45",
   doors: "locked",
   engine: { on: false },
+  startsLeft: 2,
+  closed: { doors: true, trunk: true, hood: true },
   cabinC: 34,
   fuelPct: 62,
   rangeKm: 418,
@@ -27,6 +36,7 @@ let car: CarStatus = {
 
 const snapshot = (): CarStatus => ({
   ...car,
+  engine: car.engine.on && car.engine.endsAt <= Date.now() ? { on: false } : car.engine,
   account: scenario === "signed-out" ? "signed-out" : scenario === "expired" ? "expired" : "ok",
   signedOutAt: scenario === "signed-out" ? Date.now() - 40 * 60_000 : undefined,
 });
@@ -34,7 +44,18 @@ const snapshot = (): CarStatus => ({
 const apply = (kind: CommandKind) => {
   if (kind === "lock") car = { ...car, doors: "locked" };
   if (kind === "unlock") car = { ...car, doors: "unlocked" };
-  if (kind === "start") car = { ...car, engine: { on: true, endsAt: Date.now() + 10 * 60_000 } };
+  if (kind === "start")
+    car = {
+      ...car,
+      startsLeft: car.startsLeft - 1,
+      engine: { on: true, endsAt: Date.now() + RUN_S * 1000 },
+    };
+  if (kind === "extend" && car.engine.on)
+    car = {
+      ...car,
+      startsLeft: car.startsLeft - 1,
+      engine: { on: true, endsAt: car.engine.endsAt + RUN_S * 1000 },
+    };
   if (kind === "stop") car = { ...car, engine: { on: false } };
   car = { ...car, updatedAt: Date.now() };
 };
@@ -50,15 +71,20 @@ export const mockCar: CarService = {
     car = { ...car, updatedAt: Date.now() };
     return snapshot();
   },
-  async command(kind, onEvent) {
+  async command(kind, onEvent, opts) {
+    const wait = async (ms: number) => {
+      await new Promise((r) => setTimeout(r, ms));
+      if (opts?.cancel?.cancelled)
+        throw Object.assign(new Error("cancelled"), { name: "AbortError" });
+    };
     await wait(700);
     onEvent({ type: "accepted" });
     if (scenario === "asleep" || scenario === "unreachable") {
       for (let i = 0; i < 3; i++) {
-        await wait(1800);
+        await wait(RETRY_MS);
         onEvent({ type: "asleep" });
       }
-      await wait(1800);
+      await wait(RETRY_MS);
       if (scenario === "unreachable") {
         onEvent({ type: "asleep" });
         return null;
