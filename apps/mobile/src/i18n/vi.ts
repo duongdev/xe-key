@@ -238,6 +238,7 @@ export const vi: Dict = {
   deleted: "Đã xóa",
   undo: "Hoàn tác",
   markAllRead: "Đánh dấu đã đọc",
+  alertFilters: { all: "Tất cả", warnings: "Cảnh báo", commands: "Lệnh" },
   alertText: {
     unlocked: (n) => `Mở khóa ${n ?? 0} phút`,
     "auto-off": () => "Máy tự tắt",

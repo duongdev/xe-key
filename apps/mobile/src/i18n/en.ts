@@ -237,6 +237,7 @@ export const en = {
   deleted: "Deleted",
   undo: "Undo",
   markAllRead: "Mark all read",
+  alertFilters: { all: "All", warnings: "Warnings", commands: "Commands" },
   alertText: {
     unlocked: (n?: number) => `Unlocked ${n ?? 0} min`,
     "auto-off": () => "Engine auto-off",

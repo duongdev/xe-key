@@ -20,9 +20,11 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { useCar } from "../services/query";
 import { useDistance, usePhonePosition } from "../services/use-distance";
+import { haptics } from "../theme/haptics";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
+import { Glass } from "../ui/glass";
 import { PageHeader } from "../ui/page-header";
 import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
@@ -195,10 +197,9 @@ export default function Find() {
         <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 24 }} />
       </GestureDetector>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t.backToCar}
-        onPress={() => router.back()}
+      {/* Floats over the map: Liquid Glass on iOS 26+. */}
+      <Glass
+        interactive
         style={{
           position: "absolute",
           top: insets.top + 6,
@@ -206,13 +207,17 @@ export default function Find() {
           width: 44,
           height: 44,
           borderRadius: 22,
-          backgroundColor: `${c.bg}cc`,
-          alignItems: "center",
-          justifyContent: "center",
         }}
       >
-        <CaretLeftIcon size={iconSize.md} color={c.fg} />
-      </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t.backToCar}
+          onPress={() => router.back()}
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <CaretLeftIcon size={iconSize.md} color={c.fg} />
+        </Pressable>
+      </Glass>
 
       <View
         onLayout={(e) => setSheetH(e.nativeEvent.layout.height)}
@@ -266,7 +271,10 @@ export default function Find() {
           <Pressable
             accessibilityRole="button"
             disabled={locating}
-            onPress={() => send("find")}
+            onPress={() => {
+              haptics.light();
+              send("find");
+            }}
             style={({ pressed }) => ({
               flex: 1,
               height: 60,
@@ -291,7 +299,11 @@ export default function Find() {
           <Pressable
             accessibilityRole="button"
             disabled={!loc}
-            onPress={() => loc && Linking.openURL(`maps://?daddr=${loc.lat},${loc.lng}&dirflg=w`)}
+            onPress={() => {
+              if (!loc) return;
+              haptics.light();
+              Linking.openURL(`maps://?daddr=${loc.lat},${loc.lng}&dirflg=w`);
+            }}
             style={({ pressed }) => ({
               flex: 1,
               height: 60,

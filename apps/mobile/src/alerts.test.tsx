@@ -9,6 +9,8 @@ jest.mock("react-native-gesture-handler/ReanimatedSwipeable", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => children,
 }));
+jest.mock("expo-glass-effect", () => ({ GlassView: "View", isLiquidGlassAvailable: () => false }));
+jest.mock("./services/alert-seen", () => ({ markSeen: jest.fn() }));
 jest.mock("expo-router", () => ({ router: { back: jest.fn() } }));
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageCode: "en" }] }));
 jest.mock("./prefs", () => ({ usePrefs: () => ({ prefs: { language: "en", format: "24h" } }) }));
@@ -21,6 +23,7 @@ const mockService: Pick<CarService, "alerts" | "deleteAlert"> = {
 jest.mock("./services/query", () => ({
   CAR_KEY: ["car"],
   ALERTS_KEY: ["alerts"],
+  loadAlerts: () => mockService.alerts(),
   useRefreshOnFocus: () => {},
   get carService() {
     return mockService;
