@@ -18,7 +18,7 @@ First launch walks through the 8 onboarding steps (welcome, region, sign in, dev
 - [ ] Device heads-up appears before the SMS is sent.
 - [ ] SMS code supports iOS one-time-code autofill; wrong and expired code states work.
 - [ ] Car look: swipe carousel for body shape, slider for style, scrub rail for paint; choice persists.
-- [ ] Quick setup toggles request Face ID, notifications and Siri only when switched on.
+- [ ] Quick setup toggles request Face ID and Siri only when switched on (no notifications toggle in v1 — see HANDOFF › Out of scope).
 - [ ] Each step matches its screenshot.
 
 ## Test plan

@@ -17,6 +17,8 @@ The five secondary screens exist with mock data and all four states, matching [F
 - [ ] Trips: 7-day bar chart, score ring, behaviour bars, route rows.
 - [ ] Alerts: swipe-to-delete with Undo toast.
 - [ ] Empty and error states for each screen.
+- [ ] Settings has "Face ID for unlock & start" (off by default; local gate via `expo-local-authentication`).
+- [ ] Settings has a dev-build-only (`__DEV__`) switch between mock and live car service.
 - [ ] Each screen matches its screenshot.
 
 ## Test plan

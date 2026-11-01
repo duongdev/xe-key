@@ -3,7 +3,7 @@
 - **Status:** ready
 - **Mode:** HITL
 - **Estimate:** 1d
-- **Depends on:** 005
+- **Depends on:** 005, CLI probe of `/remote/doorLock` on the real car to learn whether `/auth/pin/verify` is required
 - **Blocks:** none
 
 ## Goal

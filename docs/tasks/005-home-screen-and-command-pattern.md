@@ -41,7 +41,7 @@ Home is 90% of usage, and the command pattern is reused by engine, find and Siri
 
 ## Design notes
 
-- **Contracts changed:** introduces a `CarService` interface the UI depends on; a mock implements it now, `@honda/core` later.
+- **Contracts changed:** introduces a `CarService` interface the UI depends on; a mock implements it now, `@xekey/core` later.
 - **New modules:** command state machine, Home screen.
 - **New ADR needed?** maybe — state management choice.
 

@@ -27,6 +27,7 @@ For code that crosses a system boundary — network clients, IPC, DB calls, proc
 For renderer components.
 
 - Mock the data layer; test behavior/reducers as pure logic where possible (lift logic out of components into Layer 1 modules).
+- **Component tests** (React Native Testing Library) cover behavior, not layout: interactive primitives (hold-to-arm fires once and never on early release; sliders step via accessibility actions; swipe-to-delete offers Undo) and each screen rendering its four states from a mocked service.
 - **Visual review** against the running app: capture all **four states** — loading, empty, error, populated — plus the specific interaction/layout changed.
 - Commit screenshots when useful.
 
@@ -36,7 +37,7 @@ For renderer components.
 |---|---|---|
 | Pure function / reducer / state machine | 1 | Yes, always |
 | Network/IPC/DB glue | 2 | No — manual smoke checklist |
-| React/UI component | 3 | Mock-first + visual |
+| React/UI component | 3 | Behavior via RNTL + visual |
 
 When a task touches more than one, the task's Test plan lists each applicable layer and writes "n/a" for the rest.
 
