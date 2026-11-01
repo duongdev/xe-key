@@ -1,13 +1,14 @@
 export type { AuthResult, LoginData } from "./auth.js";
 export { login, resendCode, verifyCode } from "./auth.js";
-export { resolveDeviceId } from "./device.js";
+export type { CookieStore } from "./cookies.js";
+export { cookieHeader, memoryCookies, readSetCookie, splitSetCookie } from "./cookies.js";
 export type { EndpointKey } from "./endpoints.js";
 export { AC_TEMP, COMMANDS, ENDPOINTS } from "./endpoints.js";
 export type { IplassEnvelope, IplassError, Parsed } from "./envelope.js";
 export { isSuccess, parseEnvelope } from "./envelope.js";
-export type { HttpResponse } from "./http.js";
+export type { Fetch, HondaHttpOptions, HttpResponse } from "./http.js";
 export { HondaHttp } from "./http.js";
 export type { Region } from "./region.js";
 export { baseUrl, REGION_META, REGIONS } from "./region.js";
 export type { Session } from "./session.js";
-export { buildSession, loadSession, saveSession } from "./session.js";
+export { buildSession, parseSession } from "./session.js";

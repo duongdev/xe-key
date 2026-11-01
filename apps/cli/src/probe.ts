@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { HondaHttp, type HttpResponse, loadSession } from "@xekey/core";
+import { HondaHttp, type HttpResponse } from "@xekey/core";
+import { loadSession } from "@xekey/core/node";
 
 // Reads run automatically, one at a time with a pause and early stop.
 // Commands actuate the car and fire ONLY when named in HONDA_FIRE (comma list).
@@ -69,7 +70,7 @@ async function main(): Promise<number> {
     console.error(`no session at ${SESSION_FILE} — run the login first`);
     return 2;
   }
-  const http = new HondaHttp(session.baseUrl);
+  const http = new HondaHttp({ base: session.baseUrl });
   http.loadCookies(session.cookies);
   const oid = session.oid ?? "";
 

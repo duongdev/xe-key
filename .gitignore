@@ -6,6 +6,7 @@ dist/
 # secrets & runtime state — never commit
 research/honda_session.json
 research/honda_device_id.txt
+**/honda_device_id.txt
 research/honda_mitm_ca.cer
 research/honda_capture.log
 research/honda_all_hosts.log

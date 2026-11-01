@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { resolveDeviceId } from "./device.js";
+import { resolveDeviceId } from "./device-file.js";
 
 const ENV = "HONDA_DEVICE_ID";
 

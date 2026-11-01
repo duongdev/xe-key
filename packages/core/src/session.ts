@@ -1,4 +1,3 @@
-import { chmodSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import type { LoginData } from "./auth.js";
 
 export interface Session {
@@ -30,15 +29,8 @@ export function buildSession(
   };
 }
 
-export function saveSession(path: string, session: Session): void {
-  writeFileSync(path, JSON.stringify(session, null, 2));
-  chmodSync(path, 0o600);
-}
-
-/** Reads a session, tolerating the Python script's snake_case keys. */
-export function loadSession(path: string): Session | null {
-  if (!existsSync(path)) return null;
-  const raw = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+/** Parses a stored session, tolerating the Python script's snake_case keys. */
+export function parseSession(raw: Record<string, unknown>): Session {
   const pick = (camel: string, snake: string) => raw[camel] ?? raw[snake];
   return {
     baseUrl: String(pick("baseUrl", "base_url") ?? ""),

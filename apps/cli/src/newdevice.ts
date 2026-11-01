@@ -9,8 +9,8 @@ import {
   REGION_META,
   REGIONS,
   type Region,
-  saveSession,
 } from "@xekey/core";
+import { saveSession } from "@xekey/core/node";
 import { ask, askHidden } from "./prompt.js";
 
 // Completes a device change to map the full onboarding flow. Registers THIS fresh
@@ -26,7 +26,7 @@ async function main(): Promise<number> {
   const arg = (process.argv[2] ?? "vietnam").toLowerCase();
   const region = (arg in REGIONS ? arg : "vietnam") as Region;
   const base = baseUrl(region);
-  const http = new HondaHttp(base);
+  const http = new HondaHttp({ base });
   const deviceId = randomUUID();
 
   console.log(`region=${region} base=${base}`);

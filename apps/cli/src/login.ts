@@ -7,10 +7,9 @@ import {
   login,
   type Region,
   resendCode,
-  resolveDeviceId,
-  saveSession,
   verifyCode,
 } from "@xekey/core";
+import { resolveDeviceId, saveSession } from "@xekey/core/node";
 import { ask, askHidden } from "./prompt.js";
 
 const SESSION_FILE = process.env.HONDA_SESSION_FILE ?? "honda_session.json";
@@ -26,7 +25,7 @@ function save(base: string, deviceId: string, data: LoginData, http: HondaHttp):
 export async function runLogin(region: Region): Promise<number> {
   const base = baseUrl(region);
   const deviceId = resolveDeviceId(DEVICE_FILE);
-  const http = new HondaHttp(base);
+  const http = new HondaHttp({ base });
 
   console.log(`region   : ${region}\nendpoint : ${base}\ndeviceId : ${deviceId}\n`);
   const username = await ask("Honda phone number (username): ");
