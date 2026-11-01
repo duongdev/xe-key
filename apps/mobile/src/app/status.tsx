@@ -11,12 +11,14 @@ import {
   WarningIcon,
   WrenchIcon,
 } from "phosphor-react-native";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { useState } from "react";
+import { Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { engineState, clock as formatClock } from "../car/engine";
 import { freshness } from "../car/freshness";
 import { bodyParts, type Row, type Side } from "../car/status";
 import { useLang, useT } from "../i18n";
+import { useFormatTime } from "../i18n/format";
 import { useCar } from "../services/query";
 import { iconSize, radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -91,7 +93,10 @@ export default function Status() {
   const t = useT();
   const lang = useLang();
   const now = useNow();
-  const { data: car } = useCar();
+  const { data: car, refetch, isFetching, dataUpdatedAt } = useCar();
+  const time = useFormatTime();
+  // Spinner only for the user's pull, not for background focus refreshes.
+  const [pulling, setPulling] = useState(false);
   if (!car)
     return (
       <Screen>
@@ -176,6 +181,17 @@ export default function Status() {
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 20, paddingTop: 12, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={pulling}
+            onRefresh={async () => {
+              setPulling(true);
+              await refetch();
+              setPulling(false);
+            }}
+            tintColor={c.fg}
+          />
+        }
       >
         {serviceInKm !== null && serviceInKm <= 2000 ? (
           <Pressable
@@ -272,6 +288,11 @@ export default function Status() {
             </View>
           ))}
         </View>
+        {/* The pill's age is the car's own report; this also says when the app last asked Honda. */}
+        <Text variant="caption" color="fg2" style={{ textAlign: "center" }}>
+          {/* Any fetch (pull, focus, foreground) shows here, so the header never changes width. */}
+          {t.reportedChecked(time(car.updatedAt), isFetching ? null : time(dataUpdatedAt))}
+        </Text>
       </ScrollView>
     </Screen>
   );

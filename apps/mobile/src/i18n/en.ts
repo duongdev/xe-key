@@ -111,6 +111,9 @@ export const en = {
   tryAgain: "Try again",
   live: "Live",
   waking: "Waking",
+  /** `app` null while a check is running. */
+  reportedChecked: (car: string, app: string | null) =>
+    `Car reported ${car} · ${app ? `Checked ${app}` : "Updating…"}`,
   age: (n: number, unit: "m" | "h" | "d") => `${n}${unit}`,
   ageLong: (n: number, unit: "m" | "h" | "d") => `${n} ${{ m: "min", h: "h", d: "d" }[unit]} ago`,
   freshHint: "Tap or pull down to wake the car",

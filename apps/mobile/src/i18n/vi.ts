@@ -111,8 +111,10 @@ export const vi: Dict = {
   retrying: (n, max) => `Xe đang ngủ · thử lại (${n}/${max})`,
   notReached: "Không kết nối được xe",
   tryAgain: "Thử lại",
-  live: "Trực tiếp",
+  live: "Vừa xong",
   waking: "Đang đánh thức",
+  reportedChecked: (car: string, app: string | null) =>
+    `Xe báo lúc ${car} · ${app ? `Kiểm tra lúc ${app}` : "Đang cập nhật…"}`,
   age: (n, unit) => `${n}${{ m: "ph", h: "g", d: "ng" }[unit]}`,
   ageLong: (n, unit) => `${n} ${{ m: "phút", h: "giờ", d: "ngày" }[unit]} trước`,
   freshHint: "Chạm hoặc kéo xuống để đánh thức xe",
