@@ -135,13 +135,13 @@ describe("toAlerts", () => {
       createDate: 1,
     },
   ];
-  it("keeps Honda's text, flags failed commands, and keeps the delete key in the id", () => {
+  it("keeps Honda's text, flags failed commands, keeps the delete key, and only warnings are unread", () => {
     expect(toAlerts({ messages })).toEqual([
       {
         id: "command:1",
         kind: "command",
         at: 3,
-        unread: true,
+        unread: false,
         title: "Khóa cửa",
         text: "Khóa cửa thành công",
         ok: true,

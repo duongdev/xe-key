@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
  * turns System Haptics off. Native controls (Switch, keyboard) bring their own; don't add more.
  */
 export const haptics = {
-  /** Finger down on a Button (not links or rows). */
+  /** Finger down on a Button (not links or rows); a pull that triggers a refresh. */
   light: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
   /** A hold-to-arm action is armed. */
   medium: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),

@@ -21,6 +21,7 @@ import { useTheme } from "../../theme/use-theme";
 import { Button } from "../../ui/button";
 import { Chip } from "../../ui/chip";
 import { Glow } from "../../ui/glow";
+import { setLaunchTarget } from "../../ui/launch-target";
 import { LogoTile } from "../../ui/logo";
 import { Screen } from "../../ui/screen";
 import { Text } from "../../ui/text";
@@ -120,6 +121,7 @@ export default function Welcome() {
   const t = useT();
   const { width } = useWindowDimensions();
   const scroller = useRef<ScrollViewInstance>(null);
+  const carBox = useRef<React.ComponentRef<typeof View>>(null);
   const [i, setI] = useState(0);
 
   const chip = (Icon: typeof LockIcon, label: string, live?: boolean) => (
@@ -133,7 +135,24 @@ export default function Welcome() {
     {
       visual: (
         <View style={{ paddingHorizontal: 4 }}>
-          <Car body="crossover" paint="#6B7078" />
+          {/* The cold-start animation lands its car exactly here, as on Home. */}
+          <View
+            ref={carBox}
+            onLayout={() =>
+              carBox.current?.measureInWindow((x, y, width) =>
+                setLaunchTarget({
+                  x,
+                  y,
+                  width,
+                  body: "crossover",
+                  paint: "#6B7078",
+                  look: "shaded",
+                }),
+              )
+            }
+          >
+            <Car body="crossover" paint="#6B7078" />
+          </View>
         </View>
       ),
       title: t.welcome1,

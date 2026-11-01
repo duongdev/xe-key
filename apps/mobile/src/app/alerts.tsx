@@ -13,24 +13,32 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from "phosphor-react-native";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Pressable, SectionList, View } from "react-native";
 import Swipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
+import { markSeen } from "../services/alert-seen";
 import type { AlertKind, CarAlert, CarStatus } from "../services/car";
-import { CAR_KEY, carService, useRefreshOnFocus } from "../services/query";
+import {
+  CAR_KEY,
+  carService,
+  ALERTS_KEY as KEY,
+  loadAlerts,
+  useRefreshOnFocus,
+} from "../services/query";
 import { haptics } from "../theme/haptics";
 import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Shimmer } from "../ui/appear";
 import { EmptyState } from "../ui/empty-state";
+import { GLASS_TABS_H, GlassTabs } from "../ui/glass-tabs";
 import { PageHeader } from "../ui/page-header";
-import { Screen } from "../ui/screen";
+import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 import { useToast } from "../ui/toast";
+import { usePullRefresh } from "../ui/use-pull-refresh";
 
-const KEY = ["alerts"] as const;
 const DELETE_W = 96;
 
 const KINDS: Record<AlertKind, { icon: typeof LockIcon; tone: "acc" | "warn" | "fg2" }> = {
@@ -71,6 +79,8 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
   return (
     <Swipeable
       ref={swipe}
+      // Rows only open to the left; a rightward drag stays free for the iOS swipe-back.
+      dragOffsetFromLeft={Number.MAX_SAFE_INTEGER}
       friction={1.6}
       rightThreshold={DELETE_W / 2}
       overshootRight={false}
@@ -150,6 +160,12 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
   );
 }
 
+type Filter = "all" | "warnings" | "commands";
+const FILTERS: Filter[] = ["all", "warnings", "commands"];
+/** Warnings = everything that isn't a command result (Honda's warning lights, our own kinds). */
+const inFilter = (a: CarAlert, f: Filter) =>
+  f === "all" || (f === "commands" ? a.kind === "command" : a.kind !== "command");
+
 /** First-load placeholder shaped like an alert row. */
 function SkeletonRow({ wide }: { wide: boolean }) {
   const { c } = useTheme();
@@ -167,15 +183,26 @@ function SkeletonRow({ wide }: { wide: boolean }) {
 }
 
 export default function Alerts() {
+  const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
   const toast = useToast();
   const qc = useQueryClient();
   useRefreshOnFocus(KEY);
-  const { data, isPending, isError, isRefetching, refetch } = useQuery({
+  const [filter, setFilter] = useState<Filter>("all");
+  const {
+    data: all,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: KEY,
-    queryFn: () => carService.alerts(),
+    queryFn: loadAlerts,
   });
+  const pull = usePullRefresh(refetch);
+  const data = all?.filter((a) => inFilter(a, filter));
+  // Count badges match Home's: unread items only (commands are never unread).
+  const count = (f: Filter) => all?.filter((a) => a.unread && inFilter(a, f)).length ?? 0;
 
   const setAlerts = (fn: (list: CarAlert[]) => CarAlert[]) =>
     qc.setQueryData<CarAlert[]>(KEY, (list) => (list ? fn(list) : list));
@@ -247,7 +274,7 @@ export default function Alerts() {
     return (
       <SectionList
         style={{ flex: 1, marginHorizontal: -20 }}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: bottomPad + GLASS_TABS_H + 12 }}
         sections={[
           { key: "today", title: t.today, data: today },
           { key: "earlier", title: t.earlier, data: earlier },
@@ -273,14 +300,14 @@ export default function Alerts() {
         initialNumToRender={14}
         windowSize={7}
         removeClippedSubviews
-        refreshing={isRefetching}
-        onRefresh={() => refetch()}
+        refreshing={pull.refreshing}
+        onRefresh={pull.onRefresh}
       />
     );
   })();
 
   return (
-    <Screen>
+    <Screen scroll>
       <PageHeader
         title={t.alerts}
         right={
@@ -290,6 +317,8 @@ export default function Alerts() {
               accessibilityLabel={t.markAllRead}
               onPress={() => {
                 haptics.light();
+                const ids = all?.filter((a) => a.unread).map((a) => a.id) ?? [];
+                void markSeen(ids);
                 setAlerts((list) => list.map((a) => ({ ...a, unread: false })));
                 qc.setQueryData<CarStatus>(CAR_KEY, (car) => (car ? { ...car, alerts: 0 } : car));
               }}
@@ -308,6 +337,17 @@ export default function Alerts() {
         }
       />
       {body}
+      {all?.length ? (
+        <GlassTabs
+          value={filter}
+          onChange={setFilter}
+          tabs={FILTERS.map((f) => ({
+            key: f,
+            label: t.alertFilters[f],
+            badge: f === "all" ? undefined : count(f) || undefined,
+          }))}
+        />
+      ) : null}
     </Screen>
   );
 }

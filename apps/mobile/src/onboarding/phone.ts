@@ -12,7 +12,10 @@ export function normalizeVnPhone(raw: string): string | null {
 
 /** "90 123 4567" — groups input as typed. */
 export function formatVnPhone(raw: string): string {
-  const d = digits(raw).replace(/^0/, "").slice(0, 9);
+  let d = digits(raw);
+  // AutoFill pastes "+84 …": drop the country code (with "+", or as 84 + 9 digits).
+  if (d.startsWith("84") && (raw.trim().startsWith("+") || d.length >= 11)) d = d.slice(2);
+  d = d.replace(/^0/, "").slice(0, 9);
   return [d.slice(0, 2), d.slice(2, 5), d.slice(5)].filter(Boolean).join(" ");
 }
 

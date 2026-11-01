@@ -11,7 +11,6 @@ import {
   WarningIcon,
   WrenchIcon,
 } from "phosphor-react-native";
-import { useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { engineState, clock as formatClock } from "../car/engine";
@@ -23,9 +22,10 @@ import { useCar } from "../services/query";
 import { iconSize, radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader, Pill } from "../ui/page-header";
-import { Screen } from "../ui/screen";
+import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
+import { usePullRefresh } from "../ui/use-pull-refresh";
 
 /** Door/window strip per side in the 140×280 top-down drawing. */
 const STRIPS: Record<Side, string> = {
@@ -89,14 +89,14 @@ function TopDown({
 }
 
 export default function Status() {
+  const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
   const lang = useLang();
   const now = useNow();
   const { data: car, refetch, isFetching, dataUpdatedAt } = useCar();
   const time = useFormatTime();
-  // Spinner only for the user's pull, not for background focus refreshes.
-  const [pulling, setPulling] = useState(false);
+  const pull = usePullRefresh(refetch);
   if (!car)
     return (
       <Screen>
@@ -172,23 +172,19 @@ export default function Status() {
   const serviceInKm = car.serviceInKm;
 
   return (
-    <Screen>
+    <Screen scroll>
       <PageHeader
         title={t.status}
         right={<Pill icon={<ClockIcon size={14} color={c.fg2} />} text={ageText} />}
       />
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 20, paddingTop: 12, paddingBottom: 24 }}
+        contentContainerStyle={{ gap: 20, paddingTop: 12, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={pulling}
-            onRefresh={async () => {
-              setPulling(true);
-              await refetch();
-              setPulling(false);
-            }}
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
             tintColor={c.fg}
           />
         }

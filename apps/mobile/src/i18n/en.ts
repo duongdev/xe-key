@@ -111,7 +111,7 @@ export const en = {
   notReached: "Couldn't reach car",
   tryAgain: "Try again",
   live: "Live",
-  waking: "Waking",
+  waking: "Updating",
   /** `app` null while a check is running. */
   reportedChecked: (car: string, app: string | null) =>
     `Car reported ${car} · ${app ? `Checked ${app}` : "Updating…"}`,
@@ -237,6 +237,7 @@ export const en = {
   deleted: "Deleted",
   undo: "Undo",
   markAllRead: "Mark all read",
+  alertFilters: { all: "All", warnings: "Warnings", commands: "Commands" },
   alertText: {
     unlocked: (n?: number) => `Unlocked ${n ?? 0} min`,
     "auto-off": () => "Engine auto-off",

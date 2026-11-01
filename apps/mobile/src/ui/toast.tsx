@@ -27,6 +27,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { settle, useReducedMotion } from "../theme/motion";
 import { useTheme } from "../theme/use-theme";
+import { Glass } from "./glass";
 import { Text } from "./text";
 import { durationOf, type ToastData, type ToastKind, toastReducer } from "./toast-queue";
 
@@ -53,7 +54,6 @@ let nextId = 1;
  * the old one. Announced to VoiceOver. Reduce Motion: fade only.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
   const [toast, dispatch] = useReducer(toastReducer, null);
@@ -154,7 +154,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   extras.current.get(toast.id)?.action?.onPress();
                   finish(toast.id, true);
                 }}
-                bg={c.s2}
               />
             </Animated.View>
           </GestureDetector>
@@ -168,12 +167,10 @@ function ToastView({
   toast,
   icon,
   onAction,
-  bg,
 }: {
   toast: ToastData;
   icon?: "power";
   onAction: () => void;
-  bg: string;
 }) {
   const { c } = useTheme();
   const tone = { success: c.acc, info: c.fg2, warn: c.warn, error: c.error, undo: c.fg2 }[
@@ -190,22 +187,17 @@ function ToastView({
           undo: TrashIcon,
         }[toast.kind];
   return (
-    <View
-      accessibilityLiveRegion="polite"
+    <Glass
+      interactive
       style={{
         minHeight: 52,
         maxWidth: 380,
         paddingLeft: 10,
         paddingRight: toast.action ? 8 : 20,
         borderRadius: 26,
-        backgroundColor: bg,
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        shadowColor: "#000",
-        shadowOpacity: 0.35,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 8 },
       }}
     >
       <View
@@ -241,7 +233,7 @@ function ToastView({
           </Text>
         </Pressable>
       ) : null}
-    </View>
+    </Glass>
   );
 }
 

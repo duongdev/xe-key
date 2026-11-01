@@ -11,12 +11,12 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `src/services/car.ts` — `CarService` (status, wake, command with progress events); `mock-car.ts` implements it with dev scenarios (asleep, unreachable, slow, signed-out, expired); `query.tsx` = TanStack Query client persisted to AsyncStorage, NetInfo-driven online state, `useCar()`.
 - `src/car/status.ts` (pure: body → top-down diagram tones + rows), `trips.ts` (pure: 7-day bars, totals).
 - `src/i18n/format.ts` — `formatTime` (pure, tested) + `useFormatTime()` following the Format setting or the device.
-- `src/ui/` also has `page-header.tsx` (back + large title + pill), `empty-state.tsx`, `toast.tsx` (result toasts; queue logic in `toast-queue.ts`), `banner.tsx` (ongoing conditions), `appear.tsx` (`Appear` rise/pop/settle-left, `Shimmer`, `Spin`), `busy-ring.tsx`, `launch.tsx`, `pick.ios.ts`/`pick.ts` (option picker).
+- `src/ui/` also has `page-header.tsx` (back + large title + pill), `empty-state.tsx`, `toast.tsx` (result toasts; queue logic in `toast-queue.ts`), `banner.tsx` (ongoing conditions), `appear.tsx` (`Appear` rise/pop/settle-left, `Shimmer`, `Spin`), `busy-ring.tsx`, `launch.tsx` (cold-start Splash → Home; pure timeline in `launch-timeline.ts`, Home reports its car via `launch-target.ts`), `pick.ios.ts`/`pick.ts` (option picker).
 - `src/car/engine.ts` — pure engine session (countdown, ring fraction, auto-off, extend vs reminder); `reminder.ts` = local notification 1 min before auto-off (asks permission only when used).
 - `src/ui/segmented-slider.tsx` — named stops on a `ScrubRail` (style, AC level).
 - `src/car/command.ts` — pure command reducer (CONTEXT.md › Commands); `use-command.ts` runs one command at a time and writes the confirmed snapshot to the cache.
 - `src/services/honda.ts` — live `AuthService` + `call()` (one silent re-login on a lost session); `secret.ts` = Keychain store + cookie jar ([ADR 0008](../../docs/adr/0008-app-cookie-transport.md)); `honda-map.ts` (pure: error codes, VN username, paint/body from Honda's car); `use-auth.ts` picks mock or live (Settings › Developer, dev builds only).
-- `src/services/live-car.ts` — live `CarService` (reads, commands with 5 s status checks then one result pull) + Apple geocoder; `honda-command.ts` (pure: pull delay, done-check); `honda-car.ts` (pure: Honda replies → `CarStatus`, alerts); `use-distance.ts` (phone → car km; asks permission only on Find). `query.tsx` swaps mock/live before children fetch and refetches stale data on foreground/screen focus (no polling).
+- `src/services/live-car.ts` — live `CarService` (reads, commands with 5 s status checks then one result pull) + Apple geocoder; `honda-command.ts` (pure: pull delay, done-check); `honda-car.ts` (pure: Honda replies → `CarStatus`, alerts); `use-distance.ts` (phone → car km; asks permission only on Find). `query.tsx` swaps mock/live before children fetch and refetches stale data on foreground/screen focus and every 60 s while open; every read goes through `snapshot.ts` (pure: no older reports, confirmed commands hold).
 - `src/services/auth.ts` — `AuthService` + `mockAuth`. Force errors: password `wrong`; phone ending `0000` (Honda down) / `1111` (app blocked); code `000000` (wrong) / `111111` (expired).
 - `src/theme/` — tokens (colors, type scale, space, radii), `useTheme`, motion curves, haptics.
 - `src/ui/` — shared primitives (`Text`, `Button`).
@@ -46,6 +46,7 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). App requests use `credentials: "omit"` so only our Keychain jar holds cookies (ADR 0008).
 - `@xekey/core` resolves to its `dist/`: run `pnpm --filter @xekey/core build` after changing core, before Metro.
 - Honda VN usernames are the local number with its leading 0.
+- Car place names come from Apple's on-device geocoder and follow the phone's system language, not the app's. Kept on purpose: an online geocoder (e.g. Nominatim) would send the car's position to a third party.
 - deviceId and stored credentials live in the Keychain ([ADR 0004](../../docs/adr/0004-keychain-device-id.md), [ADR 0005](../../docs/adr/0005-keychain-password-relogin.md)).
 - This package pins `typescript ~6.0` (Expo range); the repo root uses 7.
 - Be Vietnam Pro ignores `fontVariant: tabular-nums` on iOS: use `Digits` for any changing number (timers).

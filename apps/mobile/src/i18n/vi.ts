@@ -113,7 +113,7 @@ export const vi: Dict = {
   notReached: "Không kết nối được xe",
   tryAgain: "Thử lại",
   live: "Vừa xong",
-  waking: "Đang đánh thức",
+  waking: "Đang cập nhật",
   reportedChecked: (car: string, app: string | null) =>
     `Xe báo lúc ${car} · ${app ? `Kiểm tra lúc ${app}` : "Đang cập nhật…"}`,
   age: (n, unit) => `${n}${{ m: "ph", h: "g", d: "ng" }[unit]}`,
@@ -238,6 +238,7 @@ export const vi: Dict = {
   deleted: "Đã xóa",
   undo: "Hoàn tác",
   markAllRead: "Đánh dấu đã đọc",
+  alertFilters: { all: "Tất cả", warnings: "Cảnh báo", commands: "Lệnh" },
   alertText: {
     unlocked: (n) => `Mở khóa ${n ?? 0} phút`,
     "auto-off": () => "Máy tự tắt",

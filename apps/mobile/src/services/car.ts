@@ -22,8 +22,8 @@ export type CarStatus = {
   cabinC: number | null;
   fuelPct: number;
   rangeKm: number;
-  /** Last GPS fix; null when the car has no signal. */
-  location: CarLocation | null;
+  /** Last GPS fix; null when the car has no signal; undefined until fetched (never saved to disk). */
+  location?: CarLocation | null;
   batteryV: number | null;
   odometerKm: number | null;
   serviceInKm: number | null;
@@ -31,6 +31,8 @@ export type CarStatus = {
   /** When the car last reported (not when we fetched). */
   updatedAt: number;
   account: "ok" | "signed-out" | "expired";
+  /** Set when a command confirmed this state; older reads can't undo it (see `pickSnapshot`). */
+  confirmedAt?: number;
   /** Commands the car's Honda CONNECT package allows (Entitlement). */
   can: { lock: boolean; engine: boolean };
   signedOutAt?: number;

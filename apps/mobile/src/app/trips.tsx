@@ -21,7 +21,7 @@ import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
 import { PageHeader, Pill } from "../ui/page-header";
-import { Screen } from "../ui/screen";
+import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 
 const BAR_PT = 64;
@@ -189,6 +189,7 @@ function TripRow({ trip, first }: { trip: Trip; first: boolean }) {
 }
 
 export default function Trips() {
+  const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
   const lang = useLang();
@@ -231,7 +232,7 @@ export default function Trips() {
     return (
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingTop: 12, paddingBottom: 24 }}
+        contentContainerStyle={{ gap: 12, paddingTop: 12, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
       >
         <View
@@ -305,7 +306,7 @@ export default function Trips() {
 
   const totals = data?.trips.length ? tripTotals(data.trips, new Date()) : null;
   return (
-    <Screen>
+    <Screen scroll>
       <PageHeader
         title={t.trips}
         right={

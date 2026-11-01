@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import * as LocalAuthentication from "expo-local-authentication";
 import { router } from "expo-router";
 import {
@@ -19,15 +18,15 @@ import { Alert, Pressable, ScrollView, Switch, View } from "react-native";
 import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
 import { resetLiveCar } from "../services/live-car";
-import { useCar } from "../services/query";
-import { secret } from "../services/secret";
+import { useCar, wipeCache } from "../services/query";
+import { password, secret } from "../services/secret";
 import { useAuth } from "../services/use-auth";
 import { haptics } from "../theme/haptics";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader } from "../ui/page-header";
 import { pick } from "../ui/pick";
-import { Screen } from "../ui/screen";
+import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 
 type Tint = "acc" | "warn" | "fg2";
@@ -129,9 +128,9 @@ function Group({ title, children }: { title: string; children: ReactNode[] }) {
 }
 
 export default function Settings() {
+  const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
-  const qc = useQueryClient();
   const { prefs, update } = usePrefs();
   const { data: car } = useCar();
   const auth = useAuth();
@@ -147,12 +146,27 @@ export default function Settings() {
       trackColor={{ true: c.acc, false: c.s2 }}
       onValueChange={async (on) => {
         haptics.selection();
+        // The setting also puts the stored Honda password behind Face ID (ADR 0005).
         if (key === "faceId" && on) {
           const res = await LocalAuthentication.authenticateAsync({
             promptMessage: t.faceIdPrompt,
             disableDeviceFallback: true,
           });
-          update({ faceId: res.success });
+          if (!res.success) return;
+          await password
+            .protect(true)
+            .catch((e: unknown) => console.warn("face id: lock failed", e));
+          update({ faceId: true });
+          return;
+        }
+        if (key === "faceId") {
+          // Reading the guarded password asks Face ID: only the owner can turn this off.
+          try {
+            await password.protect(false);
+            update({ faceId: false });
+          } catch {
+            // Face ID cancelled: the setting stays on.
+          }
           return;
         }
         update({ [key]: on } as Partial<Prefs>);
@@ -169,7 +183,7 @@ export default function Settings() {
         onPress: async () => {
           await auth.signOut();
           resetLiveCar();
-          qc.clear();
+          wipeCache();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
           router.replace("/onboarding/welcome");
@@ -178,45 +192,50 @@ export default function Settings() {
     ]);
 
   return (
-    <Screen>
+    <Screen scroll>
       <PageHeader title={t.settings} />
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 18, paddingTop: 8, paddingBottom: 32 }}
+        contentContainerStyle={{ gap: 18, paddingTop: 8, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
       >
-        <Group title={t.vehicle}>
-          {[
-            <Row
-              key="car"
-              icon={CarProfileIcon}
-              tint="acc"
-              label={prefs.carName ?? car?.model ?? ""}
-              value={car?.plate ?? undefined}
-              onPress={() =>
-                Alert.prompt(
-                  t.rename,
-                  undefined,
-                  (v) => update({ carName: v.trim() || null }),
-                  "plain-text",
-                  prefs.carName ?? car?.model,
-                )
-              }
-            />,
-          ]}
-        </Group>
-        <Group title={t.package}>
-          {[
-            <Row
-              key="pkg"
-              icon={CrownIcon}
-              tint="warn"
-              label="Honda CONNECT"
-              value={car?.account === "expired" ? t.expiredTitle : t.active}
-              valueTone={car?.account === "expired" ? "warn" : "acc"}
-            />,
-          ]}
-        </Group>
+        {/* No car loaded (signed out, first launch): nothing to show for vehicle or package. */}
+        {car ? (
+          <>
+            <Group title={t.vehicle}>
+              {[
+                <Row
+                  key="car"
+                  icon={CarProfileIcon}
+                  tint="acc"
+                  label={prefs.carName ?? car?.model ?? ""}
+                  value={car?.plate ?? undefined}
+                  onPress={() =>
+                    Alert.prompt(
+                      t.rename,
+                      undefined,
+                      (v) => update({ carName: v.trim() || null }),
+                      "plain-text",
+                      prefs.carName ?? car?.model,
+                    )
+                  }
+                />,
+              ]}
+            </Group>
+            <Group title={t.package}>
+              {[
+                <Row
+                  key="pkg"
+                  icon={CrownIcon}
+                  tint="warn"
+                  label="Honda CONNECT"
+                  value={car?.account === "expired" ? t.expiredTitle : t.active}
+                  valueTone={car?.account === "expired" ? "warn" : "acc"}
+                />,
+              ]}
+            </Group>
+          </>
+        ) : null}
         <Group title={t.safety}>
           {[
             <Row
@@ -273,11 +292,11 @@ export default function Settings() {
                 icon={HardDrivesIcon}
                 tint="fg2"
                 label={t.carService}
-                value={prefs.api === "live" ? t.liveService : t.mock}
+                value={prefs.honda === "live" ? t.liveService : t.mock}
                 onPress={() => {
-                  const api = prefs.api === "live" ? "mock" : "live";
-                  update({ api });
-                  if (api === "live") Alert.alert(t.liveService, t.liveNotReady);
+                  const honda = prefs.honda === "live" ? "mock" : "live";
+                  update({ honda });
+                  if (honda === "live") Alert.alert(t.liveService, t.liveNotReady);
                 }}
               />,
               <Row

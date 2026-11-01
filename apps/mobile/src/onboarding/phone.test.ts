@@ -25,6 +25,16 @@ describe("formatVnPhone", () => {
     expect(formatVnPhone("901234567")).toBe("90 123 4567");
   });
 
+  it("drops the +84 country code from AutoFill", () => {
+    expect(formatVnPhone("+84 97 947 7635")).toBe("97 947 7635");
+    expect(formatVnPhone("+84979477635")).toBe("97 947 7635");
+    expect(formatVnPhone("84979477635")).toBe("97 947 7635");
+  });
+
+  it("keeps a real number that starts with 84 (Vinaphone 084)", () => {
+    expect(formatVnPhone("843123456")).toBe("84 312 3456");
+  });
+
   it("drops a leading 0 and caps at 9 digits", () => {
     expect(formatVnPhone("0901234567")).toBe("90 123 4567");
     expect(formatVnPhone("9012345678")).toBe("90 123 4567");

@@ -4,5 +4,5 @@ import { liveAuth } from "./honda";
 
 export function useAuth(): AuthService {
   const { prefs } = usePrefs();
-  return __DEV__ && prefs.api === "mock" ? mockAuth : liveAuth;
+  return __DEV__ && prefs.honda === "mock" ? mockAuth : liveAuth;
 }

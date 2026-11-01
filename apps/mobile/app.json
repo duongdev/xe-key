@@ -9,7 +9,12 @@
     "backgroundColor": "#0B0B0C",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "dev.duongdev.xekey"
+      "bundleIdentifier": "dev.duongdev.xekey",
+      "appleTeamId": "9F77J83SKT",
+      "infoPlist": {
+        "CFBundleLocalizations": ["en", "vi"],
+        "CFBundleDevelopmentRegion": "en"
+      }
     },
     "plugins": [
       "expo-font",
@@ -23,16 +28,14 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "imageWidth": 120,
-          "backgroundColor": "#F4F4F6",
-          "dark": {
-            "backgroundColor": "#0B0B0C"
-          }
+          "imageWidth": 104,
+          "backgroundColor": "#0B0B0C"
         }
       ],
       "expo-router",
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/without-push"
     ],
     "scheme": "xekey"
   }

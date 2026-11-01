@@ -29,6 +29,7 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import type { AcLevel } from "../services/car";
 import { useCar } from "../services/query";
+import { haptics } from "../theme/haptics";
 import { settle, useReducedMotion } from "../theme/motion";
 import { iconSize, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -295,6 +296,7 @@ export default function Engine() {
         <Pressable
           accessibilityRole="button"
           onPress={() => {
+            haptics.light();
             cancel();
             toast.show({ kind: "info", text: t.noStartUsed });
           }}
@@ -314,7 +316,10 @@ export default function Engine() {
           <Pressable
             accessibilityRole="button"
             disabled={pending}
-            onPress={() => send("stop")}
+            onPress={() => {
+              haptics.light();
+              send("stop");
+            }}
             style={({ pressed }) => ({
               opacity: pending ? 0.5 : pressed ? 0.7 : 1,
               flex: 1,
@@ -341,6 +346,7 @@ export default function Engine() {
             }
             disabled={pending}
             onPress={async () => {
+              haptics.light();
               if (extend === "extend") send("extend");
               else if (extend === "remind" && car?.engine.on)
                 setReminder(

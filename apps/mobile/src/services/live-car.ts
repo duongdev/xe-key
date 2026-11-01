@@ -63,7 +63,7 @@ async function status(): Promise<CarStatus> {
   ]);
   const raw: HondaRaw = { car: c, top, door, engine, finder };
   const s = toCarStatus(raw);
-  return { ...s, location: await withPlace(s.location) };
+  return { ...s, location: await withPlace(s.location ?? null) };
 }
 
 const POLL_MS = 5000;

@@ -50,8 +50,11 @@ export function useCommand() {
       try {
         const car = await carService.command(kind, report, { ...opts, cancel: mine });
         if (mine.cancelled) return;
-        if (car) qc.setQueryData(CAR_KEY, car);
-        else dispatch({ type: "failed" });
+        if (car) {
+          // A background re-read started before the command would land later with the old state.
+          await qc.cancelQueries({ queryKey: CAR_KEY });
+          qc.setQueryData(CAR_KEY, { ...car, confirmedAt: Date.now() });
+        } else dispatch({ type: "failed" });
       } catch (e) {
         if (mine.cancelled) return;
         console.warn("command failed", kind, e);
