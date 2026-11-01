@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Car illustration</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:100%;line-height:0">
+<svg viewBox="0 0 720 280" width="100%" role="img" aria-label="{{label}}">
+<defs>
+<linearGradient id="hcShade" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#FFFFFF" stop-opacity=".42"></stop>
+<stop offset=".3" stop-color="#FFFFFF" stop-opacity=".08"></stop>
+<stop offset=".55" stop-color="#000000" stop-opacity=".02"></stop>
+<stop offset=".72" stop-color="#000000" stop-opacity=".22"></stop>
+<stop offset="1" stop-color="#000000" stop-opacity=".6"></stop>
+</linearGradient>
+<linearGradient id="hcSheen" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop>
+<stop offset=".6" stop-color="#FFFFFF" stop-opacity=".14"></stop>
+<stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+</linearGradient>
+<linearGradient id="hcGlass" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#46525F"></stop>
+<stop offset=".45" stop-color="#151A20"></stop>
+<stop offset="1" stop-color="#07090B"></stop>
+</linearGradient>
+<radialGradient id="hcRim" cx=".42" cy=".35" r=".8">
+<stop offset="0" stop-color="#C9CED4"></stop>
+<stop offset=".55" stop-color="#7C828A"></stop>
+<stop offset="1" stop-color="#3C4046"></stop>
+</radialGradient>
+<radialGradient id="hcRimDark" cx=".42" cy=".35" r=".8">
+<stop offset="0" stop-color="#4A4F57"></stop>
+<stop offset=".6" stop-color="#25282D"></stop>
+<stop offset="1" stop-color="#121417"></stop>
+</radialGradient>
+<radialGradient id="hcGlow" cx=".5" cy=".55" r=".5">
+<stop offset="0" stop-color="#FFFFFF" stop-opacity=".16"></stop>
+<stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+</radialGradient>
+<radialGradient id="hcHeadGlow" cx=".5" cy=".5" r=".5">
+<stop offset="0" stop-color="#EAF6FF" stop-opacity=".9"></stop>
+<stop offset="1" stop-color="#EAF6FF" stop-opacity="0"></stop>
+</radialGradient>
+<radialGradient id="hcTailGlow" cx=".5" cy=".5" r=".5">
+<stop offset="0" stop-color="#FF4A3D" stop-opacity=".8"></stop>
+<stop offset="1" stop-color="#FF4A3D" stop-opacity="0"></stop>
+</radialGradient>
+<radialGradient id="hcAmber" cx=".5" cy=".5" r=".5">
+<stop offset="0" stop-color="#FFB547" stop-opacity="1"></stop>
+<stop offset="1" stop-color="#FFB547" stop-opacity="0"></stop>
+</radialGradient>
+<radialGradient id="hcFloor" cx=".5" cy=".5" r=".5">
+<stop offset="0" stop-color="#000000" stop-opacity=".7"></stop>
+<stop offset="1" stop-color="#000000" stop-opacity="0"></stop>
+</radialGradient>
+</defs>
+
+<sc-if value="{{shaded}}" hint-placeholder-val="{{true}}">
+<g>
+<ellipse cx="372" cy="150" rx="350" ry="120" fill="url(#hcGlow)" opacity="{{glowOp}}"></ellipse>
+<ellipse cx="372" cy="254" rx="336" ry="14" fill="url(#hcFloor)" opacity="{{floorOp}}"></ellipse>
+<path d="{{s.archShadow}}" fill="#050506"></path>
+<path d="{{s.body}}" fill="{{paint}}"></path>
+<path d="{{s.body}}" fill="url(#hcShade)"></path>
+<path d="{{s.body}}" fill="url(#hcSheen)"></path>
+<path d="{{s.body}}" fill="none" stroke="{{edge}}" stroke-width="1.8" stroke-linejoin="round"></path>
+<path d="{{s.glass}}" fill="url(#hcGlass)"></path>
+<path d="{{s.pillars}}" fill="#0B0D10"></path>
+<path d="{{s.belt}}" stroke="{{s.beltColor}}" stroke-width="{{s.beltW}}" fill="none"></path>
+<path d="{{s.crease}}" stroke="#FFFFFF" stroke-opacity=".32" stroke-width="1.6" fill="none"></path>
+<path d="{{s.lower}}" stroke="#000000" stroke-opacity=".28" stroke-width="2" fill="none"></path>
+<path d="{{s.doors}}" stroke="#000000" stroke-opacity=".4" stroke-width="1.4" fill="none"></path>
+<path d="{{s.handles}}" stroke="#000000" stroke-opacity=".5" stroke-width="3.5" stroke-linecap="round"></path>
+<path d="{{s.mirror}}" fill="#121417"></path>
+<path d="{{s.rocker}}" fill="#000000" opacity=".5"></path>
+<path d="{{s.intake}}" stroke="#0B0C0E" stroke-width="7" stroke-linecap="round" fill="none"></path>
+<path d="{{s.aero}}" fill="#0B0C0E"></path>
+<path d="{{s.head}}" stroke="#F1F8FF" stroke-width="4" stroke-linecap="round" fill="none"></path>
+<path d="{{s.tail}}" stroke="#E0332E" stroke-width="5" stroke-linecap="round" fill="none"></path>
+<sc-for list="{{wheels}}" as="w" hint-placeholder-count="2">
+<g>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="{{w.r}}" fill="#0C0D0F"></circle>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="{{w.rim}}" fill="{{w.rimFill}}"></circle>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="{{w.inner}}" fill="#1B1D21"></circle>
+<path d="{{w.caliper}}" stroke="#D7262B" stroke-width="8" stroke-linecap="round" fill="none"></path>
+<path d="{{w.spokes}}" stroke="{{w.spokeColor}}" stroke-width="{{w.sw}}" stroke-linecap="round"></path>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="6" fill="#9AA0A7"></circle>
+</g>
+</sc-for>
+
+<sc-if value="{{unlocked}}" hint-placeholder-val="{{false}}">
+<g>
+<path d="{{s.handles}}" stroke="#FFB547" stroke-width="3.5" stroke-linecap="round"></path>
+<ellipse cx="{{st.mx}}" cy="{{st.my}}" rx="16" ry="10" fill="url(#hcAmber)">
+<animate attributeName="opacity" values="0;1;0;1;0;.7" keyTimes="0;.15;.3;.45;.6;1" dur="1.6s" fill="freeze"></animate>
+</ellipse>
+<ellipse cx="{{st.hx}}" cy="{{st.hy}}" rx="20" ry="12" fill="url(#hcAmber)" opacity="0">
+<animate attributeName="opacity" values="0;1;0;1;0" keyTimes="0;.15;.3;.45;.6" dur="1.6s" fill="freeze"></animate>
+</ellipse>
+<ellipse cx="{{st.tx}}" cy="{{st.ty}}" rx="18" ry="11" fill="url(#hcAmber)" opacity="0">
+<animate attributeName="opacity" values="0;1;0;1;0" keyTimes="0;.15;.3;.45;.6" dur="1.6s" fill="freeze"></animate>
+</ellipse>
+</g>
+</sc-if>
+
+<sc-if value="{{engineOn}}" hint-placeholder-val="{{false}}">
+<g>
+<ellipse cx="{{st.hx}}" cy="{{st.hy}}" rx="44" ry="20" fill="url(#hcHeadGlow)"></ellipse>
+<ellipse cx="{{st.tx}}" cy="{{st.ty}}" rx="30" ry="15" fill="url(#hcTailGlow)"></ellipse>
+<ellipse cx="{{st.ex}}" cy="{{st.ey}}" rx="5" ry="3.5" fill="#050506"></ellipse>
+<sc-for list="{{puffs}}" as="p" hint-placeholder-count="3">
+<circle cx="{{st.ex}}" cy="{{st.ey}}" r="5" fill="#C9CED4" opacity="0">
+<animate attributeName="cx" values="{{p.x}}" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="cy" values="{{p.y}}" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="r" values="4;12;22" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="opacity" values="0;.42;0" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+</circle>
+</sc-for>
+</g>
+</sc-if>
+</g>
+</sc-if>
+
+<sc-if value="{{line}}" hint-placeholder-val="{{false}}">
+<g fill="none" stroke="{{ink}}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M40 256 L700 256" stroke-opacity=".25"></path>
+<path d="{{s.body}}"></path>
+<path d="{{s.glass}}" stroke-opacity=".6"></path>
+<path d="{{s.crease}}" stroke-opacity=".35" stroke-width="2"></path>
+<path d="{{s.head}}" stroke="{{paint}}" stroke-width="5"></path>
+<sc-for list="{{wheels}}" as="w" hint-placeholder-count="2">
+<g>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="{{w.lineR}}"></circle>
+<circle cx="{{w.cx}}" cy="{{w.cy}}" r="{{w.inner}}" stroke="{{paint}}"></circle>
+</g>
+</sc-for>
+</g>
+</sc-if>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"model":{"editor":"enum","options":["crossover","sedan","city","suv","mpv"],"default":"crossover"},"doors":{"editor":"enum","options":["locked","unlocked"],"default":"locked"},"engine":{"editor":"boolean","default":false},"look":{"editor":"enum","options":["shaded","line"],"default":"shaded"},"paint":{"editor":"color","default":"#6B7078","options":["#6B7078","#E9E9E6","#15171A","#9E1B22"]},"ink":{"editor":null,"default":"#F2F2F3"},"ground":{"editor":"enum","options":["dark","light"],"default":"dark"},"assist":{"editor":"boolean","default":true},"label":{"editor":null,"default":""},"$preview":{"width":720,"height":280}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Body = profile top (rear-bottom to front-bottom) + generated wheel arches.
+    const S = {
+      crossover: {
+        name: 'HR-V', w: [190, 548], wy: 198, wr: 58, yb: 206, spokes: 5,
+        top: 'M112 206 L104 166 C101 138 108 118 128 108 L158 96 C204 72 246 60 302 54 L418 55 C452 57 480 72 522 104 C582 112 640 120 668 132 C684 139 690 154 688 174 L684 206',
+        glass: 'M200 106 C230 84 262 72 304 68 L412 68 C438 70 458 84 486 108 Z',
+        pillars: 'M334 68 L344 68 L346 108 L336 108 Z',
+        belt: 'M198 110 L490 112',
+        crease: 'M132 134 C300 124 500 126 662 146',
+        lower: 'M262 178 C340 174 420 174 480 178',
+        doors: 'M488 112 C492 150 490 176 484 192 M340 112 L344 192 M262 112 C256 140 256 164 262 182',
+        handles: 'M378 128 L400 128 M276 124 L294 124',
+        mirror: 'M494 100 L512 97 L515 110 L497 112 Z',
+        intake: 'M664 194 L686 194',
+        head: 'M630 134 C650 137 664 141 676 146', tail: 'M112 116 L152 102',
+      },
+      sedan: {
+        // Civic RS proportions (1:137 px/m), lowered, raked glass, ducktail, 19-inch look
+        name: 'Civic', w: [186, 561], wy: 210, wr: 46, yb: 233, gap: 5, spokes: 10, sport: true,
+        top: 'M56 233 L50 202 C48 178 52 158 60 146 C64 128 70 118 78 114 L70 107 L112 108 L170 104 C216 86 266 72 340 68 C370 67 390 69 402 73 C428 88 450 108 466 124 C544 130 622 142 676 156 C688 160 694 172 692 186 L690 212 C690 222 686 228 682 233',
+        glass: 'M176 114 C220 94 268 80 340 75 C368 74 390 76 400 80 C424 92 444 108 460 120 Z',
+        pillars: 'M318 76 L328 75 L330 120 L320 120 Z M206 100 L214 97 L216 119 L208 119 Z',
+        belt: 'M174 122 C280 121 380 122 462 124',
+        crease: 'M64 142 C200 134 420 136 684 162',
+        lower: 'M232 206 C330 199 430 199 514 204',
+        doors: 'M464 126 C470 160 472 190 468 222 M325 122 L327 224 M208 122 C206 160 212 190 230 210',
+        handles: 'M368 138 L390 138 M236 136 L256 136',
+        mirror: 'M448 110 L470 106 L474 120 L452 122 Z',
+        intake: 'M656 222 L688 222',
+        aero: 'M640 231 L693 228 L693 235 L646 237 Z M54 224 L108 224 L104 236 L60 236 Z M70 107 L66 103 L96 104 L112 108 Z',
+        head: 'M632 154 C652 157 670 162 686 170', tail: 'M52 142 C62 130 74 120 96 116',
+      },
+      city: {
+        // Honda City sedan (1:137 px/m): L 4.55, H 1.47, WB 2.6, notchback trunk, 16-inch wheels
+        name: 'City', w: [211, 567], wy: 214, wr: 42, yb: 236, gap: 7, spokes: 5,
+        top: 'M74 236 L68 210 C64 186 64 160 70 136 C72 124 76 118 84 115 L176 111 C200 92 226 72 252 63 C300 54 360 53 430 60 C448 76 464 98 478 119 C560 126 630 138 676 149 C688 154 692 166 692 182 L690 212 C690 224 688 232 684 236',
+        glass: 'M196 116 C214 98 236 80 258 72 C300 64 360 63 424 69 C440 84 454 100 466 117 Z',
+        pillars: 'M330 66 L340 66 L342 118 L332 118 Z M236 84 L243 80 L246 118 L239 118 Z',
+        belt: 'M196 120 C300 119 400 119 470 121',
+        crease: 'M84 136 C240 128 440 130 680 158',
+        lower: 'M262 210 C350 204 440 204 520 208',
+        doors: 'M470 122 C476 160 478 194 474 224 M336 120 L338 226 M246 120 C242 160 246 192 260 212',
+        handles: 'M376 140 L398 140 M262 138 L282 138',
+        mirror: 'M456 106 L478 102 L482 116 L460 118 Z',
+        intake: 'M660 226 L688 226',
+        head: 'M640 150 C656 153 672 158 688 166', tail: 'M70 130 C78 122 90 117 112 115',
+      },
+      suv: {
+        name: 'CR-V', w: [190, 548], wy: 198, wr: 58, yb: 206, spokes: 5,
+        top: 'M108 206 L104 150 C102 112 110 92 130 84 L170 70 C210 50 250 44 304 42 L430 42 C462 44 486 58 522 92 C584 102 640 112 670 126 C686 133 692 150 690 172 L686 206',
+        glass: 'M150 98 L176 74 C210 58 250 52 304 50 L414 50 C440 52 460 66 490 94 Z',
+        pillars: 'M334 50 L344 50 L346 94 L336 94 Z M228 56 L236 54 L238 96 L230 96 Z',
+        belt: 'M150 98 L492 98',
+        crease: 'M126 124 C300 116 500 118 664 136',
+        lower: 'M262 176 C340 172 420 172 480 176',
+        doors: 'M494 100 C498 140 496 174 488 192 M340 98 L344 192 M234 98 C228 136 230 166 238 186',
+        handles: 'M376 114 L400 114 M262 112 L282 112',
+        mirror: 'M492 88 L510 85 L513 98 L495 100 Z',
+        intake: 'M664 192 L688 192',
+        head: 'M636 122 C654 125 668 129 680 134', tail: 'M110 96 L110 138',
+      },
+      mpv: {
+        name: 'BR-V', w: [190, 548], wy: 198, wr: 58, yb: 206, spokes: 5,
+        top: 'M104 206 L100 140 C100 108 106 92 120 86 L150 76 C200 62 250 58 310 56 L440 56 C470 58 492 70 526 98 C588 108 640 118 668 130 C684 137 690 152 688 172 L684 206',
+        glass: 'M124 102 L136 86 C190 70 250 66 310 64 L424 64 C448 66 466 78 494 102 Z',
+        pillars: 'M230 66 L238 66 L240 102 L232 102 Z M358 64 L368 64 L370 102 L360 102 Z',
+        belt: 'M124 106 L496 106',
+        crease: 'M120 128 C300 120 500 122 664 140',
+        lower: 'M262 178 C340 174 420 174 480 178',
+        doors: 'M496 108 C500 146 498 176 490 192 M364 106 L366 192 M238 106 L242 192',
+        handles: 'M392 122 L414 122 M270 120 L290 120',
+        mirror: 'M496 96 L514 93 L517 106 L499 108 Z',
+        intake: 'M662 192 L686 192',
+        head: 'M632 128 C652 131 666 135 678 140', tail: 'M106 98 L106 136',
+      },
+    };
+    const s = S[this.props.model] || S.crossover;
+    const ar = s.wr + (s.gap || 8);
+    const dx = (r) => Math.sqrt(r * r - (s.yb - s.wy) * (s.yb - s.wy));
+    const arch = (cx, r) => ' L' + (cx + dx(r)).toFixed(1) + ' ' + s.yb + ' A' + r + ' ' + r + ' 0 1 0 ' + (cx - dx(r)).toFixed(1) + ' ' + s.yb;
+    const [r1, f1] = s.w;
+    const body = s.top + arch(f1, ar) + arch(r1, ar) + ' Z';
+    const well = (cx) => 'M' + (cx - ar) + ' ' + s.wy + ' A' + ar + ' ' + ar + ' 0 1 1 ' + (cx + ar) + ' ' + s.wy + ' L' + (cx + ar) + ' ' + s.yb + ' L' + (cx - ar) + ' ' + s.yb + ' Z';
+    const rockerTop = s.yb - (s.sport ? 18 : 14);
+    const rx = (cx, side) => (cx + side * Math.sqrt(ar * ar - (rockerTop - s.wy) * (rockerTop - s.wy))).toFixed(1);
+    const rocker = 'M' + rx(r1, 1) + ' ' + rockerTop + ' L' + rx(f1, -1) + ' ' + rockerTop + ' L' + rx(f1, -1) + ' ' + s.yb + ' L' + rx(r1, 1) + ' ' + s.yb + ' Z';
+    const rim = Math.round(s.wr * 0.72);
+    const spokes = (cx) => {
+      let d = '';
+      for (let i = 0; i < s.spokes; i++) {
+        const a = (i / s.spokes) * Math.PI * 2 - Math.PI / 2;
+        d += 'M' + (cx + Math.cos(a) * 8).toFixed(1) + ' ' + (s.wy + Math.sin(a) * 8).toFixed(1) + ' L' + (cx + Math.cos(a) * (rim - 2)).toFixed(1) + ' ' + (s.wy + Math.sin(a) * (rim - 2)).toFixed(1) + ' ';
+      }
+      return d;
+    };
+    const thin = s.spokes > 6;
+    const look = this.props.look ?? 'shaded';
+    const paintHex = this.props.paint ?? '#6B7078';
+    const lum = ((h) => { const n = parseInt(h.slice(1), 16); return (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255; })(paintHex);
+    const lightGround = this.props.ground === 'light';
+    // Contrast assist: a dark car on a dark screen gets a backlight and a light rim; a light car on a light screen gets a dark rim and a firmer shadow.
+    const assist = this.props.assist !== false && (lightGround ? lum > 0.7 : lum < 0.18);
+    const cr = rim - 9;
+    const caliper = (cx) => s.sport
+      ? 'M' + (cx - cr * Math.cos(0.35)).toFixed(1) + ' ' + (s.wy - cr * Math.sin(0.35)).toFixed(1) + ' A' + cr + ' ' + cr + ' 0 0 1 ' + (cx - cr * Math.cos(1.15)).toFixed(1) + ' ' + (s.wy - cr * Math.sin(1.15)).toFixed(1)
+      : '';
+    return {
+      s: {
+        ...s, body, archShadow: well(r1) + ' ' + well(f1), rocker, aero: s.aero || '',
+        beltColor: s.sport ? '#0B0C0E' : 'rgba(255,255,255,.28)', beltW: s.sport ? 3 : 2,
+      },
+      wheels: s.w.map((cx) => ({
+        cx, cy: s.wy, r: s.wr, rim, inner: Math.round(rim * 0.82), lineR: s.wr - 4,
+        spokes: spokes(cx), sw: s.sport ? 4.5 : thin ? 3.5 : 7,
+        spokeColor: s.sport ? '#5E646C' : thin ? '#B9BEC4' : '#2A2D31',
+        rimFill: s.sport ? 'url(#hcRimDark)' : 'url(#hcRim)', caliper: caliper(cx),
+      })),
+      unlocked: this.props.doors === 'unlocked',
+      engineOn: this.props.engine === true,
+      st: (() => {
+        const n = (str) => str.match(/-?\d+(\.\d+)?/g).map(Number);
+        const h = n(s.head), t = n(s.tail), m = n(s.mirror), o = n(s.top);
+        return { hx: h[h.length - 2], hy: h[h.length - 1], tx: t[0] + 4, ty: t[1], mx: m[0] + 12, my: m[1] + 6, ex: o[0] + 16, ey: s.yb - 4 };
+      })(),
+      puffs: ['0s', '0.9s', '1.8s'].map((begin, k) => {
+        const x0 = Number(s.top.match(/-?\d+/g)[0]) + 16, y0 = s.yb - 4;
+        return { begin, x: x0 + ';' + (x0 - 30 - k * 4) + ';' + (x0 - 70 - k * 6), y: y0 + ';' + (y0 - 14) + ';' + (y0 - 40 - k * 4) };
+      }),
+      edge: assist ? (lightGround ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.34)') : 'none',
+      glowOp: assist && !lightGround ? 1 : 0,
+      floorOp: lightGround ? (assist ? 0.75 : 0.45) : 1,
+      shaded: look !== 'line',
+      line: look === 'line',
+      paint: this.props.paint ?? '#6B7078',
+      ink: this.props.ink ?? '#F2F2F3',
+      label: this.props.label || 'Honda ' + s.name + ', side view',
+    };
+  }
+}
+</script>
+</body>
+</html>

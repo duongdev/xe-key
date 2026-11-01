@@ -1,0 +1,27 @@
+meta {
+  name: horn only
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/remote/hornLight
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:form-urlencoded {
+  carOid: {{carOid}}
+  clientUUID: {{clientUUID}}
+  command: horn
+}
+
+docs {
+  WARNING: Honks the horn. This sends a real command to the vehicle.
+}

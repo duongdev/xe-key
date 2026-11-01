@@ -1,0 +1,35 @@
+meta {
+  name: engine extend
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/remote/engine
+  body: json
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:json {
+{
+  "carOid": "{{carOid}}",
+  "clientUUID": "{{clientUUID}}",
+  "command": "extend",
+  "vehicleControl": {
+    "acSetting": {
+      "acTempVal": "04",
+      "acDefSetting": "autoOn"
+    }
+  }
+}
+}
+
+docs {
+  WARNING: Extends a RUNNING engine session (no new start). This sends a real command to the vehicle.
+}

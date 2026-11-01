@@ -1,0 +1,17 @@
+meta {
+  name: trip detail
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/car/trip/detail?oid={{tripOid}}&pinToken={{pinToken}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

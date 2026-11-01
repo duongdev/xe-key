@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quick setup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;padding:96px 20px 30px">
+<h1 style="margin:0 0 8px;font-size:34px;line-height:40px;font-weight:600;letter-spacing:-0.02em">Almost there</h1>
+<p style="margin:0 0 28px;font-size:15px;color:#A1A1A8">All optional</p>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;background:#17171A">
+<div style="width:44px;height:44px;border-radius:12px;background:#232327;display:flex;align-items:center;justify-content:center;flex:none">
+<svg width="22" height="22" aria-hidden="true" viewBox="0 0 256 256" fill="#7CC7FF"><path d="{{it.icon}}"></path></svg>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-size:16px;font-weight:600">{{it.t}}</span>
+<span style="font-size:13px;color:#A1A1A8">{{it.s}}</span>
+</div>
+<button role="switch" aria-checked="{{it.on}}" aria-label="{{it.t}}" onClick="{{it.toggle}}" style="width:52px;height:44px;border:0;padding:0;background:none;cursor:pointer;flex:none;display:flex;align-items:center">
+<span style="width:52px;height:32px;border-radius:16px;background:{{it.track}};position:relative;transition:background 200ms">
+<span style="position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:13px;background:#FFFFFF;transform:translateX({{it.knob}});transition:transform 250ms cubic-bezier(.34,1.56,.64,1)"></span>
+</span>
+</button>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1"></div>
+<a href="Main.dc.html" style="height:64px;border-radius:32px;background:#7CC7FF;color:#06121C;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none">Go to my car</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { on: [true, true, false] }; }
+  renderVals() {
+    const list = [
+      ['Face ID', 'Unlock without password', 'M224,40V76a8,8,0,0,1-16,0V48H180a8,8,0,0,1,0-16h36A8,8,0,0,1,224,40Zm-8,132a8,8,0,0,0-8,8v28H180a8,8,0,0,0,0,16h36a8,8,0,0,0,8-8V180A8,8,0,0,0,216,172ZM76,208H48V180a8,8,0,0,0-16,0v36a8,8,0,0,0,8,8H76a8,8,0,0,0,0-16ZM40,84a8,8,0,0,0,8-8V48H76a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8V76A8,8,0,0,0,40,84Zm88,116a72,72,0,1,1,72-72A72.08,72.08,0,0,1,128,200Zm56-72a56,56,0,1,0-56,56A56.06,56.06,0,0,0,184,128Zm-68-12a12,12,0,1,0-12,12A12,12,0,0,0,116,116Zm36-12a12,12,0,1,0,12,12A12,12,0,0,0,152,104Zm-5.29,42c-3.81,3.37-12,6-18.71,6s-14.9-2.63-18.71-6a8,8,0,1,0-10.58,12c7.83,6.91,20.35,10,29.29,10s21.46-3.09,29.29-10a8,8,0,1,0-10.58-12Z'],
+      ['Alerts', 'Engine off, door open', 'M224,71.1a8,8,0,0,1-10.78-3.42,94.13,94.13,0,0,0-33.46-36.91,8,8,0,1,1,8.54-13.54,111.46,111.46,0,0,1,39.12,43.09A8,8,0,0,1,224,71.1ZM35.71,72a8,8,0,0,0,7.1-4.32A94.13,94.13,0,0,1,76.27,30.77a8,8,0,1,0-8.54-13.54A111.46,111.46,0,0,0,28.61,60.32,8,8,0,0,0,35.71,72Zm186.1,103.94A16,16,0,0,1,208,200H167.2a40,40,0,0,1-78.4,0H48a16,16,0,0,1-13.79-24.06C43.22,160.39,48,138.28,48,112a80,80,0,0,1,160,0C208,138.27,212.78,160.38,221.81,175.94ZM150.62,200H105.38a24,24,0,0,0,45.24,0ZM208,184c-10.64-18.27-16-42.49-16-72a64,64,0,0,0-128,0c0,29.52-5.38,53.74-16,72Z'],
+      ['Siri & widget', '“Lock my car”', 'M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z'],
+    ];
+    return {
+      items: list.map(([t, s, icon], i) => {
+        const on = this.state.on[i];
+        return {
+          t, s, icon, on: String(on),
+          track: on ? '#7CC7FF' : '#3A3A40',
+          knob: on ? '20px' : '0px',
+          toggle: () => this.setState({ on: this.state.on.map((v, k) => (k === i ? !v : v)) }),
+        };
+      }),
+    };
+  }
+}
+</script>
+</body>
+</html>

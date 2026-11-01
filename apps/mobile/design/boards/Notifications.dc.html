@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:56px 0 30px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+<div style="padding:0 20px;display:flex;align-items:center;gap:8px">
+<a href="Main.dc.html" aria-label="Back to car" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#F2F2F3;margin-left:-10px"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg></a>
+<h1 style="flex:1;margin:0;font-size:28px;font-weight:600;letter-spacing:-0.02em">Alerts</h1>
+<button aria-label="Mark all read" style="width:44px;height:44px;border:0;border-radius:22px;background:#17171A;color:#7CC7FF;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg></button>
+</div>
+
+<div style="display:flex;flex-direction:column">
+<span style="padding:0 20px 6px;font-size:13px;color:#A1A1A8">Today</span>
+
+<div style="position:relative;height:68px;overflow:hidden">
+<div style="position:absolute;right:0;top:0;bottom:0;width:96px;background:#D93A3F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:600;color:#FFFFFF"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>Delete</div>
+<div style="position:absolute;left:-96px;right:96px;top:0;bottom:0;background:#0B0B0C;padding:0 20px 0 116px;display:flex;align-items:center;gap:12px">
+<span style="width:40px;height:40px;border-radius:20px;background:rgba(255,181,71,.16);color:#FFB547;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,80H96V56a32,32,0,0,1,32-32c15.37,0,29.2,11,32.16,25.59a8,8,0,0,0,15.68-3.18C171.32,24.15,151.2,8,128,8A48.05,48.05,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm0,128H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"></path></svg></span>
+<span style="flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Unlocked 15 min</span>
+</div>
+</div>
+
+<sc-for list="{{today}}" as="n" hint-placeholder-count="2">
+<div style="min-height:68px;padding:0 20px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 0 #1F1F23">
+<span style="width:40px;height:40px;border-radius:20px;background:{{n.bg}};color:{{n.c}};display:flex;align-items:center;justify-content:center;flex:none">
+<svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{n.d}}"></path></svg>
+</span>
+<span style="flex:1;min-width:0;font-size:15px;font-weight:{{n.w}}">{{n.t}}</span>
+<span style="font-size:13px;color:#A1A1A8;font-variant-numeric:tabular-nums">{{n.time}}</span>
+</div>
+</sc-for>
+
+<span style="padding:16px 20px 6px;font-size:13px;color:#A1A1A8">Earlier</span>
+<sc-for list="{{earlier}}" as="n" hint-placeholder-count="3">
+<div style="min-height:68px;padding:0 20px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 0 #1F1F23">
+<span style="width:40px;height:40px;border-radius:20px;background:{{n.bg}};color:{{n.c}};display:flex;align-items:center;justify-content:center;flex:none">
+<svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{n.d}}"></path></svg>
+</span>
+<span style="flex:1;min-width:0;font-size:15px">{{n.t}}</span>
+<span style="font-size:13px;color:#A1A1A8">{{n.time}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const blue = { bg: 'rgba(124,199,255,.14)', c: '#7CC7FF' };
+    const amber = { bg: 'rgba(255,181,71,.16)', c: '#FFB547' };
+    const gray = { bg: '#1C1C20', c: '#A1A1A8' };
+    return {
+      today: [
+        { ...blue, t: 'Engine auto-off', time: '07:31', w: '600', d: 'M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z' },
+        { ...gray, t: 'Locked', time: '07:12', w: '400', d: 'M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z' },
+      ],
+      earlier: [
+        { ...blue, t: 'Left Home zone', time: 'Mon', d: 'M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z' },
+        { ...amber, t: 'Service in 1,200 km', time: 'Sun', d: 'M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96,72.34,72.34,0,0,0,94,124.94L33.79,177c-.15.12-.29.26-.43.39a32,32,0,0,0,45.26,45.26c.13-.13.27-.28.39-.42L131.06,162A72,72,0,0,0,232,96,71.56,71.56,0,0,0,226.76,69ZM160,152a56.14,56.14,0,0,1-27.07-7,8,8,0,0,0-9.92,1.77L67.11,211.51a16,16,0,0,1-22.62-22.62L109.18,133a8,8,0,0,0,1.77-9.93,56,56,0,0,1,58.36-82.31l-31.2,33.81a8,8,0,0,0-1.94,7.1L141.83,108a8,8,0,0,0,6.14,6.14l26.35,5.66a8,8,0,0,0,7.1-1.94l33.81-31.2A56.06,56.06,0,0,1,160,152Z' },
+        { ...gray, t: 'Renews in 30 days', time: 'Sat', d: 'M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

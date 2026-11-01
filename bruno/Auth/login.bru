@@ -1,0 +1,23 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:form-urlencoded {
+  username: {{phone}}
+  password: {{password}}
+  deviceId: {{deviceId}}
+}

@@ -1,0 +1,17 @@
+meta {
+  name: warnings
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/car/warning?carOid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

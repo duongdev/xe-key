@@ -1,0 +1,35 @@
+meta {
+  name: engine start
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/remote/engine
+  body: json
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:json {
+{
+  "carOid": "{{carOid}}",
+  "clientUUID": "{{clientUUID}}",
+  "command": "start",
+  "vehicleControl": {
+    "acSetting": {
+      "acTempVal": "04",
+      "acDefSetting": "autoOn"
+    }
+  }
+}
+}
+
+docs {
+  WARNING: STARTS the engine. Max 2 consecutive starts (TCU limit). This sends a real command to the vehicle.
+}

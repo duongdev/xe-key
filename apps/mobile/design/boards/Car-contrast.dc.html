@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Car contrast</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:1500px;height:620px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:baseline;gap:16px">
+<span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">Same-tone cars</span>
+<span style="font-size:15px;color:#A1A1A8">White on light and black on dark lose their outline. The car adds a contrast assist only when paint and screen are close in lightness.</span>
+</div>
+<div style="flex:1;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:20px">
+<sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+<div style="border-radius:24px;background:{{t.bg}};box-shadow:inset 0 0 0 1px {{t.line}};padding:20px 8px 18px;display:flex;flex-direction:column;gap:6px">
+<div style="flex:1;display:flex;align-items:center">
+<div style="width:100%">
+<dc-import name="Car" model="{{t.model}}" paint="{{t.paint}}" ground="{{t.ground}}" assist="{{t.assist}}" hint-size="100%,130px"></dc-import>
+</div>
+</div>
+<span style="padding:0 12px;font-size:15px;font-weight:600;color:{{t.fg}}">{{t.title}}</span>
+<span style="padding:0 12px;font-size:13px;line-height:19px;color:{{t.fg2}}">{{t.sub}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1500,"height":620}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const light = { bg: '#F4F4F6', line: '#D6D6DC', fg: '#0B0B0C', fg2: '#5C5C63', ground: 'light' };
+    const dark = { bg: '#0B0B0C', line: '#2E2E33', fg: '#F2F2F3', fg2: '#A1A1A8', ground: 'dark' };
+    return {
+      tiles: [
+        { ...light, model: 'crossover', paint: '#E9E9E6', assist: false, title: 'White on light · before', sub: 'Roof and nose melt into the screen.' },
+        { ...light, model: 'crossover', paint: '#E9E9E6', assist: true, title: 'White on light · assist', sub: 'Thin dark rim + firmer floor shadow.' },
+        { ...dark, model: 'sedan', paint: '#15171A', assist: false, title: 'Black on dark · before', sub: 'Only wheels and lights read.' },
+        { ...dark, model: 'sedan', paint: '#15171A', assist: true, title: 'Black on dark · assist', sub: 'Soft backlight + light rim, like a studio shot.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

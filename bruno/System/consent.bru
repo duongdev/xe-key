@@ -1,0 +1,17 @@
+meta {
+  name: consent
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/consent/update
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

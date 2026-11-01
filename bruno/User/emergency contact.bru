@@ -1,0 +1,17 @@
+meta {
+  name: emergency contact
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/emergencyContact
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

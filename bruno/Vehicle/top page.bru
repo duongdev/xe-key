@@ -1,0 +1,17 @@
+meta {
+  name: top page
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/car/topPage?carOid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

@@ -1,0 +1,27 @@
+meta {
+  name: delete message
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/message/delete
+  body: json
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:json {
+{
+  "deleteItems": [
+    {
+      "oid": "{{messageOid}}"
+    }
+  ]
+}
+}

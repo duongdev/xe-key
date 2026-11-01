@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visual language</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:1400px;height:1240px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:40px;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:40px 56px;align-content:start">
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em">Color</h2>
+<span style="font-size:13px;color:#A1A1A8">Grays carry the UI. Blue = engine / climate / live. Amber = unlocked / attention. Red only for delete.</span>
+<div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:16px">
+<sc-for list="{{palettes}}" as="pal" hint-placeholder-count="2">
+<div style="border-radius:20px;padding:16px;background:{{pal.ground}};display:flex;flex-direction:column;gap:10px;box-shadow:inset 0 0 0 1px #2E2E33">
+<span style="font-size:13px;font-weight:600;color:{{pal.ink}}">{{pal.name}}</span>
+<sc-for list="{{pal.sw}}" as="sw" hint-placeholder-count="7">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="width:28px;height:28px;border-radius:8px;background:{{sw.hex}};box-shadow:inset 0 0 0 1px rgba(128,128,128,.35);flex:none"></span>
+<span style="flex:1;font-size:13px;color:{{pal.ink}}">{{sw.name}}</span>
+<span style="font-size:12px;color:{{pal.ink2}};font-family:ui-monospace,Menlo,monospace">{{sw.hex}}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em">Type</h2>
+<span style="font-size:13px;color:#A1A1A8">Be Vietnam Pro everywhere: made for Vietnamese diacritics, still clean in English. Tabular figures for all numbers. Scales with Dynamic Type; layouts tested to AX3.</span>
+<div style="background:#17171A;border-radius:20px;padding:8px 20px">
+<sc-for list="{{type}}" as="ty" hint-placeholder-count="6">
+<div style="min-height:56px;display:flex;align-items:center;gap:20px;box-shadow:{{ty.sep}}">
+<span style="width:120px;font-size:12px;color:#A1A1A8;font-family:ui-monospace,Menlo,monospace">{{ty.spec}}</span>
+<span style="font-size:{{ty.size}};font-weight:{{ty.w}};letter-spacing:{{ty.ls}};line-height:1.15">{{ty.sample}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em">Space, shape, icons</h2>
+<div style="display:flex;align-items:flex-end;gap:14px">
+<sc-for list="{{space}}" as="sp" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+<span style="width:{{sp.px}};height:{{sp.px}};background:#7CC7FF;border-radius:4px;opacity:.85"></span>
+<span style="font-size:12px;color:#A1A1A8">{{sp.label}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:21px;color:#C9C9CE">
+<span>4-pt grid. Screen gutter 20. Card padding 16–20. Section gap 20.</span>
+<span>Radii: chip 12 · card 20–24 · primary pill = height / 2 (68 → 34).</span>
+<span>Hit targets ≥ 44; primary actions 68 tall, bottom 40% of screen.</span>
+<span>Icons: Phosphor (phosphor-react-native), Regular weight. Fill weight only for a confirmed state. Sizes 18 / 22 / 28.</span>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em">Motion &amp; haptics</h2>
+<div style="background:#17171A;border-radius:20px;padding:8px 20px">
+<sc-for list="{{motion}}" as="m" hint-placeholder-count="6">
+<div style="min-height:52px;display:flex;align-items:center;gap:16px;box-shadow:{{m.sep}}">
+<span style="width:150px;font-size:14px;font-weight:500">{{m.k}}</span>
+<span style="flex:1;font-size:13px;line-height:19px;color:#A1A1A8">{{m.v}}</span>
+</div>
+</sc-for>
+</div>
+<span style="font-size:13px;color:#A1A1A8">Reduce Motion: springs become 150 ms fades, spinners become a pulsing dot, hold-fill stays (it is feedback, not decoration).</span>
+</section>
+
+<section style="grid-column:1 / -1;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.02em">Copy · EN / VI</h2>
+<div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px">
+<sc-for list="{{copy}}" as="cp" hint-placeholder-count="8">
+<div style="background:#17171A;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px">
+<span style="font-size:15px;font-weight:500">{{cp.en}}</span>
+<span style="font-size:15px;color:#A1A1A8">{{cp.vi}}</span>
+</div>
+</sc-for>
+</div>
+<span style="font-size:13px;color:#A1A1A8">Vietnamese runs ~30% longer and has stacked diacritics: buttons never truncate (wrap to 2 lines), line-height ≥ 1.3 for VI body text.</span>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1400,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sw = (o) => Object.keys(o).map((name) => ({ name, hex: o[name] }));
+    const sep = (i) => (i ? 'inset 0 1px 0 #26262A' : 'none');
+    return {
+      palettes: [
+        { name: 'Dark', ground: '#0B0B0C', ink: '#F2F2F3', ink2: '#A1A1A8', sw: sw({ Ground: '#0B0B0C', 'Surface 1': '#17171A', 'Surface 2': '#232327', Text: '#F2F2F3', 'Text 2': '#A1A1A8', Live: '#7CC7FF', Attention: '#FFB547' }) },
+        { name: 'Light', ground: '#F4F4F6', ink: '#0B0B0C', ink2: '#5C5C63', sw: sw({ Ground: '#F4F4F6', 'Surface 1': '#FFFFFF', 'Surface 2': '#E6E6EB', Text: '#0B0B0C', 'Text 2': '#5C5C63', Live: '#0A6FC2', Attention: '#9A5200' }) },
+      ],
+      type: [
+        ['Hero 64/600', '64px', '600', '-0.03em', '9:42'],
+        ['Title 40/600', '40px', '600', '-0.03em', 'Locked'],
+        ['Large 34/600', '34px', '600', '-0.02em', 'Trips'],
+        ['Stat 24/600', '24px', '600', '-0.02em', '418 km'],
+        ['Body 17/400', '17px', '400', '0', 'Engine off · 34° inside'],
+        ['Caption 13/400', '13px', '400', '0', 'Updated 2 min ago · pull to wake'],
+      ].map(([spec, size, w, ls, sample], i) => ({ spec, size, w, ls, sample, sep: sep(i) })),
+      space: [4, 8, 12, 16, 20, 32].map((n) => ({ px: n + 'px', label: String(n) })),
+      motion: [
+        ['Press', 'Scale 0.97, 90 ms. Haptic: light impact.'],
+        ['Hold to arm', 'Linear fill 600 ms. Release springs back in 150 ms.'],
+        ['State change', 'Spring (response 0.35, damping 0.85). Headline cross-fades.'],
+        ['Pending', 'Ring rotates 1.4 s / turn. Never a full-screen spinner.'],
+        ['Success', 'Check scales 0.8 → 1. Haptic: success.'],
+        ['Unstable / fail', 'Ring turns amber, no shake. Haptic: warning only on final fail.'],
+      ].map(([k, v], i) => ({ k, v, sep: sep(i) })),
+      copy: [
+        ['Locked', 'Đã khóa'],
+        ['Hold to unlock', 'Giữ để mở khóa'],
+        ['Start & cool', 'Nổ máy & làm mát'],
+        ['Extend +10 min', 'Thêm 10 phút'],
+        ['Accepted · waiting for car', 'Đã nhận · đang chờ xe'],
+        ['Connection unstable — retrying', 'Kết nối chập chờn — đang thử lại'],
+        ['Updated 2 min ago', 'Cập nhật 2 phút trước'],
+        ['Find my car', 'Tìm xe'],
+      ].map(([en, vi]) => ({ en, vi })),
+    };
+  }
+}
+</script>
+</body>
+</html>

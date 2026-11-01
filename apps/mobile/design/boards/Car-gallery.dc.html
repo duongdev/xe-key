@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Car illustrations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:1500px;height:440px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:40px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:baseline;gap:16px">
+<span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">Car illustrations</span>
+<span style="font-size:15px;color:#A1A1A8">5 body shapes for the Vietnam line-up × 2 looks. Any paint color. A third look uses Honda's own render from /car/image.</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));gap:16px">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="10">
+<div style="background:#141416;border-radius:20px;padding:16px 8px 14px;display:flex;flex-direction:column;gap:6px">
+<dc-import name="Car" model="{{c.model}}" look="{{c.look}}" paint="{{c.paint}}" hint-size="100%,124px"></dc-import>
+<span style="padding:0 10px;font-size:15px;font-weight:600">{{c.title}}</span>
+<span style="padding:0 10px;font-size:13px;color:#A1A1A8">{{c.sub}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1500,"height":440}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const m = [
+      ['crossover', 'Crossover', 'HR-V', '#6B7078'],
+      ['sedan', 'Sport sedan', 'Civic RS (11th gen)', '#9E1B22'],
+      ['city', 'Sedan', 'City', '#B8BCC2'],
+      ['suv', 'SUV', 'CR-V', '#E9E9E6'],
+      ['mpv', 'MPV', 'BR-V', '#1F2F4A'],
+    ];
+    const cells = [];
+    ['shaded', 'line'].forEach((look) => m.forEach(([model, title, sub, paint]) => cells.push({
+      model, look, paint: look === 'line' ? '#7CC7FF' : paint, title: title + ' · ' + (look === 'line' ? 'Line' : 'Shaded'), sub,
+    })));
+    return { cells };
+  }
+}
+</script>
+</body>
+</html>

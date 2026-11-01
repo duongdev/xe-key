@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# secrets & runtime state — never commit
+research/honda_session.json
+research/honda_device_id.txt
+research/honda_mitm_ca.cer
+research/honda_capture.log
+research/honda_all_hosts.log
+research/mitm_run.log
+research/honda_wg_*
+**/honda_session.json
+.env
+.env.*
+
+# reverse-engineering inputs/outputs — large, local-only
+research/apk/
+research/work/
+
+# expo / rn
+apps/mobile/.expo/
+*.log
+.DS_Store
+
+# probe output (local)
+research/probe-results.json
+research/probe-report.html
+
+# bruno env with real values (local)
+bruno/environments/*.local.bru

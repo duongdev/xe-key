@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Static-analysis sandbox control. One container, one project dir, clean teardown.
+set -euo pipefail
+
+IMAGE=honda-re-static
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+case "${1:-help}" in
+  build)
+    docker build -t "$IMAGE" "$DIR"
+    ;;
+  shell)
+    # APK mounted read-only; work/ is writable and persists on the host.
+    mkdir -p "$DIR/apk" "$DIR/work"
+    docker run --rm -it \
+      --network none \
+      -v "$DIR/apk:/work/apk:ro" \
+      -v "$DIR/work:/work/work" \
+      "$IMAGE" bash
+    ;;
+  run)
+    shift
+    mkdir -p "$DIR/apk" "$DIR/work"
+    docker run --rm -it \
+      --network none \
+      -v "$DIR/apk:/work/apk:ro" \
+      -v "$DIR/work:/work/work" \
+      "$IMAGE" "$@"
+    ;;
+  clean)
+    docker rmi -f "$IMAGE" 2>/dev/null || true
+    echo "Image removed. To wipe analysis output too: rm -rf '$DIR/work'"
+    ;;
+  *)
+    echo "usage: ./re {build|shell|run <cmd...>|clean}"
+    echo "  build  build the sandbox image"
+    echo "  shell  open a shell in the sandbox (apk/ ro, work/ rw, no network)"
+    echo "  run    run one command in the sandbox"
+    echo "  clean  remove the image"
+    ;;
+esac

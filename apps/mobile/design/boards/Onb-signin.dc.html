@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;padding:56px 20px 30px">
+<div style="display:flex;align-items:center;gap:12px">
+<a href="Onb-region.dc.html" aria-label="Back" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#F2F2F3;margin-left:-10px">
+<svg width="22" height="22" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg>
+</a>
+<div style="flex:1;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px" aria-label="Step 2 of 4">
+<span style="height:4px;border-radius:2px;background:#7CC7FF"></span><span style="height:4px;border-radius:2px;background:#7CC7FF"></span><span style="height:4px;border-radius:2px;background:#2A2A2F"></span><span style="height:4px;border-radius:2px;background:#2A2A2F"></span>
+</div>
+<span style="width:34px"></span>
+</div>
+
+<h1 style="margin:28px 0 8px;font-size:34px;line-height:40px;font-weight:600;letter-spacing:-0.02em">Sign in</h1>
+<p style="margin:0 0 24px;font-size:15px;color:#A1A1A8">Your Honda CONNECT login</p>
+
+<form style="display:flex;flex-direction:column;gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#A1A1A8">Phone number
+<span style="height:56px;box-sizing:border-box;border-radius:16px;background:#17171A;box-shadow:inset 0 0 0 2px #7CC7FF;display:flex;align-items:center;gap:12px;padding:0 16px">
+<svg width="20" height="20" viewBox="0 0 256 256" fill="#A1A1A8" aria-hidden="true"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"></path></svg>
+<span style="font-size:17px;color:#A1A1A8">+84</span>
+<span style="width:1px;height:24px;background:#2E2E33"></span>
+<input type="tel" value="90 123 4567" autocomplete="tel-national" style="flex:1;min-width:0;border:0;background:transparent;color:#F2F2F3;font:inherit;font-size:17px;letter-spacing:.02em;outline:none">
+</span>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#A1A1A8">Password
+<span style="height:56px;box-sizing:border-box;border-radius:16px;background:#17171A;display:flex;align-items:center;gap:12px;padding:0 6px 0 16px">
+<svg width="20" height="20" viewBox="0 0 256 256" fill="#A1A1A8" aria-hidden="true"><path d="M48,56V200a8,8,0,0,1-16,0V56a8,8,0,0,1,16,0Zm92,54.5L120,117V96a8,8,0,0,0-16,0v21L84,110.5a8,8,0,0,0-5,15.22l20,6.49-12.34,17a8,8,0,1,0,12.94,9.4l12.34-17,12.34,17a8,8,0,1,0,12.94-9.4l-12.34-17,20-6.49A8,8,0,0,0,140,110.5ZM246,115.64A8,8,0,0,0,236,110.5L216,117V96a8,8,0,0,0-16,0v21l-20-6.49a8,8,0,0,0-4.95,15.22l20,6.49-12.34,17a8,8,0,1,0,12.94,9.4l12.34-17,12.34,17a8,8,0,1,0,12.94-9.4l-12.34-17,20-6.49A8,8,0,0,0,246,115.64Z"></path></svg>
+<input type="password" value="password12" autocomplete="current-password" style="flex:1;min-width:0;border:0;background:transparent;color:#F2F2F3;font:inherit;font-size:17px;outline:none">
+<button type="button" aria-label="Show password" style="width:44px;height:44px;border:0;background:none;color:#A1A1A8;display:flex;align-items:center;justify-content:center">
+<svg width="20" height="20" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg>
+</button>
+</span>
+</label>
+<a href="#" style="align-self:flex-start;min-height:44px;display:flex;align-items:center;font-size:15px;color:#7CC7FF;text-decoration:none">Forgot password?</a>
+</form>
+
+<div style="flex:1"></div>
+<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:16px">
+<svg width="16" height="16" style="flex:none" aria-hidden="true" viewBox="0 0 256 256" fill="#A1A1A8"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"></path></svg>
+<span style="font-size:13px;color:#A1A1A8">Password goes only to Honda</span>
+</div>
+<a href="Onb-device.dc.html" style="height:64px;border-radius:32px;background:#F2F2F3;color:#0B0B0C;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;text-decoration:none">Sign in</a>
+<a href="#" style="margin-top:6px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A1A1A8;text-decoration:none">No account? Use the Honda app</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

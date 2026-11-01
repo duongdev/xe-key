@@ -1,0 +1,17 @@
+meta {
+  name: geofence
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/car/geoFence?carOid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

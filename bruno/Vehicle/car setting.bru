@@ -1,0 +1,17 @@
+meta {
+  name: car setting
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/car/setting?carOid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

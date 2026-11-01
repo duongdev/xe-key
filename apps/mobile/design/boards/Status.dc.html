@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:56px 20px 30px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px">
+<a href="Main.dc.html" aria-label="Back to car" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#F2F2F3;margin-left:-10px"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg></a>
+<h1 style="flex:1;margin:0;font-size:28px;font-weight:600;letter-spacing:-0.02em">Status</h1>
+<span style="height:28px;padding:0 10px;border-radius:14px;background:#17171A;display:flex;align-items:center;gap:6px;font-size:13px;color:#A1A1A8"><svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"></path></svg> 2 min</span>
+</div>
+
+<a href="#" style="min-height:48px;padding:0 14px;border-radius:16px;background:#221A0C;display:flex;align-items:center;gap:10px;color:#FFB547;text-decoration:none">
+<svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96,72.34,72.34,0,0,0,94,124.94L33.79,177c-.15.12-.29.26-.43.39a32,32,0,0,0,45.26,45.26c.13-.13.27-.28.39-.42L131.06,162A72,72,0,0,0,232,96,71.56,71.56,0,0,0,226.76,69ZM160,152a56.14,56.14,0,0,1-27.07-7,8,8,0,0,0-9.92,1.77L67.11,211.51a16,16,0,0,1-22.62-22.62L109.18,133a8,8,0,0,0,1.77-9.93,56,56,0,0,1,58.36-82.31l-31.2,33.81a8,8,0,0,0-1.94,7.1L141.83,108a8,8,0,0,0,6.14,6.14l26.35,5.66a8,8,0,0,0,7.1-1.94l33.81-31.2A56.06,56.06,0,0,1,160,152Z"></path></svg>
+<span style="flex:1;font-size:15px;font-weight:600">Service in 1,200 km</span>
+<svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>
+</a>
+
+<div style="display:flex;gap:16px;align-items:center">
+<svg width="132" height="264" viewBox="0 0 140 280" role="img" aria-label="Car from above: doors locked, rear left window open, trunk and hood closed" style="flex:none">
+<rect x="12" y="44" width="10" height="34" rx="4" fill="#26262A"></rect>
+<rect x="118" y="44" width="10" height="34" rx="4" fill="#26262A"></rect>
+<rect x="12" y="198" width="10" height="34" rx="4" fill="#26262A"></rect>
+<rect x="118" y="198" width="10" height="34" rx="4" fill="#26262A"></rect>
+<rect x="20" y="10" width="100" height="260" rx="42" fill="#1C1C20" stroke="#3A3A40" stroke-width="2"></rect>
+<path d="M30 70 C44 50 96 50 110 70" fill="none" stroke="#3A3A40" stroke-width="2"></path>
+<path d="M34 80 L106 80 L98 110 L42 110 Z" fill="#2A3038"></path>
+<path d="M42 190 L98 190 L104 214 L36 214 Z" fill="#2A3038"></path>
+<path d="M30 222 C44 246 96 246 110 222" fill="none" stroke="#3A3A40" stroke-width="2"></path>
+<rect x="6" y="90" width="12" height="7" rx="3" fill="#3A3A40"></rect>
+<rect x="122" y="90" width="12" height="7" rx="3" fill="#3A3A40"></rect>
+<path d="M20 106 L20 148 M20 152 L20 194 M120 106 L120 148 M120 152 L120 194" stroke="#7CC7FF" stroke-width="4" stroke-linecap="round"></path>
+<path d="M28 158 L28 190" stroke="#FFB547" stroke-width="5" stroke-linecap="round"></path>
+<circle cx="70" cy="150" r="17" fill="#0B0B0C"></circle>
+<g transform="translate(60 140)"><svg width="20" height="20" viewBox="0 0 256 256" fill="#7CC7FF" aria-hidden="true"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"></path></svg></g>
+</svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{parts}}" as="p" hint-placeholder-count="4">
+<div style="min-height:52px;display:flex;align-items:center;gap:10px">
+<span style="width:32px;height:32px;border-radius:16px;background:{{p.bg}};color:{{p.c}};display:flex;align-items:center;justify-content:center;flex:none">
+<svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{p.d}}"></path></svg>
+</span>
+<span style="display:flex;flex-direction:column">
+<span style="font-size:15px;font-weight:600">{{p.k}}</span>
+<span style="font-size:13px;color:{{p.c}}">{{p.v}}</span>
+</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px">
+<sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+<div style="padding:14px;border-radius:18px;background:#17171A;display:flex;flex-direction:column;gap:8px">
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#A1A1A8">
+<svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{t.d}}"></path></svg>
+{{t.k}}</span>
+<span style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">{{t.v}}</span>
+<sc-if value="{{t.hasBar}}" hint-placeholder-val="{{false}}">
+<span style="height:6px;border-radius:3px;background:#2A2A2F;display:block"><span style="display:block;height:6px;border-radius:3px;width:{{t.bar}};background:#7CC7FF"></span></span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = { bg: 'rgba(124,199,255,.14)', c: '#7CC7FF' };
+    const warn = { bg: 'rgba(255,181,71,.16)', c: '#FFB547' };
+    return {
+      parts: [
+        { ...ok, k: 'Doors', v: 'Locked', d: 'M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z' },
+        { ...warn, k: 'Window', v: 'Rear left · 3 cm', d: 'M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z' },
+        { ...ok, k: 'Trunk', v: 'Closed', d: 'M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z' },
+        { ...ok, k: 'Hood', v: 'Closed', d: 'M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z' },
+      ],
+      tiles: [
+        { k: 'Engine', v: 'Off', d: 'M240,104H227.31L192,68.69A15.86,15.86,0,0,0,180.69,64H140V40h24a8,8,0,0,0,0-16H100a8,8,0,0,0,0,16h24V64H64A16,16,0,0,0,48,80v52H24V108a8,8,0,0,0-16,0v64a8,8,0,0,0,16,0V148H48v20.69A15.86,15.86,0,0,0,52.69,180L92,219.31A15.86,15.86,0,0,0,103.31,224h77.38A15.86,15.86,0,0,0,192,219.31L227.31,184H240a16,16,0,0,0,16-16V120A16,16,0,0,0,240,104Zm0,64H224a8,8,0,0,0-5.66,2.34L180.69,208H103.31L64,168.69V80H180.69l37.65,37.66A8,8,0,0,0,224,120h16Z', hasBar: false, bar: '0%' },
+        { k: 'Fuel', v: '62% · 418 km', d: 'M241,69.66,221.66,50.34a8,8,0,0,0-11.32,11.32L229.66,81A8,8,0,0,1,232,86.63V168a8,8,0,0,1-16,0V128a24,24,0,0,0-24-24H176V56a24,24,0,0,0-24-24H72A24,24,0,0,0,48,56V208H32a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16H176V120h16a8,8,0,0,1,8,8v40a24,24,0,0,0,48,0V86.63A23.85,23.85,0,0,0,241,69.66ZM64,208V56a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8V208Zm80-96a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h48A8,8,0,0,1,144,112Z', hasBar: true, bar: '62%' },
+        { k: '12V', v: '12.4 V', d: 'M192,136a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0v-8h-8a8,8,0,0,1,0-16h8v-8a8,8,0,0,1,16,0v8h8A8,8,0,0,1,192,136Zm-88-8H72a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM240,88v96a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V88A16,16,0,0,1,32,72H48V56A16,16,0,0,1,64,40H96a16,16,0,0,1,16,16V72h32V56a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72h16A16,16,0,0,1,240,88ZM160,72h32V56H160ZM64,72H96V56H64ZM224,184V88H32v96H224Z', hasBar: false, bar: '0%' },
+        { k: 'Odometer', v: '24,816 km', d: 'M207.06,72.67A111.24,111.24,0,0,0,128,40h-.4C66.07,40.21,16,91,16,153.13V176a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V152A111.25,111.25,0,0,0,207.06,72.67ZM224,176H119.71l54.76-75.3a8,8,0,0,0-12.94-9.42L99.92,176H32V153.13c0-3.08.15-6.12.43-9.13H56a8,8,0,0,0,0-16H35.27c10.32-38.86,44-68.24,84.73-71.66V80a8,8,0,0,0,16,0V56.33A96.14,96.14,0,0,1,221,128H200a8,8,0,0,0,0,16h23.67c.21,2.65.33,5.31.33,8Z', hasBar: false, bar: '0%' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+meta {
+  name: app version
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/app/version?osPlatform=IOS&apiVersion=2&currentVersion=1.2.7
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

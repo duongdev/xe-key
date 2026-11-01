@@ -1,0 +1,27 @@
+meta {
+  name: lights only
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/remote/hornLight
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:form-urlencoded {
+  carOid: {{carOid}}
+  clientUUID: {{clientUUID}}
+  command: lights
+}
+
+docs {
+  WARNING: Flashes the lights (auto-off, no explicit off command). This sends a real command to the vehicle.
+}

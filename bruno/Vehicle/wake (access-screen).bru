@@ -1,0 +1,26 @@
+meta {
+  name: wake (access-screen)
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/car/access-screen
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:form-urlencoded {
+  apiName: remote/engine
+  status: 2
+}
+
+docs {
+  WARNING: Wakes the TCU so the next status read is live. This sends a real command to the vehicle.
+}

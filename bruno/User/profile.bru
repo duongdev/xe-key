@@ -1,0 +1,17 @@
+meta {
+  name: profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/user/profile?uoid={{oid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

@@ -1,0 +1,17 @@
+meta {
+  name: service package list
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/renew/servicePackageList
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

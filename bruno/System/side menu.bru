@@ -1,0 +1,17 @@
+meta {
+  name: side menu
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/sideMenu
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

@@ -1,0 +1,17 @@
+meta {
+  name: alert messages
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/car/alertMessages
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

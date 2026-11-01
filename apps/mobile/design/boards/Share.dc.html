@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shared access</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;padding:56px 20px 30px;display:flex;flex-direction:column;gap:18px;overflow:hidden">
+<a href="Settings.dc.html" aria-label="Back to settings" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#F2F2F3;margin-left:-10px">
+<svg width="22" height="22" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg>
+</a>
+<div style="display:flex;flex-direction:column;gap:4px">
+<h1 style="margin:0;font-size:34px;font-weight:600;letter-spacing:-0.02em">Shared access</h1>
+<span style="font-size:15px;color:#A1A1A8">HR-V e:HEV · 51K-123.45</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:13px;color:#A1A1A8;padding-left:4px">People</span>
+<div style="background:#17171A;border-radius:20px;padding:0 16px">
+<sc-for list="{{people}}" as="p" hint-placeholder-count="3">
+<a href="#" style="min-height:64px;display:flex;align-items:center;gap:12px;color:#F2F2F3;text-decoration:none;box-shadow:{{p.sep}}">
+<span style="width:36px;height:36px;border-radius:18px;background:#2A2A2F;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex:none">{{p.ini}}</span>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-size:15px">{{p.name}}</span>
+<span style="font-size:13px;color:#A1A1A8">{{p.perm}}</span>
+</div>
+<span style="font-size:13px;color:{{p.tagColor}}">{{p.tag}}</span>
+</a>
+</sc-for>
+</div>
+<a href="Invite.dc.html" style="min-height:52px;border-radius:26px;background:#7CC7FF;color:#06121C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;text-decoration:none">Invite someone</a>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:13px;color:#A1A1A8;padding-left:4px">Your signed-in devices</span>
+<div style="background:#17171A;border-radius:20px;padding:0 16px">
+<sc-for list="{{devices}}" as="d" hint-placeholder-count="3">
+<div style="min-height:52px;display:flex;align-items:center;justify-content:space-between;box-shadow:{{d.sep}}">
+<span style="font-size:15px">{{d.name}}</span>
+<span style="font-size:13px;color:{{d.c}}">{{d.when}}</span>
+</div>
+</sc-for>
+</div>
+<button style="height:44px;border:0;background:none;color:#FF8A80;font:inherit;font-size:15px">Sign out of all other devices</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sep = (i) => (i ? 'inset 0 1px 0 #26262A' : 'none');
+    return {
+      people: [
+        { ini: 'D', name: 'You', perm: 'Owner · everything', tag: '', tagColor: '#A1A1A8' },
+        { ini: 'L', name: 'Lan', perm: 'Lock, unlock, engine, location', tag: 'No end', tagColor: '#A1A1A8' },
+        { ini: 'M', name: 'Minh', perm: 'Lock & location', tag: 'Ends 30 Nov', tagColor: '#FFB547' },
+      ].map((p, i) => ({ ...p, sep: sep(i) })),
+      devices: [
+        { name: 'This iPhone', when: 'Now', c: '#7CC7FF' },
+        { name: 'iPad', when: '2 days ago', c: '#A1A1A8' },
+        { name: 'Apple Watch', when: 'Today', c: '#A1A1A8' },
+      ].map((d, i) => ({ ...d, sep: sep(i) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

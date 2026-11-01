@@ -1,0 +1,17 @@
+meta {
+  name: current location
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/car/currentLocation?oid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

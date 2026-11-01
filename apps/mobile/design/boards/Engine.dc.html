@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Remote engine</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="{{vars}} width:390px;height:844px;box-sizing:border-box;background:var(--bg);color:var(--fg);font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;display:flex;flex-direction:column;padding:56px 20px 30px;overflow:hidden">
+
+<div style="display:flex;align-items:center;justify-content:space-between">
+<a href="Main.dc.html" aria-label="Back to car" style="width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;color:var(--fg);margin-left:-10px">
+<svg width="22" height="22" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg>
+</a>
+<span style="font-size:15px;font-weight:600">Climate</span>
+<span style="width:44px"></span>
+</div>
+
+<div style="margin-top:28px;display:flex;justify-content:center;position:relative;height:260px">
+<svg width="260" height="260" viewBox="0 0 260 260" aria-hidden="true">
+<circle cx="130" cy="130" r="112" fill="none" stroke="var(--s2)" stroke-width="8"></circle>
+<sc-if value="{{running}}" hint-placeholder-val="{{false}}">
+<circle cx="130" cy="130" r="112" fill="none" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" stroke-dasharray="703.7" stroke-dashoffset="{{ringOffset}}" transform="rotate(-90 130 130)" style="transition:stroke-dashoffset 1s linear"></circle>
+</sc-if>
+<sc-if value="{{busy}}" hint-placeholder-val="{{false}}">
+<g>
+<circle cx="130" cy="130" r="112" fill="none" stroke="{{busyColor}}" stroke-width="8" stroke-linecap="round" stroke-dasharray="120 583.7"></circle>
+<animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="1.4s" repeatCount="indefinite"></animateTransform>
+</g>
+</sc-if>
+</svg>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+<span style="font-size:{{bigSize}};line-height:1;font-weight:600;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">{{big}}</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:15px;color:var(--fg2);font-variant-numeric:tabular-nums"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{smallIcon}}"></path></svg>{{small}}</span>
+</div>
+</div>
+
+<p aria-live="polite" style="margin:18px 0 0;min-height:32px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;color:{{msgColor}}"><svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{msgIcon}}"></path></svg><span>{{msg}}</span></p>
+
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;justify-content:space-between;color:var(--fg2)"><span id="ac-label" style="display:flex;align-items:center;gap:6px;font-size:13px"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233,135a60,60,0,0,0-89.62-35.45l16.39-65.44a8,8,0,0,0-3.45-8.68A60,60,0,1,0,95.69,128.91L30.82,147.44a8,8,0,0,0-5.8,7.32,60,60,0,0,0,44.42,60.66,60.52,60.52,0,0,0,15.62,2.07,60.07,60.07,0,0,0,59.88-62l48.48,46.92a8,8,0,0,0,9.25,1.35A60,60,0,0,0,233,135Zm-121-7a16,16,0,1,1,16,16A16,16,0,0,1,112,128ZM80,76a44,44,0,0,1,62.75-39.82L127.77,96A32,32,0,0,0,99.85,112.8,43.85,43.85,0,0,1,80,76Zm27,119.57a44,44,0,0,1-65.86-34.43l59.31-16.94A32,32,0,0,0,128,160l.91,0A43.82,43.82,0,0,1,107,195.57Zm106.17-23a43.92,43.92,0,0,1-13,14.14l-44.32-42.89a31.91,31.91,0,0,0-.59-32.57,44,44,0,0,1,57.91,61.32Z"></path></svg>AC</span><span aria-hidden="true" style="display:flex;align-items:flex-end;gap:3px;height:14px"><sc-for list="{{bars}}" as="b" hint-placeholder-count="3"><span style="width:5px;border-radius:2px;height:{{b.h}};background:{{b.c}}"></span></sc-for></span></div>
+<div role="slider" tabindex="0" aria-labelledby="ac-label" aria-valuemin="0" aria-valuemax="2" aria-valuenow="{{acIndex}}" aria-valuetext="{{acText}}" onPointerDown="{{acDown}}" onPointerMove="{{acMove}}" onPointerUp="{{acUp}}" onPointerCancel="{{acUp}}" onKeyDown="{{acKey}}" style="position:relative;height:56px;border-radius:28px;background:var(--s1);touch-action:none;user-select:none;cursor:grab">
+<div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));pointer-events:none">
+<sc-for list="{{levels}}" as="lv" hint-placeholder-count="3">
+<span style="display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--fg2)">{{lv.label}}</span>
+</sc-for>
+</div>
+<span style="position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 3);border-radius:24px;background:var(--acc);color:var(--onacc);transform:translateX({{knobX}});transition:{{knobT}};display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:600;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.35)">
+<svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M223.77,150.09a8,8,0,0,1-5.86,9.68l-24.64,6,6.46,24.11a8,8,0,0,1-5.66,9.8A8.25,8.25,0,0,1,192,200a8,8,0,0,1-7.72-5.93l-7.72-28.8L136,141.86v46.83l21.66,21.65a8,8,0,0,1-11.32,11.32L128,203.31l-18.34,18.35a8,8,0,0,1-11.32-11.32L120,188.69V141.86L79.45,165.27l-7.72,28.8A8,8,0,0,1,64,200a8.25,8.25,0,0,1-2.08-.27,8,8,0,0,1-5.66-9.8l6.46-24.11-24.64-6a8,8,0,0,1,3.82-15.54l29.45,7.23L112,128,71.36,104.54l-29.45,7.23A7.85,7.85,0,0,1,40,112a8,8,0,0,1-1.91-15.77l24.64-6L56.27,66.07a8,8,0,0,1,15.46-4.14l7.72,28.8L120,114.14V67.31L98.34,45.66a8,8,0,0,1,11.32-11.32L128,52.69l18.34-18.35a8,8,0,0,1,11.32,11.32L136,67.31v46.83l40.55-23.41,7.72-28.8a8,8,0,0,1,15.46,4.14l-6.46,24.11,24.64,6A8,8,0,0,1,216,112a7.85,7.85,0,0,1-1.91-.23l-29.45-7.23L144,128l40.64,23.46,29.45-7.23A8,8,0,0,1,223.77,150.09Z"></path></svg>
+{{acText}}</span>
+</div>
+</div>
+
+<div aria-label="{{startsAria}}" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--fg2)">
+<span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path></svg><span>{{startsText}}</span></span>
+<span aria-hidden="true" style="display:flex;gap:6px">
+<span style="width:24px;height:6px;border-radius:3px;background:{{pip1}}"></span>
+<span style="width:24px;height:6px;border-radius:3px;background:{{pip2}}"></span>
+</span>
+</div>
+
+<div style="flex:1"></div>
+
+<sc-if value="{{showHold}}" hint-placeholder-val="{{true}}">
+<button onMouseDown="{{press}}" onMouseUp="{{release}}" onMouseLeave="{{release}}" onTouchStart="{{press}}" onTouchEnd="{{release}}" style="position:relative;overflow:hidden;width:100%;height:68px;border:0;border-radius:34px;background:var(--acc);color:var(--onacc);font:inherit;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+<span style="position:absolute;left:0;top:0;bottom:0;width:{{fillW}};background:var(--onacc);opacity:.18;transition:{{fillT}}"></span>
+<svg width="22" height="22" style="position:relative" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z"></path></svg>
+<span style="position:relative">Hold to start</span>
+</button>
+</sc-if>
+
+<sc-if value="{{showBusyBar}}" hint-placeholder-val="{{false}}">
+<button onClick="{{cancel}}" style="width:100%;height:68px;border:0;border-radius:34px;background:var(--s1);color:var(--fg);font:inherit;font-size:17px;font-weight:600;cursor:pointer">Cancel</button>
+</sc-if>
+
+<sc-if value="{{showRunning}}" hint-placeholder-val="{{false}}">
+<div style="display:grid;grid-template-columns:1fr 1.6fr;gap:12px">
+<button onClick="{{stop}}" style="height:68px;border:0;border-radius:34px;background:var(--s1);color:var(--fg);font:inherit;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z"></path></svg>Stop</button>
+<button onClick="{{extend}}" aria-label="{{extendAria}}" style="height:68px;border:0;border-radius:34px;background:var(--acc);color:var(--onacc);font:inherit;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{extendIcon}}"></path></svg>{{extendLabel}}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{showCapped}}" hint-placeholder-val="{{false}}">
+<div style="height:68px;border-radius:34px;background:var(--s1);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;color:var(--fg2)"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,152a12,12,0,1,1,12-12A12,12,0,0,1,128,152Zm104-24A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128ZM40,128v.33a135.93,135.93,0,0,1,176,0V128a88,88,0,0,0-176,0Zm67.5,85.58L90.45,168H49.63A88.35,88.35,0,0,0,107.5,213.58ZM128,216c.83,0,1.66,0,2.49,0l20.07-53.57a16.07,16.07,0,0,1,15-10.39h47.12c.38-1.31.72-2.64,1-4a120,120,0,0,0-171.4,0c.31,1.34.65,2.67,1,4H90.45a16.08,16.08,0,0,1,15,10.4l20,53.56C126.31,216,127.15,216,128,216Zm78.37-48H165.55l-17.09,45.59A88.34,88.34,0,0,0,206.37,168Z"></path></svg>Drive to reset starts</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"simulate":{"editor":"enum","options":["normal","car asleep"],"default":"normal"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'idle', remaining: 600, starts: 2, ac: 'mid', holding: false, msg: '', note: false, tries: 0 };
+    this.timers = [];
+  }
+  componentDidMount() {
+    this.tick = setInterval(() => {
+      if (this.state.phase !== 'running') return;
+      const r = this.state.remaining - 1;
+      if (r <= 0) this.setState({ phase: 'idle', remaining: 600, msg: 'Auto-off after 10 min', msgKind: 'timer' });
+      else this.setState({ remaining: r });
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this.tick); this.timers.forEach(clearTimeout); clearTimeout(this.holdT); }
+  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+  acSlide(e) {
+    const r = this.acRect;
+    const f = Math.max(0, Math.min(2, ((e.clientX - r.left) / r.width) * 3 - 0.5));
+    this.setState({ acDrag: f, ac: ['low', 'mid', 'high'][Math.round(f)] });
+  }
+  clear() { this.timers.forEach(clearTimeout); this.timers = []; }
+  fire() {
+    const asleep = (this.props.simulate ?? 'normal') === 'car asleep';
+    this.setState({ phase: 'sending', msg: '', msgKind: '', starts: this.state.starts - 1, remaining: 600 });
+    this.later(800, () => this.setState({ phase: 'accepted' }));
+    if (asleep) {
+      this.later(3200, () => this.setState({ phase: 'retrying', tries: 1 }));
+      this.later(6200, () => this.setState({ tries: 2 }));
+      this.later(9200, () => this.setState({ phase: 'running', msg: '' }));
+    } else {
+      this.later(3000, () => this.setState({ phase: 'running', msg: '' }));
+    }
+  }
+  renderVals() {
+    const light = (this.props.theme ?? 'dark') === 'light';
+    const t = light
+      ? { bg: '#F4F4F6', s1: '#FFFFFF', s2: '#E6E6EB', fg: '#0B0B0C', fg2: '#5C5C63', line: '#D6D6DC', acc: '#0A6FC2', onacc: '#FFFFFF', warn: '#9A5200' }
+      : { bg: '#0B0B0C', s1: '#17171A', s2: '#232327', fg: '#F2F2F3', fg2: '#A1A1A8', line: '#2E2E33', acc: '#7CC7FF', onacc: '#06121C', warn: '#FFB547' };
+    const vars = Object.keys(t).map((k) => '--' + k + ':' + t[k] + ';').join('');
+    const s = this.state;
+    const p = s.phase;
+    const busy = p === 'sending' || p === 'accepted' || p === 'retrying';
+    const mm = Math.floor(s.remaining / 60);
+    const ss = String(s.remaining % 60).padStart(2, '0');
+    const off = new Date(Date.now() + s.remaining * 1000);
+    const offAt = String(off.getHours()).padStart(2, '0') + ':' + String(off.getMinutes()).padStart(2, '0');
+    const acName = { high: 'High', mid: 'Mid', low: 'Low' };
+    const big = { idle: 'Off', sending: 'Sending', accepted: 'Starting', retrying: 'Retrying', running: mm + ':' + ss }[p];
+    const small = p === 'running' ? 'Off at ' + offAt : '10 min';
+    const D = { timer: 'M128,40a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,40Zm0,176a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,216ZM173.66,90.34a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32-11.32l40-40A8,8,0,0,1,173.66,90.34ZM96,16a8,8,0,0,1,8-8h48a8,8,0,0,1,0,16H104A8,8,0,0,1,96,16Z', sync: 'M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z', check: 'M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z', warn: 'M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z', snow: 'M223.77,150.09a8,8,0,0,1-5.86,9.68l-24.64,6,6.46,24.11a8,8,0,0,1-5.66,9.8A8.25,8.25,0,0,1,192,200a8,8,0,0,1-7.72-5.93l-7.72-28.8L136,141.86v46.83l21.66,21.65a8,8,0,0,1-11.32,11.32L128,203.31l-18.34,18.35a8,8,0,0,1-11.32-11.32L120,188.69V141.86L79.45,165.27l-7.72,28.8A8,8,0,0,1,64,200a8.25,8.25,0,0,1-2.08-.27,8,8,0,0,1-5.66-9.8l6.46-24.11-24.64-6a8,8,0,0,1,3.82-15.54l29.45,7.23L112,128,71.36,104.54l-29.45,7.23A7.85,7.85,0,0,1,40,112a8,8,0,0,1-1.91-15.77l24.64-6L56.27,66.07a8,8,0,0,1,15.46-4.14l7.72,28.8L120,114.14V67.31L98.34,45.66a8,8,0,0,1,11.32-11.32L128,52.69l18.34-18.35a8,8,0,0,1,11.32,11.32L136,67.31v46.83l40.55-23.41,7.72-28.8a8,8,0,0,1,15.46,4.14l-6.46,24.11,24.64,6A8,8,0,0,1,216,112a7.85,7.85,0,0,1-1.91-.23l-29.45-7.23L144,128l40.64,23.46,29.45-7.23A8,8,0,0,1,223.77,150.09Z', lock: 'M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z', power: 'M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z', plus: 'M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z', bell: 'M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z' };
+    const msgs = {
+      sending: ['Sending', 'sync'],
+      accepted: ['Accepted', 'check'],
+      retrying: ['Retrying ' + s.tries + '/3', 'warn'],
+      running: ['Cooling to 26°', 'snow'],
+    };
+    const [msg, msgKind] = (p !== 'running' && msgs[p]) || (s.msg ? [s.msg, s.msgKind || 'power'] : msgs[p] || ['Doors stay locked', 'lock']);
+    const capped = s.starts <= 0;
+    return {
+      vars,
+      running: p === 'running',
+      busy,
+      busyColor: p === 'retrying' ? 'var(--warn)' : 'var(--acc)',
+      ringOffset: String(703.7 * (1 - Math.min(1, s.remaining / 600))),
+      big,
+      bigSize: p === 'running' ? '64px' : '40px',
+      small,
+      msg,
+      msgColor: p === 'retrying' ? 'var(--warn)' : p === 'running' ? 'var(--acc)' : 'var(--fg2)',
+      msgIcon: D[msgKind],
+      smallIcon: p === 'running' ? D.timer : D.snow,
+      bars: [6, 10, 14].map((h, k) => ({ h: h + 'px', c: k <= ['low', 'mid', 'high'].indexOf(s.ac) ? 'var(--acc)' : 'var(--s2)' })),
+      levels: ['low', 'mid', 'high'].map((id) => ({ label: acName[id] })),
+      acIndex: ['low', 'mid', 'high'].indexOf(s.ac),
+      acText: acName[s.ac],
+      knobX: 'calc(' + (s.acDrag ?? ['low', 'mid', 'high'].indexOf(s.ac)) + ' * 100%)',
+      knobT: s.acDrag == null ? 'transform 320ms cubic-bezier(.34,1.56,.64,1)' : 'none',
+      acDown: (e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        this.acRect = e.currentTarget.getBoundingClientRect();
+        this.acSlide(e);
+      },
+      acMove: (e) => { if (this.state.acDrag != null) this.acSlide(e); },
+      acUp: () => { if (this.state.acDrag != null) this.setState({ acDrag: null }); },
+      acKey: (e) => {
+        const L = ['low', 'mid', 'high'];
+        const i = L.indexOf(this.state.ac) + (e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0);
+        if (i >= 0 && i <= 2) this.setState({ ac: L[i] });
+      },
+      startsText: capped ? '0 left' : s.starts + ' left',
+      startsAria: capped ? 'No remote starts left. Drive to reset' : s.starts + ' of 2 remote starts left',
+      pip1: s.starts >= 1 ? 'var(--acc)' : 'var(--s2)',
+      pip2: s.starts >= 2 ? 'var(--acc)' : 'var(--s2)',
+      showHold: p === 'idle' && !capped,
+      showCapped: p === 'idle' && capped,
+      showBusyBar: busy,
+      showRunning: p === 'running',
+      extendLabel: s.note ? 'Set' : capped ? 'At 1:00' : '+10 min',
+      extendIcon: s.note ? D.check : capped ? D.bell : D.plus,
+      extendAria: s.note ? 'Reminder set' : capped ? 'Remind me 1 minute before auto-off' : 'Extend 10 minutes. Uses 1 remote start',
+      fillW: s.holding ? '100%' : '0%',
+      fillT: s.holding ? 'width 600ms linear' : 'width 150ms ease-out',
+      press: () => {
+        if (this.state.phase !== 'idle') return;
+        this.setState({ holding: true });
+        this.holdT = setTimeout(() => { this.setState({ holding: false }); this.fire(); }, 600);
+      },
+      release: () => { clearTimeout(this.holdT); if (this.state.holding) this.setState({ holding: false }); },
+      cancel: () => { this.clear(); this.setState({ phase: 'idle', starts: this.state.starts + 1, msg: 'No start used', msgKind: 'check' }); },
+      stop: () => { this.clear(); this.setState({ phase: 'idle', remaining: 600, note: false, msg: 'Engine off', msgKind: 'power' }); },
+      extend: () => {
+        if (this.state.starts <= 0) { this.setState({ note: true }); return; }
+        this.setState({ starts: this.state.starts - 1, remaining: this.state.remaining + 600, msg: '+10 min · 1 start used', msgKind: 'plus' });
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

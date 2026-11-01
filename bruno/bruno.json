@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Honda CONNECT One",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

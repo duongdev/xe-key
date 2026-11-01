@@ -1,0 +1,21 @@
+meta {
+  name: verify code
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/verifyCode
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
+
+body:form-urlencoded {
+  code: 
+}

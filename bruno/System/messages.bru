@@ -1,0 +1,17 @@
+meta {
+  name: messages
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/message
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

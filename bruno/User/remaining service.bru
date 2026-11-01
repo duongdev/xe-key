@@ -1,0 +1,17 @@
+meta {
+  name: remaining service
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/user/deletion/remaining/service
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

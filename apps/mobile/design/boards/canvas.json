@@ -1,0 +1,351 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-01T09:00:00Z" },
+  "title": "Honda Connect Redesign",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Home · dark",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Home-light.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Home · light",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Engine.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Remote engine",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Lock.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Lock / unlock",
+      "radius": 44
+    },
+    "Engine-states.dc.html": { "x": 0, "y": 1444, "w": 1800, "h": 560, "title": "Command states" },
+    "Find.dc.html": { "x": 0, "y": 2604, "w": 390, "h": 844, "title": "Find my car", "radius": 44 },
+    "Status.dc.html": {
+      "x": 470,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Status detail",
+      "radius": 44
+    },
+    "Trips.dc.html": { "x": 940, "y": 2604, "w": 390, "h": 844, "title": "Trips", "radius": 44 },
+    "Notifications.dc.html": {
+      "x": 1410,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Notifications",
+      "radius": 44
+    },
+    "Settings.dc.html": {
+      "x": 1880,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Settings",
+      "radius": 44
+    },
+    "Siri.dc.html": {
+      "x": 0,
+      "y": 3972,
+      "w": 1400,
+      "h": 900,
+      "title": "Siri, widgets, quick actions"
+    },
+    "System.dc.html": { "x": 1480, "y": 3972, "w": 1400, "h": 1240, "title": "Visual language" },
+    "Onb-welcome.dc.html": {
+      "x": 0,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Welcome",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Onb-region.dc.html": {
+      "x": 470,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "2 · Region",
+      "radius": 44
+    },
+    "Onb-signin.dc.html": {
+      "x": 940,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "3 · Sign in",
+      "radius": 44
+    },
+    "Onb-device.dc.html": {
+      "x": 1410,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "4 · Device heads-up",
+      "radius": 44
+    },
+    "Onb-otp.dc.html": {
+      "x": 1880,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "5 · SMS code",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Onb-found.dc.html": {
+      "x": 2350,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Car found",
+      "radius": 44
+    },
+    "Onb-style.dc.html": {
+      "x": 2820,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "7 · Car look",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Onb-setup.dc.html": {
+      "x": 3290,
+      "y": 5672,
+      "w": 390,
+      "h": 844,
+      "title": "8 · Quick setup",
+      "radius": 44
+    },
+    "Car-gallery.dc.html": {
+      "x": 2280,
+      "y": 7116,
+      "w": 1500,
+      "h": 440,
+      "title": "Car illustrations"
+    },
+    "Car-contrast.dc.html": {
+      "x": 3860,
+      "y": 7116,
+      "w": 1500,
+      "h": 620,
+      "title": "Same-tone contrast"
+    },
+    "Car-states.dc.html": { "x": 5440, "y": 7116, "w": 1500, "h": 560, "title": "Car states" },
+    "Logo.dc.html": { "x": 0, "y": 7116, "w": 1400, "h": 900, "title": "Logo & name ideas" },
+    "Car.dc.html": {
+      "x": 1480,
+      "y": 7116,
+      "w": 720,
+      "h": 280,
+      "title": "Car illustration (component)"
+    },
+    "Cars.dc.html": {
+      "x": 0,
+      "y": 8616,
+      "w": 390,
+      "h": 844,
+      "title": "Car switcher",
+      "radius": 44
+    },
+    "Share.dc.html": {
+      "x": 470,
+      "y": 8616,
+      "w": 390,
+      "h": 844,
+      "title": "Shared access & devices",
+      "radius": 44
+    },
+    "Invite.dc.html": {
+      "x": 940,
+      "y": 8616,
+      "w": 390,
+      "h": 844,
+      "title": "Invite someone",
+      "radius": 44
+    },
+    "Home-loading.dc.html": {
+      "x": 0,
+      "y": 10060,
+      "w": 390,
+      "h": 844,
+      "title": "Home · first load",
+      "radius": 44
+    },
+    "Home-offline.dc.html": {
+      "x": 470,
+      "y": 10060,
+      "w": 390,
+      "h": 844,
+      "title": "Home · car asleep / offline",
+      "radius": 44
+    },
+    "Home-signedout.dc.html": {
+      "x": 940,
+      "y": 10060,
+      "w": 390,
+      "h": 844,
+      "title": "Home · signed in elsewhere",
+      "radius": 44
+    },
+    "Home-expired.dc.html": {
+      "x": 1410,
+      "y": 10060,
+      "w": 390,
+      "h": 844,
+      "title": "Home · package expired",
+      "radius": 44
+    },
+    "Empty-states.dc.html": { "x": 1880, "y": 10060, "w": 1350, "h": 844, "title": "Empty states" },
+    "Signin-errors.dc.html": {
+      "x": 3310,
+      "y": 10060,
+      "w": 1350,
+      "h": 844,
+      "title": "Sign-in errors"
+    },
+    "Toasts.dc.html": { "x": 4740, "y": 10060, "w": 1350, "h": 844, "title": "Toasts & banners" },
+    "Motion.dc.html": { "x": 0, "y": 11504, "w": 1600, "h": 1000, "title": "Motion (live)" }
+  },
+  "order": [
+    "Main.dc.html",
+    "Home-light.dc.html",
+    "Engine.dc.html",
+    "Lock.dc.html",
+    "Engine-states.dc.html",
+    "Find.dc.html",
+    "Status.dc.html",
+    "Trips.dc.html",
+    "Notifications.dc.html",
+    "Settings.dc.html",
+    "Siri.dc.html",
+    "System.dc.html",
+    "Onb-welcome.dc.html",
+    "Onb-region.dc.html",
+    "Onb-signin.dc.html",
+    "Onb-device.dc.html",
+    "Onb-otp.dc.html",
+    "Onb-found.dc.html",
+    "Onb-style.dc.html",
+    "Onb-setup.dc.html",
+    "Logo.dc.html",
+    "Car.dc.html",
+    "Car-gallery.dc.html",
+    "Car-contrast.dc.html",
+    "Car-states.dc.html",
+    "Cars.dc.html",
+    "Share.dc.html",
+    "Invite.dc.html",
+    "Home-loading.dc.html",
+    "Home-offline.dc.html",
+    "Home-signedout.dc.html",
+    "Home-expired.dc.html",
+    "Empty-states.dc.html",
+    "Signin-errors.dc.html",
+    "Toasts.dc.html",
+    "Motion.dc.html"
+  ],
+  "notes": {
+    "t1": {
+      "x": 0,
+      "y": -300,
+      "text": "Core — Home & remote engine",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "t2": { "x": 0, "y": 1144, "text": "Async command states", "kind": "title1", "maxW": 1800 },
+    "t3": { "x": 0, "y": 2304, "text": "Secondary screens", "kind": "title1", "maxW": 2270 },
+    "t4": {
+      "x": 0,
+      "y": 3672,
+      "text": "Siri, widgets & visual language",
+      "kind": "title1",
+      "maxW": 2880
+    },
+    "t5": { "x": 0, "y": 5372, "text": "First launch & sign-in", "kind": "title1", "maxW": 3680 },
+    "t6": { "x": 0, "y": 6816, "text": "Brand: logo & car art", "kind": "title1", "maxW": 6940 },
+    "t7": {
+      "x": 0,
+      "y": 8316,
+      "text": "Later: multi-car & sharing",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "t9": { "x": 0, "y": 11204, "text": "Motion", "kind": "title1", "maxW": 1600 },
+    "t8": {
+      "x": 0,
+      "y": 9760,
+      "text": "States: loading, offline, empty, errors, toasts",
+      "kind": "title1",
+      "maxW": 6090
+    },
+    "g6": {
+      "x": 6170,
+      "y": 10060,
+      "w": 380,
+      "fill": "yellow",
+      "text": "State rules\n\nLoading: skeleton in the real layout, never a spinner page. Cached data shows at once with its age; skeleton only on very first load.\nOffline vs asleep: no internet = grey banner, commands disabled with reason. Car asleep = amber line, commands still allowed (they queue + wake).\nSigned out elsewhere: Honda allows one phone. Explain, keep the car picture, one button to sign in again.\nPackage expired: read-only data stays, remote actions replaced by one renew link.\nToast = result of something you just did (3 s, top, swipe up). Banner = ongoing condition (stays until fixed). Errors on a form = inline under the field, not a toast."
+    },
+    "g5": {
+      "x": 3760,
+      "y": 5672,
+      "w": 380,
+      "fill": "green",
+      "text": "Onboarding rationale\n\nGoal: first launch to unlocking the car in under 60 s.\n3 intro slides max, skippable. Then only what the API needs: region, phone + password, SMS code.\nStep 4 is the honest part: Honda binds an account to one phone. Signing in here signs the official app out. Say it before the SMS, not after.\nStep 6 is the reward: the car appears in its real color (from /car/image) with plate. Feels like a key handover.\nStep 7 lets the user pick body shape (pre-selected from the API model), style (shaded / line / Honda photo) and paint. Skippable.\nStep 8 groups Face ID, notifications and Siri on one screen, each skippable. No permission prompt without a reason line.\nProgress bar: 4 segments for sign-in steps only. Intro slides use dots."
+    },
+    "g4": {
+      "x": 1410,
+      "y": 8616,
+      "w": 380,
+      "fill": "orange",
+      "text": "Account, multi-car, sharing\n\nSign in once; token in Keychain, Face ID to reopen. Password goes only to Honda.\nMulti-car: name on Home is the switcher. Swipe the car image left/right to change car. Widgets and Siri take a car (\"Lock the City\"); default = last used.\nShared cars show who shared them and only the actions you were given. Hidden actions are not shown greyed out.\nSharing: per-person permissions (location / lock / unlock / engine) + expiry. Unlock and engine need Face ID on the guest's device.\nDevices: every signed-in device is listed; sign out one or all.\n\nOpen question: if Honda's API has no guest users, sharing needs our own backend holding the owner's token. That is a security decision, not a UI one."
+    },
+    "g1": {
+      "x": 1880,
+      "y": 0,
+      "w": 380,
+      "fill": "blue",
+      "text": "Gesture map\n\nTap = safe, reversible (Lock, open a screen).\nSwipe / scrub to choose, never tap-tap: swipe the car to change car or body shape; slide a knob for AC level and style; scrub a finger along the paint rail. Value changes live under the finger, haptic tick per stop, knob springs to the nearest stop on release. Taps and VoiceOver adjust (swipe up/down) still work.\nHold ~0.6 s = physical / risky (Unlock, Start engine). The pill fills under the thumb; release early cancels. Haptic: light tick at start, firm tap when armed.\nPull down on Home = wake the car + refresh. Not a reload: it sends a wake, then reads live data.\nSwipe left on a notification = delete. Edge-swipe = back.\nAll primary controls live in the bottom 40% of the screen."
+    },
+    "g2": {
+      "x": 1880,
+      "y": 520,
+      "w": 380,
+      "fill": "teal",
+      "text": "Async command pattern\n\n1 Fire: button turns into its own progress ring at once. Haptic tick. No modal, no blocking.\n2 Accepted: one calm line says the car got it (\"Accepted · waiting for car\").\n3 Confirm: poll until the car reports the new state, then a success haptic and the headline changes.\nSlow / car asleep: amber \"Connection unstable — retrying\". Keep the last known state visible. Only after all retries: \"Couldn't reach car\" + Try again.\nThe UI is optimistic in motion, honest in words: the headline only changes when the car confirms."
+    },
+    "g3": {
+      "x": 2960,
+      "y": 3972,
+      "w": 380,
+      "fill": "purple",
+      "text": "Siri flows\n\nEvery intent answers in one spoken sentence + a compact snippet, no app launch.\nRead intents (Is it locked? Where is it?) run at once.\nPhysical intents (Unlock, Start) ask \"Unlock your HR-V?\" — Siri confirmation is the voice version of long-press.\nLock needs no confirm.\nSlow car: Siri says \"Sent. I'll notify you when it's done.\" and a push confirms later."
+    }
+  },
+  "designSystems": []
+}

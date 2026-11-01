@@ -1,0 +1,17 @@
+meta {
+  name: finder location
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/car/finder/location?carOid={{carOid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

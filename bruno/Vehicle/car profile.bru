@@ -1,0 +1,17 @@
+meta {
+  name: car profile
+  type: http
+  seq: 19
+}
+
+get {
+  url: {{baseUrl}}/car/profile?uoid={{oid}}
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}

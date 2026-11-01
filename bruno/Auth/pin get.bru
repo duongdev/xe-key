@@ -1,0 +1,17 @@
+meta {
+  name: pin get
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/auth/pin/get
+  body: none
+  auth: none
+}
+
+headers {
+  app: OneApp
+  User-Agent: HConnect-OneApp
+  Cookie: {{cookie}}
+}
