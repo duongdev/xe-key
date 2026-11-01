@@ -26,7 +26,7 @@ import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader } from "../ui/page-header";
 import { pick } from "../ui/pick";
-import { Screen } from "../ui/screen";
+import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 
 type Tint = "acc" | "warn" | "fg2";
@@ -128,6 +128,7 @@ function Group({ title, children }: { title: string; children: ReactNode[] }) {
 }
 
 export default function Settings() {
+  const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
   const { prefs, update } = usePrefs();
@@ -191,45 +192,50 @@ export default function Settings() {
     ]);
 
   return (
-    <Screen>
+    <Screen scroll>
       <PageHeader title={t.settings} />
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 18, paddingTop: 8, paddingBottom: 32 }}
+        contentContainerStyle={{ gap: 18, paddingTop: 8, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
       >
-        <Group title={t.vehicle}>
-          {[
-            <Row
-              key="car"
-              icon={CarProfileIcon}
-              tint="acc"
-              label={prefs.carName ?? car?.model ?? ""}
-              value={car?.plate ?? undefined}
-              onPress={() =>
-                Alert.prompt(
-                  t.rename,
-                  undefined,
-                  (v) => update({ carName: v.trim() || null }),
-                  "plain-text",
-                  prefs.carName ?? car?.model,
-                )
-              }
-            />,
-          ]}
-        </Group>
-        <Group title={t.package}>
-          {[
-            <Row
-              key="pkg"
-              icon={CrownIcon}
-              tint="warn"
-              label="Honda CONNECT"
-              value={car?.account === "expired" ? t.expiredTitle : t.active}
-              valueTone={car?.account === "expired" ? "warn" : "acc"}
-            />,
-          ]}
-        </Group>
+        {/* No car loaded (signed out, first launch): nothing to show for vehicle or package. */}
+        {car ? (
+          <>
+            <Group title={t.vehicle}>
+              {[
+                <Row
+                  key="car"
+                  icon={CarProfileIcon}
+                  tint="acc"
+                  label={prefs.carName ?? car?.model ?? ""}
+                  value={car?.plate ?? undefined}
+                  onPress={() =>
+                    Alert.prompt(
+                      t.rename,
+                      undefined,
+                      (v) => update({ carName: v.trim() || null }),
+                      "plain-text",
+                      prefs.carName ?? car?.model,
+                    )
+                  }
+                />,
+              ]}
+            </Group>
+            <Group title={t.package}>
+              {[
+                <Row
+                  key="pkg"
+                  icon={CrownIcon}
+                  tint="warn"
+                  label="Honda CONNECT"
+                  value={car?.account === "expired" ? t.expiredTitle : t.active}
+                  valueTone={car?.account === "expired" ? "warn" : "acc"}
+                />,
+              ]}
+            </Group>
+          </>
+        ) : null}
         <Group title={t.safety}>
           {[
             <Row
@@ -286,11 +292,11 @@ export default function Settings() {
                 icon={HardDrivesIcon}
                 tint="fg2"
                 label={t.carService}
-                value={prefs.api === "live" ? t.liveService : t.mock}
+                value={prefs.honda === "live" ? t.liveService : t.mock}
                 onPress={() => {
-                  const api = prefs.api === "live" ? "mock" : "live";
-                  update({ api });
-                  if (api === "live") Alert.alert(t.liveService, t.liveNotReady);
+                  const honda = prefs.honda === "live" ? "mock" : "live";
+                  update({ honda });
+                  if (honda === "live") Alert.alert(t.liveService, t.liveNotReady);
                 }}
               />,
               <Row

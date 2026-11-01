@@ -14,7 +14,8 @@ import { useFocusEffect } from "expo-router";
 import { type ReactNode, useCallback, useLayoutEffect, useRef } from "react";
 import { AppState } from "react-native";
 import { usePrefs } from "../prefs";
-import type { CarService, CarStatus } from "./car";
+import { withSeen } from "./alert-seen";
+import type { CarAlert, CarService, CarStatus } from "./car";
 import { SignedOut } from "./honda";
 import { liveCar } from "./live-car";
 import { mockCar } from "./mock-car";
@@ -53,6 +54,11 @@ const persister = createAsyncStoragePersister({
     }),
 });
 
+/** Alerts with the user's own "marked read" applied (Honda can't store it). */
+export async function loadAlerts(): Promise<CarAlert[]> {
+  return withSeen(await carService.alerts());
+}
+
 /** Pull-to-refresh: a fresh read through the same checks as every other read. */
 export function refreshCar() {
   return queryClient.fetchQuery({ queryKey: CAR_KEY, queryFn: carStatus, staleTime: 0 });
@@ -69,12 +75,12 @@ export function wipeCache() {
   persister.removeClient();
 }
 
-let impl: CarService = __DEV__ ? mockCar : liveCar;
+let impl: CarService = liveCar;
 
 /** Mock or live per Settings › Developer; release builds are always live. Swaps before children fetch. */
 function CarServiceGate({ children }: { children: ReactNode }) {
   const { prefs } = usePrefs();
-  const next = __DEV__ && prefs.api === "mock" ? mockCar : liveCar;
+  const next = __DEV__ && prefs.honda === "mock" ? mockCar : liveCar;
   useLayoutEffect(() => {
     if (impl === next) return;
     impl = next;

@@ -1,4 +1,4 @@
-import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
   ArrowsClockwiseIcon,
@@ -42,8 +42,9 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
 import type { CarStatus } from "../services/car";
-import { ALERTS_KEY, carService, refreshCar, useCar } from "../services/query";
+import { ALERTS_KEY, loadAlerts, refreshCar, useCar } from "../services/query";
 import { useDistance } from "../services/use-distance";
+import { haptics } from "../theme/haptics";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Appear, Shimmer } from "../ui/appear";
@@ -54,6 +55,7 @@ import { HoldButton } from "../ui/hold-button";
 import { setLaunchTarget } from "../ui/launch-target";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
+import { usePullRefresh } from "../ui/use-pull-refresh";
 
 /** No fresh report for this long = the car has gone to sleep. */
 const ASLEEP_MIN = 30;
@@ -239,10 +241,14 @@ export default function Home() {
   const carBox = useRef<React.ComponentRef<typeof View>>(null);
   // "Wake" is a fresh read: Honda has no wake call (FINDINGS Round 3 correction).
   const wake = useMutation({ mutationFn: refreshCar });
+  const pull = usePullRefresh(() =>
+    online && car?.account !== "expired" ? wake.mutateAsync() : null,
+  );
   // Alerts aren't saved to disk; load them behind Home so the Alerts screen opens with data.
   const signedIn = !!car;
+  const alertList = useQuery({ queryKey: ALERTS_KEY, queryFn: loadAlerts, enabled: false }).data;
   useEffect(() => {
-    if (signedIn) qc.prefetchQuery({ queryKey: ALERTS_KEY, queryFn: () => carService.alerts() });
+    if (signedIn) qc.prefetchQuery({ queryKey: ALERTS_KEY, queryFn: loadAlerts });
   }, [signedIn, qc]);
   const km = useDistance(car?.location);
   const place = car?.location ? (car.location.name ?? t.carSpot) : t.noGps;
@@ -357,10 +363,8 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={wake.isPending}
-            onRefresh={() => {
-              if (online && !expired) wake.mutate();
-            }}
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
             tintColor={c.fg2}
           />
         }
@@ -453,7 +457,14 @@ export default function Home() {
                       color={age?.unit === "live" && !wake.isPending ? c.acc : c.fg2}
                     />
                   }
-                  onPress={online && !expired && !wake.isPending ? () => wake.mutate() : undefined}
+                  onPress={
+                    online && !expired && !wake.isPending
+                      ? () => {
+                          haptics.light();
+                          wake.mutate();
+                        }
+                      : undefined
+                  }
                   text={freshText}
                 />
               </>
@@ -482,18 +493,15 @@ export default function Home() {
             opacity: loading ? 0.35 : online ? 1 : 0.55,
           }}
         >
-          {/* Car answers: settles in from the left when its lock or engine state changes, not on
-              every read (live data re-reads often). */}
-          <Appear kind="settle-left" play={car ? `${car.doors}-${engineOn}` : undefined}>
-            <Car
-              body={body}
-              look={look === "line" ? "line" : "shaded"}
-              paint={loading ? "#3A3A40" : paint}
-              ground={scheme}
-              doors={unlocked ? "unlocked" : "locked"}
-              engine={engineOn}
-            />
-          </Appear>
+          {/* The car stays put; state shows on it (amber lights unlocked, exhaust running). */}
+          <Car
+            body={body}
+            look={look === "line" ? "line" : "shaded"}
+            paint={loading ? "#3A3A40" : paint}
+            ground={scheme}
+            doors={unlocked ? "unlocked" : "locked"}
+            engine={engineOn}
+          />
         </View>
 
         <View
@@ -717,7 +725,13 @@ export default function Home() {
         {[
           { key: "status", icon: GaugeIcon, label: t.status },
           { key: "trips", icon: PathIcon, label: t.trips },
-          { key: "alerts", icon: BellIcon, label: t.alerts, badge: car?.alerts },
+          {
+            key: "alerts",
+            icon: BellIcon,
+            label: t.alerts,
+            // Once alerts are loaded the badge counts them (with "marked read" applied).
+            badge: alertList ? alertList.filter((a) => a.unread).length : car?.alerts,
+          },
         ].map(({ key, icon: Icon, label, badge }) => (
           <Pressable
             key={key}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
   Easing,
@@ -41,11 +41,12 @@ export function Launch({ onDone }: { onDone: () => void }) {
   const fade = useSharedValue(1);
   const [car, setCar] = useState<LaunchTarget | null>(null);
   const [go, setGo] = useState(false);
+  const started = useRef(false);
 
   useEffect(() => {
     const off = onLaunchTarget((target) => {
-      // Follow Home's latest layout (data can arrive and move the car before the reveal).
-      setCar(target);
+      // Follow Home's latest layout, but never add a car once the sequence started without one.
+      setCar((c) => (c || !started.current ? target : c));
       setGo(true);
     });
     const id = setTimeout(() => setGo(true), TARGET_WAIT_MS);
@@ -57,6 +58,7 @@ export function Launch({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     if (!go) return;
+    started.current = true;
     const done = (finished?: boolean) => {
       "worklet";
       if (finished) runOnJS(onDone)();
@@ -91,7 +93,8 @@ export function Launch({ onDone }: { onDone: () => void }) {
       ["#0A6FC2", "#7CC7FF", "#EAF6FF"],
     );
     return {
-      opacity: car ? f.dotOpacity : 1,
+      // No car to fly to (e.g. onboarding): the dot leaves with its tile.
+      opacity: car ? f.dotOpacity : f.tileOpacity,
       backgroundColor: color,
       shadowColor: color,
       shadowRadius: Math.min(1, t.value / 1050) * 11,
@@ -117,7 +120,9 @@ export function Launch({ onDone }: { onDone: () => void }) {
       />
       {car && !reduced ? (
         <>
-          <Animated.View style={[{ position: "absolute", left: 0, top: 0 }, floorStyle]}>
+          <Animated.View
+            style={[{ position: "absolute", left: 0, top: 0, opacity: 0 }, floorStyle]}
+          >
             <Glow
               color="#7CC7FF"
               opacity={0.16}
@@ -125,11 +130,21 @@ export function Launch({ onDone }: { onDone: () => void }) {
             />
           </Animated.View>
           <Animated.View
-            style={[{ position: "absolute", left: car.x, top: car.y, width: car.width }, carStyle]}
+            // Base style = the 0 ms frame (off to the left), so the first paint can't flash the car.
+            style={[
+              {
+                position: "absolute",
+                left: car.x,
+                top: car.y,
+                width: car.width,
+                transform: [{ translateX: -(car.x + car.width + 84 * b) }],
+              },
+              carStyle,
+            ]}
           >
             <Car body={car.body} paint={car.paint} look={car.look} ground="dark" />
           </Animated.View>
-          <Animated.View style={[{ position: "absolute", left: 0, top: 0 }, winkStyle]}>
+          <Animated.View style={[{ position: "absolute", left: 0, top: 0, opacity: 0 }, winkStyle]}>
             <Glow
               color="#EAF6FF"
               opacity={0.95}
@@ -154,6 +169,11 @@ export function Launch({ onDone }: { onDone: () => void }) {
             width: DOT.size,
             height: DOT.size,
             borderRadius: DOT.size / 2,
+            backgroundColor: "#0A6FC2",
+            transform: [
+              { translateX: from.x - DOT.size / 2 },
+              { translateY: from.y - DOT.size / 2 },
+            ],
             shadowOpacity: 0.55,
             shadowOffset: { width: 0, height: 0 },
           },

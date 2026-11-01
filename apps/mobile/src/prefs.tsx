@@ -15,8 +15,9 @@ export type Prefs = {
   siri: boolean;
   language: "system" | "en" | "vi";
   format: "system" | "24h" | "12h";
-  /** Dev builds only; release builds always talk to Honda. */
-  api: "mock" | "live";
+  /** Dev builds only (Settings › Developer); release builds always talk to Honda. Renamed from
+   * `api` so devices that saved the old mock default start on live. */
+  honda: "mock" | "live";
 };
 
 const DEFAULTS: Prefs = {
@@ -28,7 +29,7 @@ const DEFAULTS: Prefs = {
   siri: false,
   language: "system",
   format: "system",
-  api: __DEV__ ? "mock" : "live",
+  honda: "live",
 };
 
 const KEY = "prefs.v1";

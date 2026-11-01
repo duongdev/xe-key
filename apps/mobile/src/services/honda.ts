@@ -24,7 +24,15 @@ const omitFetch = (url: string, init: RequestInit) => fetch(url, { ...init, cred
 const client = (region: Region, cookies: Record<string, string> = {}) =>
   new HondaHttp({ base: baseUrl(region), fetch: omitFetch, cookies: keychainCookies(cookies) });
 
+// A personal build can pin a deviceId that Honda already trusts (no device-change SMS):
+// EXPO_PUBLIC_DEVICE_ID in apps/mobile/.env.local, never committed.
+const PINNED_DEVICE_ID = process.env.EXPO_PUBLIC_DEVICE_ID;
+
 async function ensure(key: "deviceId" | "deviceToken"): Promise<string> {
+  if (key === "deviceId" && PINNED_DEVICE_ID) {
+    if ((await secret.get(key)) !== PINNED_DEVICE_ID) await secret.set(key, PINNED_DEVICE_ID);
+    return PINNED_DEVICE_ID;
+  }
   const have = await secret.get(key);
   if (have) return have;
   const id = randomUUID();
