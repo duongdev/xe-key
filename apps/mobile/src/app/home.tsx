@@ -632,59 +632,64 @@ export default function Home() {
         </View>
       ) : (
         <View style={{ marginTop: 8, flexDirection: "row", gap: 12 }}>
-          <HoldButton
-            mode={unlocked ? "tap" : "hold"}
-            label={lockLabel}
-            accessibilityHint={unlocked ? undefined : t.holdHint}
-            disabled={controlsOff || pending}
-            bg={unlocked && !pending ? "warn" : "s1"}
-            fg={unlocked && !pending ? "onwarn" : "fg"}
-            icon={
-              !online ? (
+          {car && !car.can.lock ? null : (
+            <HoldButton
+              mode={unlocked ? "tap" : "hold"}
+              label={lockLabel}
+              accessibilityLabel={!unlocked && !pending ? t.unlock : undefined}
+              accessibilityHint={unlocked ? undefined : t.holdHint}
+              disabled={controlsOff || pending}
+              bg={unlocked && !pending ? "warn" : "s1"}
+              fg={unlocked && !pending ? "onwarn" : "fg"}
+              icon={
+                !online ? (
+                  <WifiSlashIcon size={iconSize.md} color={c.fg2} />
+                ) : unlocked ? (
+                  <LockIcon size={iconSize.md} color={pending ? c.fg : c.onwarn} />
+                ) : (
+                  <LockOpenIcon size={iconSize.md} color={c.fg} />
+                )
+              }
+              onAction={() => send(unlocked ? "lock" : "unlock")}
+            />
+          )}
+          {car && !car.can.engine ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={engineOn ? clock : t.start}
+              disabled={controlsOff}
+              onPress={() => router.push("/engine")}
+              style={({ pressed }) => ({
+                flex: 1,
+                height: 68,
+                borderRadius: 34,
+                backgroundColor: engineOn ? c.s2 : c.s1,
+                borderWidth: engineOn ? 2 : 0,
+                borderColor: c.acc,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                opacity: controlsOff ? 0.5 : pressed ? 0.8 : 1,
+              })}
+            >
+              {!online ? (
                 <WifiSlashIcon size={iconSize.md} color={c.fg2} />
-              ) : unlocked ? (
-                <LockIcon size={iconSize.md} color={pending ? c.fg : c.onwarn} />
               ) : (
-                <LockOpenIcon size={iconSize.md} color={c.fg} />
-              )
-            }
-            onAction={() => send(unlocked ? "lock" : "unlock")}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={engineOn ? clock : t.start}
-            disabled={controlsOff}
-            onPress={() => router.push("/engine")}
-            style={({ pressed }) => ({
-              flex: 1,
-              height: 68,
-              borderRadius: 34,
-              backgroundColor: engineOn ? c.s2 : c.s1,
-              borderWidth: engineOn ? 2 : 0,
-              borderColor: c.acc,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              opacity: controlsOff ? 0.5 : pressed ? 0.8 : 1,
-            })}
-          >
-            {!online ? (
-              <WifiSlashIcon size={iconSize.md} color={c.fg2} />
-            ) : (
-              <SnowflakeIcon size={iconSize.md} color={c.acc} />
-            )}
-            {engineOn ? (
-              <Digits
-                value={clock}
-                style={{ ...textStyle("body", 600), fontSize: 16, color: c.fg }}
-              />
-            ) : (
-              <Text weight={600} style={{ fontSize: 16 }}>
-                {t.start}
-              </Text>
-            )}
-          </Pressable>
+                <SnowflakeIcon size={iconSize.md} color={c.acc} />
+              )}
+              {engineOn ? (
+                <Digits
+                  value={clock}
+                  style={{ ...textStyle("body", 600), fontSize: 16, color: c.fg }}
+                />
+              ) : (
+                <Text weight={600} style={{ fontSize: 16 }}>
+                  {t.start}
+                </Text>
+              )}
+            </Pressable>
+          )}
         </View>
       )}
 

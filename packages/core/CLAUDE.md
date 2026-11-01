@@ -12,6 +12,7 @@ The package root is runtime-agnostic (bundles in React Native); Node-only helper
 - `http.ts` — `HondaHttp({ base, fetch?, cookies? })` + `app: OneApp` header.
 - `cookies.ts` — `CookieStore`, in-memory jar, Set-Cookie parsing (also React Native's comma-joined header). Pure.
 - `auth.ts` — `registerDevice` / `login` / `verifyCode` / `resendCode` / `logout`.
+- `remote.ts` — `sendRemote` / `pullRemote`: lock, unlock, engine start/stop/extend and their result pull (raw responses, so callers' session handling applies).
 - `session.ts` — session type, `buildSession`, `parseSession` (snake_case tolerant). Pure.
 - `node/` — `@xekey/core/node`: session file save (chmod 600) / load, `fileCookies`, `resolveDeviceId` (env > file > generated).
 

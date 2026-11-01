@@ -54,17 +54,11 @@ export function useCommand() {
         else dispatch({ type: "failed" });
       } catch (e) {
         if (mine.cancelled) return;
-        // Live commands land in task 015; nothing was sent to the car.
-        if (e instanceof Error && e.name === "NotYet") {
-          toast.show({ kind: "info", text: t.notYet });
-          dispatch({ type: "reset" });
-          return;
-        }
         console.warn("command failed", kind, e);
         dispatch({ type: "failed" });
       }
     },
-    [state, qc, toast, t],
+    [state, qc],
   );
 
   resend.current = (kind) => send(kind);

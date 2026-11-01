@@ -40,6 +40,7 @@ const mockCar: CarStatus = {
   alerts: 0,
   updatedAt: Date.now(),
   account: "ok",
+  can: { lock: true, engine: true },
 };
 
 let mockFinish: (() => void) | null = null;

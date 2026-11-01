@@ -56,6 +56,7 @@ let car: CarStatus = {
   alerts: 2,
   updatedAt: Date.now() - 2 * 60_000,
   account: "ok",
+  can: { lock: true, engine: true },
 };
 
 /** `days` back at h:m; for today, never later than 30 min ago. */

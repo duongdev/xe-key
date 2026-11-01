@@ -10,5 +10,7 @@ export type { Fetch, HondaHttpOptions, HttpResponse } from "./http.js";
 export { HondaHttp } from "./http.js";
 export type { Region } from "./region.js";
 export { baseUrl, REGION_META, REGIONS } from "./region.js";
+export type { AcLevel, RemoteAccepted, RemoteKind } from "./remote.js";
+export { pullRemote, sendRemote } from "./remote.js";
 export type { Session } from "./session.js";
 export { buildSession, parseSession } from "./session.js";

@@ -27,7 +27,7 @@ focusManager.setEventListener((setFocused) => {
 });
 
 export const queryClient = new QueryClient({
-  // No polling: each Honda read may wake the car's TCU (task 014, Q22).
+  // No polling while parked: each Honda read may wake the car's TCU (task 014, Q22).
   defaultOptions: { queries: { gcTime: 7 * 24 * 3_600_000, staleTime: 30_000, retry: 1 } },
 });
 
@@ -54,7 +54,7 @@ export const carService: CarService = {
   deleteAlert: (id) => impl.deleteAlert(id),
 };
 /** Bump when CarStatus changes shape so old cached data is dropped. */
-const CACHE_VERSION = "3";
+const CACHE_VERSION = "4";
 
 export const CAR_KEY = ["car"] as const;
 
@@ -86,5 +86,11 @@ export function useRefreshOnFocus(queryKey: QueryKey) {
 
 export function useCar() {
   useRefreshOnFocus(CAR_KEY);
-  return useQuery({ queryKey: CAR_KEY, queryFn: () => carService.status() });
+  return useQuery({
+    queryKey: CAR_KEY,
+    queryFn: () => carService.status(),
+    // While the engine runs the car reports about once a minute anyway: re-read so a stop or
+    // extend made elsewhere shows, and the countdown tracks the car. Parked: no polling.
+    refetchInterval: (q) => (q.state.data?.engine.on ? 60_000 : false),
+  });
 }

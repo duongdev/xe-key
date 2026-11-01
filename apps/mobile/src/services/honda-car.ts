@@ -22,16 +22,23 @@ export function toCarStatus(raw: HondaRaw): CarStatus {
   const lat = num(raw.finder.latitude);
   const lng = num(raw.finder.longitude);
   const doorOpen = is(raw.door.allDoors, "OPEN");
+  // Bits per the official app; it defaults to 8191 (everything) when the code is missing.
+  const pkg = num(raw.car.packageServiceCode) ?? 8191;
   return {
     model: str(raw.car.name).trim() || "Honda",
     plate: null,
     doors: is(raw.door.allDoors, "LOCK") ? "locked" : "unlocked",
-    // ponytail: no end time from Honda (resTime unit unknown); assume a 10 min run from the last report.
+    // resTime = whole minutes left, rounded up, as of the car's last report (lastTimeCall). Logged
+    // 2026-11-02: every report pointed to the same off time within its minute, so the middle of
+    // that minute is within ±30 s. Without resTime, assume a full run from the last report.
     engine:
       raw.engine.engine === true
-        ? { on: true, endsAt: resTime > 0 ? Date.now() + resTime * 1000 : updatedAt + RUN_S * 1000 }
+        ? {
+            on: true,
+            endsAt: resTime > 0 ? updatedAt + resTime * 60_000 - 30_000 : updatedAt + RUN_S * 1000,
+          }
         : { on: false },
-    // Unverified: resStartCounter read 1 after recent starts; assumed starts used since the last drive.
+    // Remote starts used since the car was last driven (went 1 → 2 on a start, 2026-11-02).
     startsLeft: used === null ? null : Math.max(0, 2 - used),
     body: {
       doorsOpen: null,
@@ -62,6 +69,7 @@ export function toCarStatus(raw: HondaRaw): CarStatus {
     alerts: num(raw.top.unreadAlertMessages) ?? 0,
     updatedAt,
     account: raw.car.isExpired === true ? "expired" : "ok",
+    can: { lock: (pkg & 32) > 0, engine: (pkg & 16) > 0 },
   };
 }
 

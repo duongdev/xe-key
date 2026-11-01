@@ -1,9 +1,11 @@
 import type { HondaHttp } from "@xekey/core";
-import { isSuccess, parseEnvelope } from "@xekey/core";
+import { isSuccess, parseEnvelope, pullRemote, type RemoteKind, sendRemote } from "@xekey/core";
+import { randomUUID } from "expo-crypto";
 import * as Location from "expo-location";
 import type { CarLocation, CarService, CarStatus } from "./car";
 import { call } from "./honda";
 import { type HondaRaw, toAlerts, toCarStatus } from "./honda-car";
+import { done, pullDelayMs } from "./honda-command";
 
 type Obj = Record<string, unknown>;
 
@@ -64,15 +66,59 @@ async function status(): Promise<CarStatus> {
   return { ...s, location: await withPlace(s.location) };
 }
 
-export class NotYet extends Error {
-  name = "NotYet";
+const POLL_MS = 5000;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * One command, CONTEXT.md › Commands: Sent → Accepted (POST SUCCESS) → Confirmed or Failed.
+ * Honda has no push to us, so we watch the door/engine status every 5 s and confirm as soon as it
+ * shows the change; when Honda's wait is over we ask for the result once, as the official app does.
+ */
+async function remote(
+  kind: RemoteKind,
+  onEvent: Parameters<CarService["command"]>[1],
+  opts: Parameters<CarService["command"]>[2],
+): Promise<CarStatus | null> {
+  await car();
+  const oid = carOid ?? "";
+  const uuid = randomUUID();
+  const sentAt = Date.now();
+  const accepted = parseEnvelope(
+    (await call((h) => sendRemote(h, oid, kind, uuid, opts?.ac ?? "mid"))).json,
+  );
+  if (!isSuccess(accepted.status)) {
+    console.warn("command refused", kind, accepted.error.code, accepted.error.message);
+    return null;
+  }
+  onEvent({ type: "accepted" });
+  const deadline = Date.now() + pullDelayMs(accepted.data);
+  const statusPath =
+    kind === "lock" || kind === "unlock" ? "/car/status/door" : "/car/status/engine";
+  while (Date.now() < deadline) {
+    await sleep(POLL_MS);
+    if (opts?.cancel?.cancelled) return null;
+    const reply = await data((h) => h.get(`${statusPath}?carOid=${encodeURIComponent(oid)}`)).catch(
+      () => ({}),
+    );
+    if (done(kind, reply)) {
+      onEvent({ type: "confirmed" });
+      return status();
+    }
+  }
+  const pulled = parseEnvelope((await call((h) => pullRemote(h, oid, kind, uuid, sentAt))).json);
+  if (!isSuccess(pulled.status)) {
+    console.warn("command failed", kind, pulled.error.code, pulled.error.message);
+    return null;
+  }
+  onEvent({ type: "confirmed" });
+  return status();
 }
 
 export const liveCar: CarService = {
   status,
-  async command(kind, onEvent) {
-    // Task 015 wires real commands; until then only "find" (a plain read) runs.
-    if (kind !== "find") throw new NotYet();
+  async command(kind, onEvent, opts) {
+    if (kind !== "find") return remote(kind, onEvent, opts);
+    // Find is a plain read: the official app never asks the car for a fresh fix.
     onEvent({ type: "accepted" });
     const s = await status();
     onEvent({ type: "confirmed" });

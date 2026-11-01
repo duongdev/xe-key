@@ -65,6 +65,13 @@ describe("toCarStatus", () => {
     expect(s.body.trunkOpen).toBe(true);
   });
 
+  it("ends a run resTime minutes (rounded up) after the car's report, minus half a minute", () => {
+    // Live: report 02:33:56 with resTime 3; the car turned off at about 02:37:00.
+    const on = { ...raw, engine: { engine: true, remoteEngine: { resTime: 3 } } };
+    const at = raw.top.vehicleInfo.lastTimeCall;
+    expect(toCarStatus(on).engine).toEqual({ on: true, endsAt: at + 180_000 - 30_000 });
+  });
+
   it("runs the engine for 10 min from the last report when Honda gives no end time", () => {
     const s = toCarStatus({ ...raw, engine: { engine: true, remoteEngine: { resTime: 0 } } });
     expect(s.engine).toEqual({ on: true, endsAt: 1_793_544_550_000 + 600_000 });
@@ -83,6 +90,14 @@ describe("toCarStatus", () => {
       vehicleInfo: { ...raw.top.vehicleInfo, cabinTemperature: { unit: "c", value: 0 } },
     };
     expect(toCarStatus({ ...raw, top }).cabinC).toBeNull();
+  });
+
+  it("reads the Entitlement bitmask (16 engine, 32 lock); no code means all", () => {
+    expect(toCarStatus(raw).can).toEqual({ lock: true, engine: true });
+    const only = (code: number) =>
+      toCarStatus({ ...raw, car: { ...raw.car, packageServiceCode: code } }).can;
+    expect(only(32)).toEqual({ lock: true, engine: false });
+    expect(only(16)).toEqual({ lock: false, engine: true });
   });
 
   it("marks an expired package", () => {

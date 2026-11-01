@@ -331,3 +331,9 @@ success, engine started/stopped, and these failures:
 
 **App findings (2026-11-02, task 014):** `cabinTemperature.value` comes back `0` on a parked car — treat 0 as no reading. `resStartCounter` read `1` the morning after two remote starts; working guess: starts used since the last drive (`startsLeft = 2 − counter`), to confirm on the first real start in task 015. Alert dates are epoch ms in `createDate`; `name` uses `_` as a separator (`"Đèn cảnh báo _ACC"`).
 
+**Remote commands, live (2026-11-02, task 015):**
+- Lock (car already locked): POST `SUCCESS`; the car logged "Khóa cửa thành công" ~5 s later; `pullDoorLockResult` returned `SUCCESS` (empty data) when polled after the ~150 s wait.
+- Engine start: confirmed by `/car/status/engine` `engine: true` within ~10 s; alert "Động cơ đã được khởi động".
+- `resStartCounter` = remote starts used since the last drive (1 → 2 on this start; cap 2). `resStatus` `"ENGINE START IG RUN"`, `resRequester` `"TCU"` while running.
+- `resTime` = whole minutes left, updated only with the car's reports (`lastTimeCall`, ~1/min while running) and unevenly (10, 8, 6, 5, 4, 3, 3, 1). The run ended ~10 min 20 s after the start alert; the car's report flips `engine` to `false`.
+
