@@ -187,6 +187,7 @@ export const vi: Dict = {
   engineOffAuto: "Máy đã tắt · 10 phút",
 
   findCar: "Tìm xe",
+  loading: "Đang tải",
   noGps: "Mất tín hiệu GPS",
   carSpot: "Vị trí cuối của xe",
   notYet: "Chưa hỗ trợ",

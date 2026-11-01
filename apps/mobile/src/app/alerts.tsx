@@ -14,7 +14,7 @@ import {
   XCircleIcon,
 } from "phosphor-react-native";
 import { useRef } from "react";
-import { ActivityIndicator, Pressable, SectionList, View } from "react-native";
+import { Pressable, SectionList, View } from "react-native";
 import Swipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
@@ -23,6 +23,7 @@ import { CAR_KEY, carService, useRefreshOnFocus } from "../services/query";
 import { haptics } from "../theme/haptics";
 import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { Shimmer } from "../ui/appear";
 import { EmptyState } from "../ui/empty-state";
 import { PageHeader } from "../ui/page-header";
 import { Screen } from "../ui/screen";
@@ -149,6 +150,22 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
   );
 }
 
+/** First-load placeholder shaped like an alert row. */
+function SkeletonRow({ wide }: { wide: boolean }) {
+  const { c } = useTheme();
+  const bar = { height: 12, borderRadius: 6, backgroundColor: c.s1 };
+  return (
+    <View style={{ minHeight: 68, flexDirection: "row", alignItems: "center", gap: 14 }}>
+      <Shimmer style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.s1 }} />
+      <View style={{ flex: 1, gap: 8 }}>
+        <Shimmer style={{ ...bar, width: wide ? "70%" : "50%" }} />
+        <Shimmer style={{ ...bar, width: "30%" }} />
+      </View>
+      <Shimmer style={{ ...bar, width: 56 }} />
+    </View>
+  );
+}
+
 export default function Alerts() {
   const { c } = useTheme();
   const t = useT();
@@ -200,8 +217,11 @@ export default function Alerts() {
   const body = (() => {
     if (isPending)
       return (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator color={c.fg2} />
+        <View accessibilityLabel={t.loading} style={{ paddingTop: 14 }}>
+          {[true, false, true, true, false, true].map((wide, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder rows
+            <SkeletonRow key={i} wide={wide} />
+          ))}
         </View>
       );
     if (isError || !data)

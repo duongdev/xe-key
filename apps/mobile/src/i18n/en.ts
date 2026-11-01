@@ -186,6 +186,7 @@ export const en = {
   engineOffAuto: "Engine off · 10 min",
 
   findCar: "Find my car",
+  loading: "Loading",
   noGps: "No GPS signal",
   carSpot: "Car's last spot",
   notYet: "Not available yet",
