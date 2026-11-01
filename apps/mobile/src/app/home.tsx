@@ -43,6 +43,7 @@ import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
 import type { CarStatus } from "../services/car";
 import { CAR_KEY, carService, useCar } from "../services/query";
+import { useDistance } from "../services/use-distance";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Appear, Shimmer } from "../ui/appear";
@@ -234,10 +235,14 @@ export default function Home() {
   // Tick every second while the engine countdown shows; otherwise freshness only needs 30 s.
   const now = useNow(car?.engine.on ? 1000 : 30_000);
   const { state: cmd, send } = useCommand();
+  // "Wake" is a fresh read: Honda has no wake call (FINDINGS Round 3 correction).
   const wake = useMutation({
-    mutationFn: () => carService.wake(),
+    mutationFn: () => carService.status(),
     onSuccess: (fresh) => qc.setQueryData(CAR_KEY, fresh),
   });
+  const km = useDistance(car?.location);
+  const place = car?.location ? (car.location.name ?? t.carSpot) : t.noGps;
+  const placeSub = car?.location ? (km !== null ? `${km} km` : car.location.area) : null;
 
   const page = (children: ReactNode) => (
     <View
@@ -289,7 +294,7 @@ export default function Home() {
         ? t.lock
         : t.holdToUnlock;
 
-  const openWindows = car
+  const openWindows = car?.body.windowsCm
     ? (Object.entries(car.body.windowsCm) as [Side, number][]).filter(([, cm]) => cm > 0)
     : [];
   const [firstSide, firstCm] = openWindows[0] ?? ["fl", 0];
@@ -417,21 +422,23 @@ export default function Home() {
                   icon={<PowerIcon size={16} color={engineOn ? c.acc : c.fg} />}
                   text={engineOn ? clock : t.off}
                 />
-                <Chip
-                  label={t.cabin(car?.cabinC ?? 0)}
-                  icon={<ThermometerSimpleIcon size={16} color={c.fg2} />}
-                  after={
-                    <View
-                      style={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: 4,
-                        backgroundColor: engineOn ? c.acc : c.warn,
-                      }}
-                    />
-                  }
-                  text={`${car?.cabinC ?? "—"}°`}
-                />
+                {car?.cabinC != null ? (
+                  <Chip
+                    label={t.cabin(car.cabinC)}
+                    icon={<ThermometerSimpleIcon size={16} color={c.fg2} />}
+                    after={
+                      <View
+                        style={{
+                          width: 7,
+                          height: 7,
+                          borderRadius: 4,
+                          backgroundColor: engineOn ? c.acc : c.warn,
+                        }}
+                      />
+                    }
+                    text={`${car.cabinC}°`}
+                  />
+                ) : null}
                 <Chip
                   label={freshLabel}
                   color={age?.unit === "live" && !wake.isPending ? c.acc : c.fg2}
@@ -524,9 +531,7 @@ export default function Home() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            car?.location ? `${car.location.name}, ${car.location.distanceKm} km` : t.noGps
-          }
+          accessibilityLabel={[place, placeSub].filter(Boolean).join(", ")}
           onPress={() => router.push("/find")}
           style={({ pressed }) => ({
             marginTop: 12,
@@ -548,11 +553,15 @@ export default function Home() {
               </>
             ) : (
               <Appear kind="rise" index={2}>
-                <Text variant="label">{car?.location?.name ?? t.noGps}</Text>
-                {car?.location ? (
+                <Text variant="label" numberOfLines={1}>
+                  {place}
+                </Text>
+                {placeSub ? (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <NavigationArrowIcon size={14} color={c.fg2} />
-                    <Text variant="caption" color="fg2">{`${car.location.distanceKm} km`}</Text>
+                    {km !== null ? <NavigationArrowIcon size={14} color={c.fg2} /> : null}
+                    <Text variant="caption" color="fg2" numberOfLines={1} style={{ flexShrink: 1 }}>
+                      {placeSub}
+                    </Text>
                   </View>
                 ) : null}
               </Appear>

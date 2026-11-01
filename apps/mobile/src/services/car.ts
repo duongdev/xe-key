@@ -10,21 +10,23 @@ export type CancelToken = { cancelled: boolean };
 
 export type CarStatus = {
   model: string;
-  plate: string;
+  /** Honda does not send it; null hides it. */
+  plate: string | null;
   doors: "locked" | "unlocked";
   engine: Engine;
-  /** Remote starts left before the car must be driven. */
-  startsLeft: number;
+  /** Remote starts left before the car must be driven; null when unknown. */
+  startsLeft: number | null;
   /** Doors, windows, trunk, hood; lock state is `doors`. */
   body: Omit<Body, "doorsLocked">;
-  cabinC: number;
+  /** Null when the car did not report it. */
+  cabinC: number | null;
   fuelPct: number;
   rangeKm: number;
   /** Last GPS fix; null when the car has no signal. */
   location: CarLocation | null;
-  batteryV: number;
-  odometerKm: number;
-  serviceInKm: number;
+  batteryV: number | null;
+  odometerKm: number | null;
+  serviceInKm: number | null;
   alerts: number;
   /** When the car last reported (not when we fetched). */
   updatedAt: number;
@@ -32,13 +34,14 @@ export type CarStatus = {
   signedOutAt?: number;
 };
 
+/** Honda sends only lat/lng/time; the rest is filled on the phone when possible. */
 export type CarLocation = {
-  name: string;
-  area: string;
+  name: string | null;
+  area: string | null;
   lat: number;
   lng: number;
-  distanceKm: number;
-  accuracyM: number;
+  distanceKm: number | null;
+  accuracyM: number | null;
   at: number;
 };
 
@@ -51,22 +54,40 @@ export type Driving = {
   speed: number;
 };
 
-export type AlertKind = "unlocked" | "auto-off" | "locked" | "zone" | "service" | "renew";
-/** `n`: minutes unlocked, km to service or days to renewal, by kind. */
-export type CarAlert = { id: string; kind: AlertKind; at: number; n?: number; unread: boolean };
+export type AlertKind =
+  | "unlocked"
+  | "auto-off"
+  | "locked"
+  | "zone"
+  | "service"
+  | "renew"
+  /** A command result from Honda; `ok` false for a failure. */
+  | "command"
+  /** A warning light from the car. */
+  | "diagnosis";
+/** `n`: minutes unlocked, km to service or days to renewal, by kind. `text`: Honda's own words. */
+export type CarAlert = {
+  id: string;
+  kind: AlertKind;
+  at: number;
+  n?: number;
+  unread: boolean;
+  title?: string;
+  text?: string;
+  ok?: boolean;
+};
 
 export interface CarService {
   /** Last snapshot Honda holds; may be old. */
   status(): Promise<CarStatus>;
-  /** Asks the car for live data, then returns the fresh snapshot. */
-  wake(): Promise<CarStatus>;
   /** Sends a command and reports progress until confirmed or failed. Resolves with the confirmed status. */
   command(
     kind: CommandKind,
     onEvent: (e: CommandEvent) => void,
     opts?: { ac?: AcLevel; cancel?: CancelToken },
   ): Promise<CarStatus | null>;
-  trips(): Promise<{ trips: Trip[]; driving: Driving | null }>;
+  /** `soon`: this service cannot read trips yet (live: needs the Honda PIN token). */
+  trips(): Promise<{ trips: Trip[]; driving: Driving | null; soon?: boolean }>;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }

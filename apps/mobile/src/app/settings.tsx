@@ -18,6 +18,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Switch, View } from "react-native";
 import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
+import { resetLiveCar } from "../services/live-car";
 import { useCar } from "../services/query";
 import { secret } from "../services/secret";
 import { useAuth } from "../services/use-auth";
@@ -167,6 +168,7 @@ export default function Settings() {
         style: "destructive",
         onPress: async () => {
           await auth.signOut();
+          resetLiveCar();
           qc.clear();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
@@ -190,7 +192,7 @@ export default function Settings() {
               icon={CarProfileIcon}
               tint="acc"
               label={prefs.carName ?? car?.model ?? ""}
-              value={car?.plate}
+              value={car?.plate ?? undefined}
               onPress={() =>
                 Alert.prompt(
                   t.rename,

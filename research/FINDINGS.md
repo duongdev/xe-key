@@ -329,3 +329,5 @@ success, engine started/stopped, and these failures:
 
 **Still 500:** `/car/currentLocation`, `/car/geoFence`, `/car/default`, `/message/paymentInstruction`.
 
+**App findings (2026-11-02, task 014):** `cabinTemperature.value` comes back `0` on a parked car — treat 0 as no reading. `resStartCounter` read `1` the morning after two remote starts; working guess: starts used since the last drive (`startsLeft = 2 − counter`), to confirm on the first real start in task 015. Alert dates are epoch ms in `createDate`; `name` uses `_` as a separator (`"Đèn cảnh báo _ACC"`).
+

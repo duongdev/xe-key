@@ -184,6 +184,9 @@ export const en = {
 
   findCar: "Find my car",
   noGps: "No GPS signal",
+  carSpot: "Car's last spot",
+  notYet: "Not available yet",
+  tripsSoon: "Trips are coming soon",
   askAgain: "Ask again",
   distanceFromYou: "Distance from you",
   sinceUpdate: "Since last update",

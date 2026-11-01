@@ -18,6 +18,7 @@ import { freshness } from "../car/freshness";
 import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { useCar } from "../services/query";
+import { useDistance } from "../services/use-distance";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
@@ -45,6 +46,8 @@ export default function Find() {
   const { state: cmd, send } = useCommand();
   const locating = inFlight(cmd);
   const loc = car?.location ?? null;
+  const km = useDistance(loc, true);
+  const name = loc?.name ?? t.carSpot;
   const map = useRef<MapView>(null);
   // The map runs under the sheet (no black corners); padding keeps the car and Apple's legal label above it.
   const [sheetH, setSheetH] = useState(0);
@@ -78,10 +81,14 @@ export default function Find() {
           : t.age(age.n, age.unit);
   const stats = loc
     ? [
-        { icon: NavigationArrowIcon, value: `${loc.distanceKm} km`, label: t.distanceFromYou },
+        km !== null && { icon: NavigationArrowIcon, value: `${km} km`, label: t.distanceFromYou },
         { icon: ClockIcon, value: ageText, label: t.sinceUpdate },
-        { icon: CrosshairIcon, value: `±${loc.accuracyM} m`, label: t.accuracy },
-      ]
+        loc.accuracyM !== null && {
+          icon: CrosshairIcon,
+          value: `±${loc.accuracyM} m`,
+          label: t.accuracy,
+        },
+      ].filter((s) => s !== false)
     : [];
   const tile = {
     flex: 1,
@@ -98,7 +105,7 @@ export default function Find() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       {loc ? (
         <MapView
-          accessibilityLabel={t.mapLabel(loc.name, loc.distanceKm)}
+          accessibilityLabel={km !== null ? t.mapLabel(name, km) : name}
           style={StyleSheet.absoluteFill}
           mapPadding={{
             top: insets.top,
@@ -177,9 +184,11 @@ export default function Find() {
           gap: 16,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 14 }}>
           <View
             style={{
+              // Centred on the first line of the name (line height 28): 14 − 44 / 2.
+              marginTop: -8,
               width: 44,
               height: 44,
               borderRadius: 22,
@@ -191,24 +200,27 @@ export default function Find() {
             <MapPinIcon size={iconSize.md} color={c.acc} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ ...textStyle("stat"), fontSize: 26, lineHeight: 32 }}>
-              {loc?.name ?? ""}
+            <Text numberOfLines={2} style={{ ...textStyle("stat"), fontSize: 22, lineHeight: 28 }}>
+              {name}
             </Text>
-            <Text variant="label" weight={400} color="fg2">
-              {loc?.area ?? ""}
+            <Text variant="label" weight={400} color="fg2" numberOfLines={1}>
+              {/* A lone stat tile looks empty: with only the age known, it joins this line. */}
+              {[loc?.area, stats.length === 1 ? ageText : null].filter(Boolean).join(" · ")}
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          {stats.map(({ icon: Icon, value, label }) => (
-            <View key={label} accessible accessibilityLabel={`${label}: ${value}`} style={tile}>
-              <Icon size={16} color={c.fg2} />
-              <Text variant="label" weight={600}>
-                {value}
-              </Text>
-            </View>
-          ))}
-        </View>
+        {stats.length > 1 ? (
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {stats.map(({ icon: Icon, value, label }) => (
+              <View key={label} accessible accessibilityLabel={`${label}: ${value}`} style={tile}>
+                <Icon size={16} color={c.fg2} />
+                <Text variant="label" weight={600}>
+                  {value}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
         <View style={{ flexDirection: "row", gap: 12 }}>
           <Pressable
             accessibilityRole="button"

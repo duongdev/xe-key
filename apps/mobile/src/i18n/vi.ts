@@ -186,6 +186,9 @@ export const vi: Dict = {
 
   findCar: "Tìm xe",
   noGps: "Mất tín hiệu GPS",
+  carSpot: "Vị trí cuối của xe",
+  notYet: "Chưa hỗ trợ",
+  tripsSoon: "Chuyến đi sẽ sớm có",
   askAgain: "Hỏi lại",
   distanceFromYou: "Cách bạn",
   sinceUpdate: "Từ lần cập nhật",

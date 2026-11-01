@@ -151,14 +151,20 @@ export default function Status() {
       value: `${car.fuelPct}% · ${num(car.rangeKm)} km`,
       bar: car.fuelPct,
     },
-    {
+    car.batteryV !== null && {
       key: "12v",
       icon: CarBatteryIcon,
       label: t.battery12v,
       value: `${car.batteryV.toFixed(1)} V`,
     },
-    { key: "odo", icon: GaugeIcon, label: t.odometer, value: `${num(car.odometerKm)} km` },
-  ];
+    car.odometerKm !== null && {
+      key: "odo",
+      icon: GaugeIcon,
+      label: t.odometer,
+      value: `${num(car.odometerKm)} km`,
+    },
+  ].filter((x) => x !== false);
+  const serviceInKm = car.serviceInKm;
 
   return (
     <Screen>
@@ -171,10 +177,10 @@ export default function Status() {
         contentContainerStyle={{ gap: 20, paddingTop: 12, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {car.serviceInKm <= 2000 ? (
+        {serviceInKm !== null && serviceInKm <= 2000 ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => Alert.alert(t.serviceIn(num(car.serviceInKm)))}
+            onPress={() => Alert.alert(t.serviceIn(num(serviceInKm)))}
             style={({ pressed }) => ({
               minHeight: 52,
               paddingHorizontal: 16,
@@ -188,7 +194,7 @@ export default function Status() {
           >
             <WrenchIcon size={iconSize.sm} color={c.warn} />
             <Text variant="label" weight={600} color="warn" style={{ flex: 1 }}>
-              {t.serviceIn(num(car.serviceInKm))}
+              {t.serviceIn(num(serviceInKm))}
             </Text>
             <CaretRightIcon size={16} color={c.warn} />
           </Pressable>
