@@ -10,6 +10,8 @@ The single authority for vocabulary in this repo.
   device's region setting unless overridden in the app. _Avoid:_ "region" for this.
 - **iPLAss** — the Java backend framework behind the API. Replies are wrapped in an
   **envelope**: `{ status, results: { data, error } }`.
+- **Bound device** — the one device an account is tied to. Signing in from a new
+  deviceId makes it the bound device; the old one must pass a device-change OTP again.
 - **deviceId** — the identifier the server binds a session/registration to. Android uses
   `ANDROID_ID`; the official iOS app uses an `identifierForVendor` UUID; Xe Key uses its
   own UUID kept in the Keychain (survives reinstall). A new deviceId triggers a
@@ -36,9 +38,17 @@ The single authority for vocabulary in this repo.
 - **Command** — a remote request to the car: lock, unlock, start, stop, extend, find.
 - A command moves through these states:
   - **Sent** — the app posted it.
-  - **Accepted** — the server queued it.
-  - **Confirmed** — the command's result reports success and a fresh car status agrees.
-    Only a confirmed change alters the UI headline or car picture.
-  - **Retrying (n/3)** — the car is asleep (`COMMUNICATION_ERROR`); the command stays queued.
-  - **Failed** — all retries used; nothing changed on the car.
+  - **Accepted** — the server took it and gave a time to wait for the result.
+  - **Confirmed** — the result check after that wait reports success. Only a confirmed
+    change alters the UI headline or car picture.
+  - **Failed** — the result check reports anything else, or never comes back; nothing
+    changed on the car as far as we know.
   _Avoid:_ "fire", "pending" as a state name.
+- **Entitlement** — which commands the car's Honda CONNECT package allows (engine,
+  lock, horn/light). A command the package does not allow is not offered.
+
+## Messages
+
+- **Alert** — a warning about the car (e.g. low battery, door open). Per car; can be deleted.
+- **Notification** — a message from Honda to the user (news, service). Per user.
+  _Avoid:_ "message" alone; say which one.

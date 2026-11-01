@@ -1,34 +1,41 @@
 import type { Body } from "../car/geometry";
 import type { RegionId } from "../onboarding/region";
 
-export type SignInError = "wrong-credentials" | "server-down" | "app-blocked";
-export type CodeError = "wrong-code" | "expired-code";
+export type SignInError =
+  | "wrong-credentials"
+  | "server-down"
+  | "app-blocked"
+  | "wrong-region"
+  | "unknown";
+export type CodeError = "wrong-code" | "expired-code" | "server-down" | "unknown";
 
 export type FoundCar = {
   model: string;
   body: Body;
   paintName: string;
   paint: string;
-  plate: string;
+  plate: string | null;
   connectActive: boolean;
   updatedAt: number;
 };
 
 export interface AuthService {
-  /** Checks credentials. A new device always needs an SMS code next. */
+  /** Checks credentials. `car` is set when this device is already trusted (no SMS code needed). */
   signIn(input: {
     region: RegionId;
     phone: string;
     password: string;
-  }): Promise<{ ok: true } | { ok: false; error: SignInError }>;
+  }): Promise<{ ok: true; car?: FoundCar } | { ok: false; error: SignInError; code?: string }>;
+  /** Re-sends the SMS code. The first one goes out with sign-in. */
   sendCode(): Promise<void>;
   verifyCode(code: string): Promise<{ ok: true; car: FoundCar } | { ok: false; error: CodeError }>;
+  signOut(): Promise<void>;
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Stand-in until `@xekey/core` runs in the app (task 010). Force error states with:
+ * Offline stand-in (dev builds, Settings > Developer). Force error states with:
  * password `wrong` · phone ending `0000` (Honda down) · `1111` (app blocked) ·
  * code `000000` (wrong) · `111111` (expired).
  */
@@ -60,4 +67,5 @@ export const mockAuth: AuthService = {
       },
     };
   },
+  async signOut() {},
 };

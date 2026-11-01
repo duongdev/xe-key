@@ -33,3 +33,14 @@ export function parseEnvelope<T extends object = Record<string, unknown>>(
 export function isSuccess(status: string): boolean {
   return status.toUpperCase() === "SUCCESS";
 }
+
+const LOST_SESSION = new Set(["NO_LOGIN_SESSION", "INVALID_TOKEN"]);
+
+/** The session is gone and a fresh login may fix the call. */
+export function sessionExpired(
+  statusCode: number,
+  body: IplassEnvelope | null | undefined,
+): boolean {
+  if (statusCode >= 500) return !body;
+  return LOST_SESSION.has(body?.results?.error?.code ?? "");
+}

@@ -8,10 +8,10 @@ The package root is runtime-agnostic (bundles in React Native); Node-only helper
 ## Layout
 - `region.ts` — per-country base URLs.
 - `endpoints.ts` — API path constants.
-- `envelope.ts` — iPLAss `{status, results:{data,error}}` parsing. Pure.
+- `envelope.ts` — iPLAss `{status, results:{data,error}}` parsing, `sessionExpired()`. Pure.
 - `http.ts` — `HondaHttp({ base, fetch?, cookies? })` + `app: OneApp` header.
 - `cookies.ts` — `CookieStore`, in-memory jar, Set-Cookie parsing (also React Native's comma-joined header). Pure.
-- `auth.ts` — `login` / `verifyCode` / `resendCode`.
+- `auth.ts` — `registerDevice` / `login` / `verifyCode` / `resendCode` / `logout`.
 - `session.ts` — session type, `buildSession`, `parseSession` (snake_case tolerant). Pure.
 - `node/` — `@xekey/core/node`: session file save (chmod 600) / load, `fileCookies`, `resolveDeviceId` (env > file > generated).
 

@@ -8,6 +8,8 @@ import { loadSession } from "@xekey/core/node";
 const SESSION_FILE = process.env.HONDA_SESSION_FILE ?? "research/honda_session.json";
 const DELAY_MS = Number(process.env.HONDA_PROBE_DELAY ?? 3000);
 const OUT = process.env.HONDA_PROBE_OUT ?? "research/probe-results.json";
+// Raw reply values (personal data included) go only to this gitignored local file.
+const BODIES = process.env.HONDA_PROBE_BODIES ? "research/probe-bodies.local.json" : null;
 const FIRE = (process.env.HONDA_FIRE ?? "")
   .split(",")
   .map((s) => s.trim())
@@ -102,7 +104,7 @@ async function main(): Promise<number> {
     { feature: "car setting", path: `/car/setting${q({ carOid })}` },
     { feature: "next maintenance", path: `/car/nextMaintenance${q({ carOid })}` },
     { feature: "warnings", path: `/car/warning${q({ carOid })}` },
-    { feature: "alert messages", path: "/car/alertMessages" },
+    { feature: "alert messages", path: `/car/alertMessages${q({ carOid })}` },
     { feature: "car profile", path: `/car/profile${q({ uoid: oid })}` },
     { feature: "car default", path: "/car/default" },
     { feature: "profile", path: `/user/profile${q({ uoid: oid })}` },
@@ -205,6 +207,7 @@ async function main(): Promise<number> {
       ? (JSON.parse(readFileSync(OUT, "utf8")).results as Result[]).filter((r) => r.kind === "read")
       : [];
   let serverErrors = 0;
+  const bodies: { path: string; httpStatus: number; json: Json }[] = [];
 
   // When firing commands, skip the read sweep (reads were already captured).
   const readsToRun = FIRE.length ? [] : reads;
@@ -231,6 +234,7 @@ async function main(): Promise<number> {
       path: redactPath(t.path),
     });
     results.push(r);
+    bodies.push({ path: t.path, httpStatus: res.statusCode, json: res.json });
     console.log(
       `${r.ok ? "OK  " : "--  "} ${t.feature.padEnd(18)} http=${r.httpStatus} env=${r.envStatus || "-"} ${r.errorCode ?? ""}`,
     );
@@ -300,6 +304,7 @@ async function main(): Promise<number> {
   }
 
   writeFileSync(OUT, JSON.stringify({ probedAt: new Date().toISOString(), results }, null, 2));
+  if (BODIES) writeFileSync(BODIES, JSON.stringify(bodies, null, 2), { mode: 0o600 });
   const okCount = results.filter((r) => r.kind === "read" && r.ok).length;
   const readCount = results.filter((r) => r.kind === "read").length;
   console.log(`\n${okCount}/${readCount} reads reachable. results -> ${OUT}`);

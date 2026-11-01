@@ -28,6 +28,7 @@ apps/mobile/.expo/
 # probe output (local)
 research/probe-results.json
 research/probe-report.html
+*.local.json
 
 # bruno env with real values (local)
 bruno/environments/*.local.bru

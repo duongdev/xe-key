@@ -15,10 +15,11 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `src/car/engine.ts` — pure engine session (countdown, ring fraction, auto-off, extend vs reminder); `reminder.ts` = local notification 1 min before auto-off (asks permission only when used).
 - `src/ui/segmented-slider.tsx` — named stops on a `ScrubRail` (style, AC level).
 - `src/car/command.ts` — pure command reducer (CONTEXT.md › Commands); `use-command.ts` runs one command at a time and writes the confirmed snapshot to the cache.
+- `src/services/honda.ts` — live `AuthService` + `call()` (one silent re-login on a lost session); `secret.ts` = Keychain store + cookie jar ([ADR 0008](../../docs/adr/0008-app-cookie-transport.md)); `honda-map.ts` (pure: error codes, VN username, paint/body from Honda's car); `use-auth.ts` picks mock or live (Settings › Developer, dev builds only).
 - `src/services/auth.ts` — `AuthService` + `mockAuth`. Force errors: password `wrong`; phone ending `0000` (Honda down) / `1111` (app blocked); code `000000` (wrong) / `111111` (expired).
 - `src/theme/` — tokens (colors, type scale, space, radii), `useTheme`, motion curves, haptics.
 - `src/ui/` — shared primitives (`Text`, `Button`).
-- `src/car/` — `<Car>` illustration: `geometry.ts` (pure: body paths, wheel arches, contrast assist) + `car.tsx` (SVG, unlocked/engine effects).
+- `src/car/` — `<Car>` illustration: `geometry.ts` (pure: body paths, wheel arches, contrast assist), `frame.ts` (pure: viewBox that centres the body) + `car.tsx` (SVG, unlocked/engine effects, vapor puffs as gradient sprites).
 - `src/kitchen-sink.tsx` — dev screen showing every token, icon and button.
 - `docs/review/` — visual review screenshots per task.
 
@@ -41,7 +42,9 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - Add deps with `npx expo install` (SDK-matched versions). Decisions: [ADR 0002](../../docs/adr/0002-expo-reanimated-phosphor.md).
 
 ## Gotchas
-- `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). How RN reads `Set-Cookie` is settled by a spike in 005.
+- `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). App requests use `credentials: "omit"` so only our Keychain jar holds cookies (ADR 0008).
+- `@xekey/core` resolves to its `dist/`: run `pnpm --filter @xekey/core build` after changing core, before Metro.
+- Honda VN usernames are the local number with its leading 0.
 - deviceId and stored credentials live in the Keychain ([ADR 0004](../../docs/adr/0004-keychain-device-id.md), [ADR 0005](../../docs/adr/0005-keychain-password-relogin.md)).
 - This package pins `typescript ~6.0` (Expo range); the repo root uses 7.
 - Be Vietnam Pro ignores `fontVariant: tabular-nums` on iOS: use `Digits` for any changing number (timers).

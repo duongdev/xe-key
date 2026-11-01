@@ -14,11 +14,13 @@ import {
   SignOutIcon,
   SquaresFourIcon,
 } from "phosphor-react-native";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Switch, View } from "react-native";
 import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
 import { useCar } from "../services/query";
+import { secret } from "../services/secret";
+import { useAuth } from "../services/use-auth";
 import { haptics } from "../theme/haptics";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -131,6 +133,11 @@ export default function Settings() {
   const qc = useQueryClient();
   const { prefs, update } = usePrefs();
   const { data: car } = useCar();
+  const auth = useAuth();
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  useEffect(() => {
+    if (__DEV__) secret.get("deviceId").then(setDeviceId);
+  }, []);
 
   const toggle = (key: "faceId" | "siri") => (
     <Switch
@@ -158,8 +165,8 @@ export default function Settings() {
       {
         text: t.signOut,
         style: "destructive",
-        onPress: () => {
-          // ponytail: mock auth has no session yet; the live adapter also clears the Keychain (ADR 0004/0005).
+        onPress: async () => {
+          await auth.signOut();
           qc.clear();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
@@ -264,8 +271,32 @@ export default function Settings() {
                 icon={HardDrivesIcon}
                 tint="fg2"
                 label={t.carService}
-                value={t.mock}
-                onPress={() => Alert.alert(t.liveService, t.liveNotReady)}
+                value={prefs.api === "live" ? t.liveService : t.mock}
+                onPress={() => {
+                  const api = prefs.api === "live" ? "mock" : "live";
+                  update({ api });
+                  if (api === "live") Alert.alert(t.liveService, t.liveNotReady);
+                }}
+              />,
+              <Row
+                key="device"
+                icon={HardDrivesIcon}
+                tint="fg2"
+                label={t.deviceIdDev}
+                value={deviceId ? `${deviceId.slice(0, 8)}…` : "-"}
+                onPress={() =>
+                  Alert.prompt(
+                    t.deviceIdDev,
+                    t.deviceIdHint,
+                    async (v) => {
+                      const id = v.trim();
+                      await (id ? secret.set("deviceId", id) : secret.del("deviceId"));
+                      setDeviceId(id || null);
+                    },
+                    "plain-text",
+                    deviceId ?? "",
+                  )
+                }
               />,
               <Row
                 key="sink"

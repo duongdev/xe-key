@@ -69,8 +69,8 @@ const E = [
   ["Remote (danger)", "engine stop", "post", "/remote/engine", { json: { carOid: "{{carOid}}", clientUUID: "{{clientUUID}}", command: "stop", vehicleControl: { acSetting: { acTempVal: "04", acDefSetting: "autoOn" } } }, danger: "Stops the engine." }],
   ["Remote (danger)", "engine extend", "post", "/remote/engine", { json: { carOid: "{{carOid}}", clientUUID: "{{clientUUID}}", command: "extend", vehicleControl: { acSetting: { acTempVal: "04", acDefSetting: "autoOn" } } }, danger: "Extends a RUNNING engine session (no new start)." }],
   ["Remote (danger)", "finder ping", "post", "/car/finder/location", { json: { carOid: "{{carOid}}", clientUUID: "{{clientUUID}}" }, danger: "Pings the car for its live location." }],
-  // Fresh-status: POST access-screen (wakes the TCU) before reading /car/status/*
-  ["Vehicle", "wake (access-screen)", "post", "/car/access-screen", { form: { apiName: "remote/engine", status: "2" }, danger: "Wakes the TCU so the next status read is live." }],
+  // Access log: POST access-screen (the app logs screen use and actions; no wake effect shown)
+  ["Vehicle", "access-screen", "post", "/car/access-screen", { form: { apiName: "remote/engine", status: "2" }, danger: "Access/audit log call. Not a wake call." }],
 ];
 
 function headersBlock() {

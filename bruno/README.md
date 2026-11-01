@@ -18,7 +18,7 @@ Do not commit real values — edit the env locally or make a `Vietnam.local.bru`
 - **Auth** — login, verify code, OTP, logout.
 - **Vehicle / User / System** — read-only endpoints.
 - **Remote (danger)** — lock, unlock, horn, engine start/stop, finder ping. These send real
-  commands to the car. `COMMUNICATION_ERROR` means the server accepted it but the TCU was
-  unreachable (asleep / no signal).
+  commands to the car. Results show up in `/car/alertMessages` (category `command`); `W001(0)`
+  means the car could not be reached. See research/FINDINGS.md Round 7.
 
 Regenerate with `node research/build-bruno.mjs`.

@@ -69,36 +69,43 @@ export default function Found() {
       </View>
 
       <View style={{ marginTop: 8, alignItems: "center" }}>
-        <View
-          style={{
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 6,
-            backgroundColor: "#F2F2F0",
-            borderWidth: 2,
-            borderColor: "#111111",
-          }}
-        >
-          <Text
-            weight={700}
-            style={{ fontSize: 20, lineHeight: 24, letterSpacing: 1.2, color: "#111111" }}
+        {car.plate ? (
+          <View
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 6,
+              backgroundColor: "#F2F2F0",
+              borderWidth: 2,
+              borderColor: "#111111",
+            }}
           >
-            {car.plate}
-          </Text>
-        </View>
+            <Text
+              weight={700}
+              style={{ fontSize: 20, lineHeight: 24, letterSpacing: 1.2, color: "#111111" }}
+            >
+              {car.plate}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <View style={{ flex: 1 }} />
       <View style={{ flexDirection: "row", gap: 10 }}>
         <View style={tile}>
           <WifiHighIcon size={iconSize.sm} color={car.connectActive ? c.acc : c.fg2} />
-          <Text variant="caption" style={{ fontSize: 14 }}>
+          <Text variant="caption" numberOfLines={1} style={{ fontSize: 14, flexShrink: 1 }}>
             {t.connectActive}
           </Text>
         </View>
         <View style={tile}>
           <ClockIcon size={iconSize.sm} color={c.fg2} />
-          <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
+          <Text
+            variant="caption"
+            color="fg2"
+            numberOfLines={1}
+            style={{ fontSize: 14, flexShrink: 1 }}
+          >
             {t.minAgo(minutes)}
           </Text>
         </View>
