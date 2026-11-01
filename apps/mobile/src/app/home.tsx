@@ -22,7 +22,7 @@ import {
   WarningIcon,
   WifiSlashIcon,
 } from "phosphor-react-native";
-import { type ReactNode, useSyncExternalStore } from "react";
+import { type ReactNode, useRef, useSyncExternalStore } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -51,6 +51,7 @@ import { Banner } from "../ui/banner";
 import { Button } from "../ui/button";
 import { Digits } from "../ui/digits";
 import { HoldButton } from "../ui/hold-button";
+import { setLaunchTarget } from "../ui/launch-target";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
 
@@ -235,6 +236,7 @@ export default function Home() {
   // Tick every second while the engine countdown shows; otherwise freshness only needs 30 s.
   const now = useNow(car?.engine.on ? 1000 : 30_000);
   const { state: cmd, send } = useCommand();
+  const carBox = useRef<React.ComponentRef<typeof View>>(null);
   // "Wake" is a fresh read: Honda has no wake call (FINDINGS Round 3 correction).
   const wake = useMutation({
     mutationFn: () => carService.status(),
@@ -457,6 +459,20 @@ export default function Home() {
         </View>
 
         <View
+          ref={carBox}
+          // The cold-start animation lands its car exactly here.
+          onLayout={() =>
+            carBox.current?.measureInWindow((x, y, width) =>
+              setLaunchTarget({
+                x,
+                y,
+                width,
+                body,
+                paint,
+                look: look === "line" ? "line" : "shaded",
+              }),
+            )
+          }
           style={{
             marginTop: 2,
             marginHorizontal: -16,
@@ -493,7 +509,7 @@ export default function Home() {
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <GasPumpIcon size={iconSize.sm} color={c.fg2} />
-              {loading || wake.isPending ? (
+              {loading ? (
                 <Skeleton w={48} />
               ) : (
                 <Appear kind="rise" index={0}>
@@ -502,7 +518,7 @@ export default function Home() {
               )}
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              {loading || wake.isPending ? (
+              {loading ? (
                 <Skeleton w={64} />
               ) : (
                 <Appear kind="rise" index={1}>
@@ -546,7 +562,7 @@ export default function Home() {
         >
           <MiniMap />
           <View style={{ flex: 1, gap: 3 }}>
-            {loading ? (
+            {loading || car?.location === undefined ? (
               <>
                 <Skeleton w="70%" h={14} />
                 <Skeleton w="40%" h={12} />
