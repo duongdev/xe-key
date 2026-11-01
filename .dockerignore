@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/dist
+.git
+.turbo
+research
+apps/mobile/design
+apps/mobile/docs
+apps/landing/docs
+**/.env*

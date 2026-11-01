@@ -1,0 +1,231 @@
+.reg {
+  width: 100%;
+  max-width: 560px;
+  box-sizing: border-box;
+  text-align: left;
+  border-radius: 28px;
+  background: var(--s0);
+  box-shadow: inset 0 0 0 1px var(--line), 0 30px 80px rgba(0, 0, 0, 0.45);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: pop 520ms var(--pop);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tick {
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+.tick circle {
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: draw 600ms var(--settle) 120ms forwards;
+}
+
+.tick path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: draw 360ms var(--settle) 560ms forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.head b {
+  display: block;
+  font-size: 19px;
+  line-height: 25px;
+  font-weight: 600;
+}
+
+.head div > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--fg2);
+}
+
+.head em {
+  font-style: normal;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.ptag {
+  font-style: normal;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  background: var(--s2);
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.q p {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+}
+
+.q p i {
+  margin-left: 8px;
+  white-space: nowrap;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chips button {
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 19px;
+  background: var(--line2);
+  color: var(--fgsoft);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: background 200ms, color 200ms, transform 90ms;
+}
+
+.chips button:active {
+  transform: scale(0.97);
+}
+
+.chips button[aria-pressed="true"] {
+  background: rgba(124, 199, 255, 0.14);
+  color: var(--acc);
+  box-shadow: inset 0 0 0 1.5px var(--acc);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.foot :global(.go) {
+  height: 48px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+
+.skip {
+  height: 48px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--fg2);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.thx {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(124, 199, 255, 0.08);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fg2);
+  animation: rise 420ms var(--settle);
+}
+
+.thx svg {
+  flex: none;
+}
+
+.thx b {
+  display: block;
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--s2);
+  font-size: 14px;
+  color: var(--fg2);
+}
+
+.share button {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 899px) {
+  .reg {
+    border-radius: 24px;
+    padding: 18px;
+    gap: 18px;
+  }
+  .tick {
+    width: 48px;
+    height: 48px;
+  }
+  .head b {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .share {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reg,
+  .thx {
+    animation: none;
+  }
+  .tick circle,
+  .tick path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

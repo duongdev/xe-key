@@ -1,0 +1,50 @@
+.doc {
+  max-width: 760px;
+  padding-top: 48px;
+  padding-bottom: 96px;
+}
+
+.doc h1 {
+  margin: 0 0 8px;
+  font-size: 44px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.doc h2 {
+  margin: 40px 0 8px;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  white-space: normal;
+}
+
+.doc p {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--fgsoft);
+}
+
+.doc a {
+  color: var(--acc);
+}
+
+
+.updated {
+  font-size: 14px !important;
+  color: var(--fg2) !important;
+  margin-bottom: 28px !important;
+}
+
+@media (max-width: 899px) {
+  .doc {
+    padding-top: 24px;
+    padding-bottom: 64px;
+  }
+  .doc h1 {
+    font-size: 34px;
+    line-height: 40px;
+  }
+}

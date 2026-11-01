@@ -1,0 +1,137 @@
+.nav {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.tile,
+.bigtile {
+  background: var(--fg);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+
+.tile i,
+.bigtile i {
+  font-style: normal;
+  color: var(--brand);
+}
+
+.tile {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  font-size: 15px;
+}
+
+.bigtile {
+  width: 104px;
+  height: 104px;
+  border-radius: 26px;
+  font-size: 48px;
+  margin-bottom: 32px;
+  box-shadow: 0 30px 80px rgba(124, 199, 255, 0.18);
+}
+
+.navr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seg {
+  display: flex;
+  height: 36px;
+  padding: 3px;
+  box-sizing: border-box;
+  border-radius: 18px;
+  background: var(--s1);
+}
+
+.seg a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg2);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 40px;
+  border-radius: 15px;
+}
+
+.seg a[aria-current="page"] {
+  background: var(--line);
+  color: var(--fg);
+}
+
+.navcta {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.foot {
+  padding: 40px 0 48px;
+  border-top: 1px solid var(--line2);
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--fg2);
+}
+
+.foot a {
+  color: var(--fg2);
+  text-decoration: none;
+}
+
+.foot a:hover {
+  color: var(--fg);
+}
+
+.links {
+  display: flex;
+  gap: 20px;
+  flex: none;
+}
+
+@media (max-width: 899px) {
+  .navcta {
+    display: none;
+  }
+  .bigtile {
+    width: 84px;
+    height: 84px;
+    border-radius: 21px;
+    font-size: 38px;
+  }
+  .foot {
+    flex-direction: column;
+    padding: 32px 0 40px;
+  }
+}

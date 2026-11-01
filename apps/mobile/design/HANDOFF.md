@@ -114,7 +114,7 @@ Every screen ships four states: loading, empty, error, populated.
 
 ## Website (landing page)
 
-A separate deliverable from the Expo app (tasks [011](../../../docs/tasks/011-landing-page.md), [012](../../../docs/tasks/012-waitlist-storage.md)). Same tokens, font, icons and motion curves as the app.
+A separate deliverable from the Expo app (tasks [011](../../../docs/tasks/done/011-landing-page.md), [012](../../../docs/tasks/012-waitlist-storage.md)). Same tokens, font, icons and motion curves as the app.
 
 | Board | What | Notes |
 |---|---|---|

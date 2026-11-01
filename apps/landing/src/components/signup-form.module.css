@@ -1,0 +1,122 @@
+.signup {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.plat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--fg2);
+}
+
+.plat button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: 0;
+  background: var(--s1);
+  color: var(--fg2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.plat button[aria-checked="true"] {
+  background: var(--fg);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 34px;
+  background: var(--s1);
+  box-shadow: inset 0 0 0 1px var(--line);
+  text-align: left;
+}
+
+.form:focus-within {
+  box-shadow: inset 0 0 0 2px var(--acc);
+}
+
+.form.err {
+  box-shadow: inset 0 0 0 2px var(--error);
+}
+
+.form input {
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 17px;
+  padding: 0 18px;
+  outline: none;
+}
+
+.form input::placeholder {
+  color: var(--fg3);
+}
+
+.errline {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--error);
+}
+
+.note {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--fg2);
+}
+
+.note > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 899px) {
+  .form {
+    flex-direction: column;
+    border-radius: 24px;
+  }
+  .form input {
+    flex: none;
+  }
+  .form :global(.go) {
+    border-radius: 20px;
+  }
+}
+
+.check:not(:empty) {
+  margin-top: 12px;
+}
+
+.form :global(.go)[disabled] {
+  background: var(--acc);
+  color: var(--onacc);
+  opacity: 0.6;
+  cursor: progress;
+}

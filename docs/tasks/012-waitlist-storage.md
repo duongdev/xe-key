@@ -22,6 +22,9 @@ The waitlist exists to measure demand. Without storage the page collects nothing
 - [ ] Server errors show an inline error; the typed email stays in the field.
 - [ ] Owner can export sign-ups with platform and survey counts.
 - [ ] No secrets in the client bundle.
+- [ ] The route verifies the Turnstile token with Cloudflare siteverify (secret from env, check `success`, `action` = `signup` and `hostname`) before storing; a failed check stores nothing.
+- [ ] Survey answers are accepted only for a sign-up made in the same session (e.g. a signed id returned by the sign-up route), so a stranger cannot write answers for any email.
+- [ ] Rate limit per IP on both routes.
 
 ## Test plan
 
