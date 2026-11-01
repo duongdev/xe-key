@@ -32,9 +32,9 @@ describe("ScrubRail", () => {
     const { onChange, view } = setup(2);
     await view;
     const rail = screen.getByRole("adjustable");
-    fireEvent(rail, "accessibilityAction", { nativeEvent: { actionName: "increment" } });
+    await fireEvent(rail, "accessibilityAction", { nativeEvent: { actionName: "increment" } });
     expect(onChange).not.toHaveBeenCalled();
-    fireEvent(rail, "accessibilityAction", { nativeEvent: { actionName: "decrement" } });
+    await fireEvent(rail, "accessibilityAction", { nativeEvent: { actionName: "decrement" } });
     expect(onChange).toHaveBeenCalledWith(1);
   });
 });

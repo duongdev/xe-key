@@ -1,38 +1,680 @@
-import { Link, router } from "expo-router";
-import { View } from "react-native";
+import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import {
+  ArrowsClockwiseIcon,
+  BellIcon,
+  CaretRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  CrownIcon,
+  DeviceMobileIcon,
+  GasPumpIcon,
+  GaugeIcon,
+  LockIcon,
+  LockOpenIcon,
+  NavigationArrowIcon,
+  PathIcon,
+  PowerIcon,
+  RoadHorizonIcon,
+  SlidersHorizontalIcon,
+  SnowflakeIcon,
+  ThermometerSimpleIcon,
+  WarningCircleIcon,
+  WifiSlashIcon,
+} from "phosphor-react-native";
+import { type ReactNode, useSyncExternalStore } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Car } from "../car/car";
-import { BODIES } from "../car/geometry";
+import { MAX_RETRIES } from "../car/command";
+import { freshness } from "../car/freshness";
+import { useCommand } from "../car/use-command";
+import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
+import type { CarStatus } from "../services/car";
+import { CAR_KEY, carService, useCar } from "../services/query";
+import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
-import { Screen } from "../ui/screen";
+import { Button } from "../ui/button";
+import { HoldButton } from "../ui/hold-button";
 import { Text } from "../ui/text";
-import { TextButton } from "../ui/text-button";
+import { useNow } from "../ui/use-now";
 
-// ponytail: placeholder until task 005 builds Home.
-export default function Home() {
-  const { scheme } = useTheme();
-  const { prefs, update } = usePrefs();
-  const { body, look, paint } = prefs.car;
-  return (
-    <Screen style={{ justifyContent: "center", gap: 16 }}>
-      <Text variant="title">{prefs.carName ?? BODIES[body].name}</Text>
-      <View style={{ marginHorizontal: -16 }}>
-        <Car body={body} look={look === "line" ? "line" : "shaded"} paint={paint} ground={scheme} />
+const useOnline = () =>
+  useSyncExternalStore(
+    (cb) => onlineManager.subscribe(cb),
+    () => onlineManager.isOnline(),
+  );
+
+function Chip({
+  icon,
+  text,
+  after,
+  color,
+  label,
+  onPress,
+}: {
+  icon: ReactNode;
+  text: string;
+  after?: ReactNode;
+  color?: string;
+  label?: string;
+  onPress?: () => void;
+}) {
+  const { c } = useTheme();
+  const chip = (
+    <View
+      style={{
+        height: 34,
+        paddingHorizontal: 12,
+        borderRadius: 17,
+        backgroundColor: c.s1,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+      }}
+    >
+      {icon}
+      <Text variant="caption" weight={500} style={{ fontSize: 14, color: color ?? c.fg }}>
+        {text}
+      </Text>
+      {after}
+    </View>
+  );
+  if (!onPress)
+    return (
+      <View accessible accessibilityLabel={label}>
+        {chip}
       </View>
-      {__DEV__ ? (
-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 16 }}>
-          <Link href="/dev" asChild>
-            <TextButton label="Kitchen sink" />
-          </Link>
-          <TextButton
-            label="Restart onboarding"
-            onPress={() => {
-              update({ onboarded: false });
-              router.replace("/onboarding/welcome");
-            }}
-          />
+    );
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      hitSlop={5}
+      style={{ minHeight: 44, justifyContent: "center" }}
+    >
+      {chip}
+    </Pressable>
+  );
+}
+
+function Skeleton({ w, h = 22 }: { w: number | `${number}%`; h?: number }) {
+  const { c } = useTheme();
+  return <View style={{ width: w, height: h, borderRadius: 6, backgroundColor: c.s2 }} />;
+}
+
+function MiniMap() {
+  const { c } = useTheme();
+  return (
+    <Svg
+      width={52}
+      height={52}
+      viewBox="0 0 56 56"
+      style={{ borderRadius: 12, overflow: "hidden" }}
+    >
+      <Rect width={56} height={56} fill={c.s2} />
+      <Path
+        d="M0 18 L56 26 M14 0 L22 56 M0 44 L56 38 M40 0 L36 56"
+        stroke={c.line}
+        strokeWidth={3}
+      />
+      <Circle cx={29} cy={29} r={9} fill={c.acc} opacity={0.2} />
+      <Circle cx={29} cy={29} r={4.5} fill={c.acc} />
+    </Svg>
+  );
+}
+
+function SignedOut({ car }: { car: CarStatus }) {
+  const { c } = useTheme();
+  const t = useT();
+  const time = car.signedOutAt ? new Date(car.signedOutAt).toTimeString().slice(0, 5) : "";
+  const disc = {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  } as const;
+  return (
+    <View style={{ flex: 1, paddingTop: 40 }}>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 28 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
+          <View style={{ ...disc, backgroundColor: c.s1, opacity: 0.5 }}>
+            <DeviceMobileIcon size={36} color={c.fg2} />
+          </View>
+          <CaretRightIcon size={iconSize.md} color={c.fg2} />
+          <View style={{ ...disc, backgroundColor: c.s1, borderWidth: 2, borderColor: c.warn }}>
+            <DeviceMobileIcon size={36} color={c.warn} />
+          </View>
+        </View>
+        <View style={{ alignItems: "center", gap: 8 }}>
+          <Text
+            style={{ ...textStyle("large"), fontSize: 30, lineHeight: 36, textAlign: "center" }}
+          >
+            {t.signedOutTitle}
+          </Text>
+          <Text variant="label" weight={400} color="fg2">
+            {t.signedOutWhere(time)}
+          </Text>
+        </View>
+        <View
+          style={{
+            height: 36,
+            paddingHorizontal: 14,
+            borderRadius: 18,
+            backgroundColor: c.s1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <LockIcon size={16} color={c.fg2} />
+          <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
+            {t.carUnchanged}
+          </Text>
+        </View>
+      </View>
+      <Button
+        height={64}
+        tone="neutral"
+        label={t.signInAgain}
+        onPress={() => router.push("/onboarding/sign-in")}
+      />
+      <View
+        style={{
+          marginTop: 12,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+        }}
+      >
+        <DeviceMobileIcon size={16} color={c.fg2} />
+        <Text variant="caption" color="fg2">
+          {t.smsNeeded}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export default function Home() {
+  const { c, scheme } = useTheme();
+  const t = useT();
+  const insets = useSafeAreaInsets();
+  const { prefs } = usePrefs();
+  const qc = useQueryClient();
+  const now = useNow();
+  const online = useOnline();
+  const { data: car, isPending } = useCar();
+  const { state: cmd, send } = useCommand();
+  const wake = useMutation({
+    mutationFn: () => carService.wake(),
+    onSuccess: (fresh) => qc.setQueryData(CAR_KEY, fresh),
+  });
+
+  const page = (children: ReactNode) => (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: c.bg,
+        paddingTop: insets.top + 6,
+        paddingBottom: Math.max(insets.bottom, 16),
+        paddingHorizontal: space.gutter,
+      }}
+    >
+      {children}
+    </View>
+  );
+
+  if (car?.account === "signed-out") return page(<SignedOut car={car} />);
+
+  const name = prefs.carName ?? car?.model ?? "";
+  const { body, look, paint } = prefs.car;
+  const loading = isPending && !car;
+  const expired = car?.account === "expired";
+  const controlsOff = !car || !online || expired;
+  const pending = cmd.status === "sent" || cmd.status === "accepted" || cmd.status === "retrying";
+
+  // Headline and picture follow the confirmed snapshot only.
+  const unlocked = car?.doors === "unlocked";
+  const engineOn = car?.engine.on === true;
+  const left = car?.engine.on ? Math.max(0, Math.round((car.engine.endsAt - now) / 1000)) : 0;
+  const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+
+  const age = car ? freshness(car.updatedAt, now) : null;
+  const freshText = wake.isPending
+    ? t.waking
+    : !age || age.unit === "live"
+      ? t.live
+      : t.age(age.n, age.unit);
+  const freshLabel = wake.isPending
+    ? t.waking
+    : !age || age.unit === "live"
+      ? t.live
+      : `${t.ageLong(age.n, age.unit)}. ${t.freshHint}`;
+
+  const lockLabel =
+    cmd.status !== "idle" && pending
+      ? cmd.kind === "unlock"
+        ? t.unlocking
+        : t.locking
+      : unlocked
+        ? t.lock
+        : t.holdToUnlock;
+
+  const statusLine = (() => {
+    if (cmd.status === "sent") return { text: t.sending, spin: true };
+    if (cmd.status === "accepted") return { text: t.acceptedWaiting, spin: true };
+    if (cmd.status === "retrying")
+      return { text: t.retrying(cmd.attempt, MAX_RETRIES), spin: true, warn: true };
+    if (cmd.status === "confirmed")
+      return { text: cmd.kind === "unlock" ? t.unlocked : t.locked, done: true };
+    if (cmd.status === "failed") return { text: t.notReached, failed: true };
+    if (!car && isPending) return { text: t.connecting, spin: true };
+    return null;
+  })();
+
+  return page(
+    <>
+      {!online ? (
+        <View
+          accessibilityRole="alert"
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+            borderRadius: 16,
+            backgroundColor: c.s1,
+            marginBottom: 12,
+          }}
+        >
+          <WifiSlashIcon size={iconSize.sm} color={c.warn} />
+          <Text variant="label" style={{ flex: 1 }}>
+            {t.offline}
+          </Text>
+          <ActivityIndicator size="small" color={c.fg2} />
         </View>
       ) : null}
-    </Screen>
+
+      <ScrollView
+        style={{ flex: 1, marginHorizontal: -space.gutter }}
+        contentContainerStyle={{ paddingHorizontal: space.gutter }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={wake.isPending}
+            onRefresh={() => {
+              if (online && !expired) wake.mutate();
+            }}
+            tintColor={c.fg2}
+          />
+        }
+      >
+        <View
+          style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+        >
+          <View style={{ minHeight: 44, justifyContent: "center", gap: 2 }}>
+            <Text variant="label" weight={600}>
+              {name}
+            </Text>
+            <Text variant="caption" color="fg2">
+              {car?.plate ?? ""}
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.settings}
+            onPress={() => router.push("/settings")}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: c.s1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <SlidersHorizontalIcon size={20} color={c.fg} />
+          </Pressable>
+        </View>
+
+        <View style={{ marginTop: 24, gap: 10 }}>
+          {loading ? (
+            <Skeleton w={160} h={44} />
+          ) : (
+            <Text
+              variant="title"
+              color={unlocked ? "warn" : "fg"}
+              accessibilityRole="header"
+              accessibilityLiveRegion="polite"
+            >
+              {unlocked ? t.unlocked : t.locked}
+            </Text>
+          )}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {loading ? (
+              <>
+                <Skeleton w={110} h={34} />
+                <Skeleton w={84} h={34} />
+              </>
+            ) : (
+              <>
+                <Chip
+                  label={engineOn ? clock : t.engineOff}
+                  color={engineOn ? c.acc : c.fg}
+                  icon={<PowerIcon size={16} color={engineOn ? c.acc : c.fg} />}
+                  text={engineOn ? clock : t.off}
+                />
+                <Chip
+                  label={t.cabin(car?.cabinC ?? 0)}
+                  icon={<ThermometerSimpleIcon size={16} color={c.fg2} />}
+                  after={
+                    <View
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: 4,
+                        backgroundColor: engineOn ? c.acc : c.warn,
+                      }}
+                    />
+                  }
+                  text={`${car?.cabinC ?? "—"}°`}
+                />
+                <Chip
+                  label={freshLabel}
+                  color={age?.unit === "live" && !wake.isPending ? c.acc : c.fg2}
+                  icon={
+                    <ClockIcon
+                      size={16}
+                      color={age?.unit === "live" && !wake.isPending ? c.acc : c.fg2}
+                    />
+                  }
+                  onPress={online && !expired && !wake.isPending ? () => wake.mutate() : undefined}
+                  text={freshText}
+                />
+              </>
+            )}
+          </View>
+        </View>
+
+        <View
+          style={{
+            marginTop: 2,
+            marginHorizontal: -16,
+            opacity: loading ? 0.35 : online ? 1 : 0.55,
+          }}
+        >
+          <Car
+            body={body}
+            look={look === "line" ? "line" : "shaded"}
+            paint={loading ? "#3A3A40" : paint}
+            ground={scheme}
+            doors={unlocked ? "unlocked" : "locked"}
+            engine={engineOn}
+          />
+        </View>
+
+        <View
+          accessible
+          accessibilityLabel={car ? t.fuel(car.fuelPct, car.rangeKm) : undefined}
+          style={{
+            marginTop: 12,
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            borderRadius: 18,
+            backgroundColor: c.s1,
+            gap: 10,
+          }}
+        >
+          <View
+            style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <GasPumpIcon size={iconSize.sm} color={c.fg2} />
+              {loading || wake.isPending ? (
+                <Skeleton w={48} />
+              ) : (
+                <Text variant="stat" style={{ fontSize: 22 }}>{`${car?.fuelPct}%`}</Text>
+              )}
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              {loading || wake.isPending ? (
+                <Skeleton w={64} />
+              ) : (
+                <Text variant="stat" style={{ fontSize: 22 }}>
+                  {car?.rangeKm}
+                  <Text variant="caption" weight={500} color="fg2" style={{ fontSize: 14 }}>
+                    {" km"}
+                  </Text>
+                </Text>
+              )}
+              <RoadHorizonIcon size={iconSize.sm} color={c.fg2} />
+            </View>
+          </View>
+          <View style={{ height: 6, borderRadius: 3, backgroundColor: c.s2 }}>
+            <View
+              style={{
+                width: `${car?.fuelPct ?? 0}%`,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: online ? c.fg : c.fg2,
+              }}
+            />
+          </View>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            car ? `${car.location.name}, ${car.location.distanceKm} km` : undefined
+          }
+          onPress={() => router.push("/find")}
+          style={({ pressed }) => ({
+            marginTop: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 14,
+            padding: 10,
+            borderRadius: 18,
+            backgroundColor: c.s1,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <MiniMap />
+          <View style={{ flex: 1, gap: 3 }}>
+            {loading ? (
+              <>
+                <Skeleton w="70%" h={14} />
+                <Skeleton w="40%" h={12} />
+              </>
+            ) : (
+              <>
+                <Text variant="label">{car?.location.name}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <NavigationArrowIcon size={14} color={c.fg2} />
+                  <Text variant="caption" color="fg2">{`${car?.location.distanceKm} km`}</Text>
+                </View>
+              </>
+            )}
+          </View>
+          <CaretRightIcon size={iconSize.sm} color={c.fg2} />
+        </Pressable>
+      </ScrollView>
+
+      <View
+        style={{
+          minHeight: 28,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+        }}
+      >
+        {statusLine?.spin ? (
+          <ActivityIndicator size="small" color={statusLine.warn ? c.warn : c.fg2} />
+        ) : null}
+        {statusLine?.done ? <CheckCircleIcon size={14} color={c.acc} weight="fill" /> : null}
+        {statusLine?.failed ? <WarningCircleIcon size={14} color={c.warn} /> : null}
+        {statusLine ? (
+          <Text
+            variant="caption"
+            color={statusLine.warn || statusLine.failed ? "warn" : "fg2"}
+            accessibilityLiveRegion="polite"
+          >
+            {statusLine.text}
+          </Text>
+        ) : null}
+        {/* Physical commands (unlock, start) are never resent by a tap; the user holds again. */}
+        {statusLine?.failed && cmd.status === "failed" && cmd.kind === "lock" ? (
+          <Pressable accessibilityRole="button" hitSlop={12} onPress={() => send(cmd.kind)}>
+            <Text variant="caption" weight={600} color="acc">
+              {`· ${t.tryAgain}`}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {expired ? (
+        <View
+          style={{
+            marginTop: 8,
+            padding: 18,
+            borderRadius: radius.cardLg,
+            backgroundColor: c.s1,
+            borderWidth: 1,
+            borderColor: c.warn,
+            gap: 14,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <CrownIcon size={iconSize.md} color={c.warn} />
+            <Text weight={600} color="warn" style={{ flex: 1 }}>
+              {t.expiredTitle}
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10, opacity: 0.55 }}>
+              <LockIcon size={iconSize.sm} color={c.fg2} />
+              <PowerIcon size={iconSize.sm} color={c.fg2} />
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <ArrowsClockwiseIcon size={16} color={c.fg2} />
+            <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
+              {t.expiredHint}
+            </Text>
+          </View>
+          <Button
+            tone="warn"
+            label={t.renew}
+            height={64}
+            onPress={() => Alert.alert(t.renewInHondaApp)}
+          />
+        </View>
+      ) : (
+        <View style={{ marginTop: 8, flexDirection: "row", gap: 12 }}>
+          <HoldButton
+            mode={unlocked ? "tap" : "hold"}
+            label={lockLabel}
+            accessibilityHint={unlocked ? undefined : t.holdHint}
+            disabled={controlsOff || pending}
+            bg={unlocked && !pending ? "warn" : "s1"}
+            fg={unlocked && !pending ? "onwarn" : "fg"}
+            icon={
+              !online ? (
+                <WifiSlashIcon size={iconSize.md} color={c.fg2} />
+              ) : unlocked ? (
+                <LockIcon size={iconSize.md} color={pending ? c.fg : c.onwarn} />
+              ) : (
+                <LockOpenIcon size={iconSize.md} color={c.fg} />
+              )
+            }
+            onAction={() => send(unlocked ? "lock" : "unlock")}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={engineOn ? clock : t.start}
+            disabled={controlsOff}
+            onPress={() => router.push("/engine")}
+            style={({ pressed }) => ({
+              flex: 1,
+              height: 68,
+              borderRadius: 34,
+              backgroundColor: engineOn ? c.s2 : c.s1,
+              borderWidth: engineOn ? 2 : 0,
+              borderColor: c.acc,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              opacity: controlsOff ? 0.5 : pressed ? 0.8 : 1,
+            })}
+          >
+            {!online ? (
+              <WifiSlashIcon size={iconSize.md} color={c.fg2} />
+            ) : (
+              <SnowflakeIcon size={iconSize.md} color={c.acc} />
+            )}
+            <Text weight={600} style={{ fontSize: 16 }}>
+              {engineOn ? clock : t.start}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      <View style={{ marginTop: 10, flexDirection: "row" }}>
+        {[
+          { key: "status", icon: GaugeIcon, label: t.status },
+          { key: "trips", icon: PathIcon, label: t.trips },
+          { key: "alerts", icon: BellIcon, label: t.alerts, badge: car?.alerts },
+        ].map(({ key, icon: Icon, label, badge }) => (
+          <Pressable
+            key={key}
+            accessibilityRole="button"
+            accessibilityLabel={badge ? `${label}, ${badge}` : label}
+            onPress={() => router.push(`/${key}`)}
+            style={{ flex: 1, height: 56, alignItems: "center", justifyContent: "center", gap: 4 }}
+          >
+            <View>
+              <Icon size={iconSize.md} color={c.fg2} />
+              {badge ? (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -9,
+                    minWidth: 16,
+                    height: 16,
+                    paddingHorizontal: 4,
+                    borderRadius: 8,
+                    backgroundColor: c.warn,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text weight={700} color="onwarn" style={{ fontSize: 10, lineHeight: 12 }}>
+                    {badge}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            <Text variant="caption" color="fg2" style={{ fontSize: 12 }}>
+              {label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    </>,
   );
 }

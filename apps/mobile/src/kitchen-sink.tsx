@@ -5,6 +5,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Car, type CarProps } from "./car/car";
 import type { Body } from "./car/geometry";
+import { getScenario, type Scenario, setScenario } from "./services/mock-car";
+import { CAR_KEY, queryClient } from "./services/query";
 import { haptics } from "./theme/haptics";
 import { pop, settle, useTiming } from "./theme/motion";
 import { colors, iconSize, radius, space, type TextVariant } from "./theme/tokens";
@@ -148,6 +150,38 @@ function CarCard({ title, ...car }: CarProps & { title: string }) {
   );
 }
 
+const SCENARIOS: Scenario[] = ["normal", "asleep", "unreachable", "slow", "signed-out", "expired"];
+
+/** Drives every Home state from the mock service. Offline: toggle the Mac's network. */
+function MockScenarios() {
+  const [now, setNow] = useState(getScenario());
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {SCENARIOS.map((s) => (
+        <Button
+          key={s}
+          tone={s === now ? "primary" : "secondary"}
+          label={s}
+          height={64}
+          style={{ minHeight: 44, paddingHorizontal: 16 }}
+          onPress={() => {
+            setScenario(s);
+            setNow(s);
+            queryClient.invalidateQueries({ queryKey: CAR_KEY });
+          }}
+        />
+      ))}
+      <Button
+        tone="secondary"
+        label="clear cache"
+        height={64}
+        style={{ minHeight: 44, paddingHorizontal: 16 }}
+        onPress={() => queryClient.resetQueries({ queryKey: CAR_KEY })}
+      />
+    </View>
+  );
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{ gap: 12 }}>
@@ -240,6 +274,10 @@ export function KitchenSink() {
       }}
     >
       <Text variant="large">Kitchen sink</Text>
+
+      <Section title="Mock car">
+        <MockScenarios />
+      </Section>
 
       <Section title="Color">
         <View style={{ flexDirection: "row", gap: 12 }}>

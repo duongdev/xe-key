@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PrefsProvider } from "../prefs";
+import { QueryProvider } from "../services/query";
 import { useTheme } from "../theme/use-theme";
 
 SplashScreen.preventAutoHideAsync();
@@ -39,8 +40,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: c.bg }}>
       <SafeAreaProvider>
         <PrefsProvider>
-          <StatusBar style="auto" />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }} />
+          <QueryProvider>
+            <StatusBar style="auto" />
+            <Stack
+              screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}
+            />
+          </QueryProvider>
         </PrefsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
