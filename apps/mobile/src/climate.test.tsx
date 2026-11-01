@@ -40,12 +40,12 @@ const mockCar: CarStatus = {
   alerts: 0,
   updatedAt: Date.now(),
   account: "ok",
+  can: { lock: true, engine: true },
 };
 
 let mockFinish: (() => void) | null = null;
 const mockService: CarService = {
   status: async () => mockCar,
-  wake: async () => mockCar,
   trips: async () => ({ trips: [], driving: null }),
   alerts: async () => [],
   deleteAlert: async () => {},

@@ -72,6 +72,10 @@ export class HondaHttp {
     return this.send<T>(path, { method: "GET", headers: this.headers() });
   }
 
+  delete<T>(path: string): Promise<HttpResponse<T>> {
+    return this.send<T>(path, { method: "DELETE", headers: this.headers() });
+  }
+
   postForm<T>(path: string, fields: Record<string, string>): Promise<HttpResponse<T>> {
     return this.send<T>(path, {
       method: "POST",

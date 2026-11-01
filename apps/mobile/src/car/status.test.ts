@@ -63,3 +63,18 @@ describe("bodyParts", () => {
     expect(p.rows[3]?.tone).toBe("warn");
   });
 });
+
+describe("bodyParts with Honda's coarse data", () => {
+  const coarse = { ...closed, doorsOpen: null, windowsCm: null };
+  it("drops the windows row and keeps sides neutral when per-side data is missing", () => {
+    const p = bodyParts(coarse);
+    expect(p.rows.map((r) => r.part)).toEqual(["doors", "trunk", "hood"]);
+    expect(p.sides).toEqual({ fl: "ok", fr: "ok", rl: "ok", rr: "ok" });
+    expect(p.attention).toBe(false);
+  });
+  it("shows an open door without a side", () => {
+    const p = bodyParts({ ...coarse, anyDoorOpen: true });
+    expect(p.rows[0]).toEqual({ part: "doors", tone: "warn", value: { kind: "open" } });
+    expect(p.attention).toBe(true);
+  });
+});

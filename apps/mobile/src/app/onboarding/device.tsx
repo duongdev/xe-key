@@ -1,6 +1,5 @@
 import { router } from "expo-router";
 import { ArrowsClockwiseIcon, ChatTextIcon, KeyIcon, WarningIcon } from "phosphor-react-native";
-import { useState } from "react";
 import { View } from "react-native";
 import Svg, { Circle, Line, Rect, Text as SvgText } from "react-native-svg";
 import { useT } from "../../i18n";
@@ -8,7 +7,6 @@ import { next } from "../../onboarding/flow";
 import { maskPhone } from "../../onboarding/phone";
 import { useOnboarding } from "../../onboarding/session";
 import { StepHeader } from "../../onboarding/step-header";
-import { mockAuth } from "../../services/auth";
 import { iconSize, textStyle } from "../../theme/tokens";
 import { useTheme } from "../../theme/use-theme";
 import { Button } from "../../ui/button";
@@ -113,7 +111,6 @@ export default function Device() {
   const { c } = useTheme();
   const t = useT();
   const { phone } = useOnboarding();
-  const [busy, setBusy] = useState(false);
   const masked = maskPhone(phone ?? "");
 
   return (
@@ -137,13 +134,8 @@ export default function Device() {
         height={64}
         tone="neutral"
         label={t.sendCodeTo(masked)}
-        loading={busy}
-        onPress={async () => {
-          setBusy(true);
-          await mockAuth.sendCode();
-          setBusy(false);
-          router.push(`/onboarding/${next("device")}`);
-        }}
+        // Sign-in already asked Honda to send the code.
+        onPress={() => router.push(`/onboarding/${next("device")}`)}
       />
       <TextButton
         label={t.notNow}

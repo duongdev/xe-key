@@ -8,8 +8,8 @@ export type EngineState = { running: false } | { running: true; left: number; fr
 
 export function engineState(engine: Engine, now: number): EngineState {
   if (!engine.on) return { running: false };
-  const left = Math.floor((engine.endsAt - now) / 1000);
-  if (left <= 0) return { running: false };
+  // Our end time is an estimate (±30 s); only the car's report turns the engine off.
+  const left = Math.max(0, Math.floor((engine.endsAt - now) / 1000));
   return { running: true, left, fraction: Math.min(1, left / RUN_S) };
 }
 

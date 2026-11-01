@@ -12,9 +12,12 @@ describe("engineState", () => {
     expect(s).toEqual({ running: true, left: 522, fraction: 522 / RUN_S });
   });
 
-  it("auto-offs when the time is up, even before the car reports it", () => {
-    expect(engineState({ on: true, endsAt: now - 1 }, now)).toEqual({ running: false });
-    expect(engineState({ on: true, endsAt: now }, now)).toEqual({ running: false });
+  it("stays running at 0:00 until the car reports off, so Stop stays reachable", () => {
+    expect(engineState({ on: true, endsAt: now - 1 }, now)).toEqual({
+      running: true,
+      left: 0,
+      fraction: 0,
+    });
   });
 
   it("keeps the ring full after an extend pushes past 10 min", () => {

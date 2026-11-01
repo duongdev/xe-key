@@ -18,7 +18,8 @@ import { regionById } from "../../onboarding/region";
 import { useOnboarding } from "../../onboarding/session";
 import { StepHeader } from "../../onboarding/step-header";
 import { usePrefs } from "../../prefs";
-import { mockAuth, type SignInError } from "../../services/auth";
+import type { SignInError } from "../../services/auth";
+import { useAuth } from "../../services/use-auth";
 import { haptics } from "../../theme/haptics";
 import { iconSize, textStyle } from "../../theme/tokens";
 import { useTheme } from "../../theme/use-theme";
@@ -36,7 +37,9 @@ export default function SignIn() {
   const t = useT();
   const region = regionById(usePrefs().prefs.region ?? "vietnam");
   const vn = region.id === "vietnam";
-  const { setPhone } = useOnboarding();
+  const { setPhone, setCar } = useOnboarding();
+  const auth = useAuth();
+  const [code, setCode] = useState<string>();
   const [phone, setPhoneText] = useState("");
   const [password, setPassword] = useState("");
   const [reveal, setReveal] = useState(false);
@@ -61,18 +64,25 @@ export default function SignIn() {
     setAttempt((n) => n + 1);
     // Keep the Honda-down view up while retrying; clear form errors.
     setError((e) => (e === "server-down" || e === "app-blocked" ? e : null));
-    const res = await mockAuth.signIn({ region: region.id, phone: national, password });
+    const res = await auth.signIn({ region: region.id, phone: national, password });
     setBusy(false);
     if (!res.ok) {
       // Auto-retries while Honda is down stay silent: only a new failure buzzes.
       if (errorRef.current !== res.error) haptics.warning();
       setError(res.error);
+      setCode(res.code);
       return;
     }
     setError(null);
     setPhone(national);
+    // Already-trusted device: no SMS code, straight to the car.
+    if (res.car) {
+      setCar(res.car);
+      router.push("/onboarding/found");
+      return;
+    }
     router.push(`/onboarding/${next("sign-in")}`);
-  }, [national, password, region.id, setPhone]);
+  }, [auth, national, password, region.id, setPhone, setCar]);
 
   const down = error === "server-down" || error === "app-blocked";
 
@@ -161,14 +171,23 @@ export default function SignIn() {
                 )}
               </Pressable>
             </Field>
-            {error === "wrong-credentials" || error === "invalid-phone" ? (
+            {error === "wrong-credentials" ||
+            error === "invalid-phone" ||
+            error === "wrong-region" ||
+            error === "unknown" ? (
               <View
                 accessibilityRole="alert"
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
                 <WarningCircleIcon size={iconSize.sm} color={c.error} />
                 <Text variant="caption" color="error" style={{ fontSize: 14 }}>
-                  {error === "invalid-phone" ? t.invalidPhone : t.wrongCredentials}
+                  {error === "invalid-phone"
+                    ? t.invalidPhone
+                    : error === "wrong-region"
+                      ? t.wrongRegion
+                      : error === "unknown"
+                        ? t.hondaError(code)
+                        : t.wrongCredentials}
                 </Text>
               </View>
             ) : null}

@@ -25,6 +25,8 @@ type Props = {
   fg?: keyof Colors;
   fill?: keyof Colors;
   disabled?: boolean;
+  /** Defaults to `label`; set it when the visible label is shortened. */
+  accessibilityLabel?: string;
   accessibilityHint?: string;
   /** Finger down/up during a hold, e.g. to show "Keep holding". */
   onHoldChange?: (holding: boolean) => void;
@@ -44,6 +46,7 @@ export function HoldButton({
   fg = "fg",
   fill = "warn",
   disabled,
+  accessibilityLabel,
   accessibilityHint,
   onHoldChange,
 }: Props) {
@@ -85,7 +88,7 @@ export function HoldButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: !!disabled }}
       accessibilityActions={[{ name: "activate" }]}

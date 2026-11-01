@@ -46,3 +46,26 @@ export async function resendCode(http: HondaHttp): Promise<AuthResult> {
   const res = await http.get<LoginData>(ENDPOINTS.verificationCode);
   return { ...parseEnvelope<LoginData>(res.json), statusCode: res.statusCode, text: res.text };
 }
+
+/** Fields the official iOS app sends to `/user/device`. `uid` is the deviceId. */
+export interface DeviceInfo {
+  uid: string;
+  deviceToken: string;
+  appID: string;
+  appVersion: string;
+  osPlatform: string;
+  osVersion: string;
+  model: string;
+  manufacturer: string;
+  locale: string;
+  timeZone: string;
+}
+
+/** Must run before login on a new device, or verifyCode fails with an empty FAILURE. */
+export function registerDevice(http: HondaHttp, info: DeviceInfo): Promise<AuthResult> {
+  return form(http, ENDPOINTS.device, { ...info });
+}
+
+export function logout(http: HondaHttp, deviceId: string): Promise<AuthResult> {
+  return form(http, ENDPOINTS.logout, { deviceId });
+}

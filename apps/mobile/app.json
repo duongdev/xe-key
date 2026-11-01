@@ -14,6 +14,12 @@
     "plugins": [
       "expo-font",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Xe Key uses your location to show how far away your car is."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
@@ -25,7 +31,8 @@
         }
       ],
       "expo-router",
-      "expo-localization"
+      "expo-localization",
+      "expo-secure-store"
     ],
     "scheme": "xekey"
   }

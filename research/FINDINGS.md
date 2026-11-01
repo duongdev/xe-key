@@ -186,6 +186,9 @@ Clean up the one-off bits: `honda_wg_keys`, `honda_wg_client.conf`, `honda_wg_qr
 
 ## Round 3 — live command capture (iPhone) + corrections
 
+_Note (2026-11-02): no log of this capture or of Round 4 is in the repo; the claims below that
+the app source does not also support are unverified._
+
 Captured the real app's commands via proxy. Static analysis had misled me twice:
 
 - **Command values are the enum `toString()`, not the constant name:**
@@ -198,9 +201,15 @@ Captured the real app's commands via proxy. Static analysis had misled me twice:
   `"autoOn"`/`"autoOff"`.
 - **Commands only work when the car is awake.** A sleeping/out-of-signal TCU returns
   `COMMUNICATION_ERROR` (the app's "kết nối không ổn định"); the app retries/polls until it wakes.
+  _Unverified (2026-11-02): no capture in the repo shows this code and the app source never
+  names it. Live alert history shows `W001(0)` (no connection) and `W101` (timeout) instead —
+  see Round 7._
 - **Fresh status:** `GET /car/status/*` returns a cached snapshot. To force live data the app
   first POSTs `/car/access-screen` with `apiName` (e.g. `remote/engine`) + `status` (a code,
   `"1"`/`"2"`), which wakes the TCU; then the GET returns live state.
+  _Corrected (2026-11-02): the app only logs this call's reply and never waits on it. `status`
+  is `"1"` when the user confirms an action, `"2"` on cancel or failed auth; it is sent next to
+  the command, not before it. It reads as an access/audit log; no wake effect is shown._
 
 ### The 2-remote-start cap — no client bypass
 `resStartCounter` / `resRequester:"TCU"` come from the vehicle; there is **no client-side limit
@@ -216,7 +225,7 @@ Verified live (all `200/SUCCESS` unless noted). Reads unless marked POST.
 **Vehicle:** `/car`, `/car/topPage`, `/car/dashboard`, `/car/status`, `/car/status/door`,
 `/car/status/engine`, `/car/finder/location` (read position), `/car/setting`,
 `/car/nextMaintenance`, `/car/warning`, `/car/profile`, `/car/currentLocation`.
-**Fresh read:** `POST /car/access-screen {apiName, status?}` wakes the TCU first. apiName values:
+**Access log:** `POST /car/access-screen {apiName, status?}` (not a wake call — see Round 3 correction). apiName values:
 `topPage, remote/engine, remote/doorLock, remote/hornLight, car/finder/location, alertMessages,
 emergencyCall, locationSearch, tripRecent, tripSummary`.
 **Trips/driving:** `/car/trip/recent` (drive log), `/car/trip/summary` (driving behaviour),
@@ -230,9 +239,10 @@ emergencyCall, locationSearch, tripRecent, tripSummary`.
 - `/remote/doorLock` form `command=allLock | doorUnlock`
 - `/remote/hornLight` form `command=horn-lights | lights | horn` (no "off" — lights auto-off on a timeout)
 - `/remote/engine` json `command=start | stop | extend` + `vehicleControl.acSetting{acTempVal,acDefSetting}`
-- `/car/finder/location` json (POST) pings the TCU for live location
+- `/car/finder/location` json (POST) pings the TCU for live location (_the app never calls it;
+  Find My Car only GETs the last position_)
 All succeed only when the car is awake; a sleeping TCU returns `COMMUNICATION_ERROR` and the app
-retries/polls.
+retries/polls (_unverified, see Round 3_).
 
 ## Round 5 — per-country matrix (static, 8 regions)
 
@@ -274,3 +284,56 @@ Captured the real app completing a device change (by rewriting deviceId on the w
 
 So verifyCode is a device-verification step, not a session grant; a fresh login completes it.
 `research/mitm_newdevice.py` rewrites `deviceId`/`uid` on the wire to force this flow for capture.
+
+## Round 7 — live values (2026-11-02)
+
+Read-only probe with real values (`HONDA_PROBE_BODIES=1 pnpm probe`, raw bodies kept in the
+gitignored `research/probe-bodies.local.json`). One VN car, TCU gen 3. No personal data below.
+
+**Car (`/car`):** `default` true; `color` is a paint code + local name (`"NH-883P Trắng ngà"`);
+`carModel.modelName`/`name` are an internal code (`"VC5 883"`), not a model name;
+`packageServiceCode` `8191` (all features); `isTcu` true; `tcuGen` `"3"`. No plate, licence or
+odometer field in `/car`, `/car/profile` or `/car/topPage`. `name` is the user's nickname.
+
+**`/car/topPage` `vehicleInfo`:** `fuel{unit:"%",value:15}`, `driveRange{unit:"km",value:87}`,
+`cabinTemperature{unit:"c",value:26}`, `lockStatus` bool, `engineStatus` bool, `ignition` bool,
+`RemoteEngineStatus` `"OFF"`, `batteryVoltage` `"14.9"` (string), `battLevel` `"Normal"`,
+`maintenanceReminderLevel` `"OVER_DUE"`, `nextMaintenanceDate`/`lastTimeCall` epoch ms,
+`nextMaintenanceMileage` number, `remainingDayToMaintenance`, `carLocation{latitude,longitude}`
+(strings). `lastTimeCall` is the time of the car's last report.
+
+**`/car/dashboard` `carStatus`:** `doors{allDoors:"Lock",tailgate:"Close",hood:"Close"}` — mixed
+case, compare case-insensitively; `batteryVoltage{unit:"V",value:"14.9",battLevel}`,
+`coolantTemperature{unit:"°C",value}`, `parkingBrake`/`transmission` `"Error"` on this car.
+
+**`/car/status/door`:** same `allDoors/tailgate/hood` values. **`/car/status`:** all numbers `0`
+on this car — not useful. **`/car/status/engine`:** `{engine:false, autoAC:true, ACDescription:"",
+remoteEngine:{resTime:0, resStartCounter:1, resStatus:"OFF", resRequester:"NO"}}` — meaning of
+`resStartCounter` still unknown (needs a reading after a start).
+
+**`/car/finder/location` (GET):** `{latitude, longitude, time}` — numbers, `time` epoch ms.
+
+**`/car/alertMessages?carOid=`:** 361 items, no paging. `category`/`warningType` ∈ `command`,
+`diagnosis`. Delete: `DELETE /car/alertMessages?oid=&warningType=` (one) or
+`POST /car/alertMessages {deleteItems:[{oid,warningType}]}` (many) — from the app source.
+`command` items are the server's command results, in the user's language, e.g. lock/unlock
+success, engine started/stopped, and these failures:
+
+| Code | Meaning |
+|---|---|
+| `W001(0)` | cannot connect to the car, try later |
+| `W101` | connection timed out / not allowed while the engine runs |
+| `W003(12)` | only possible when the car is in Park |
+| `W003(19)` | not possible now, contact the dealer |
+| `RTS02(29)` | Start pressed max 2 times; start the engine with the key (the 2-start cap) |
+
+**Still 500:** `/car/currentLocation`, `/car/geoFence`, `/car/default`, `/message/paymentInstruction`.
+
+**App findings (2026-11-02, task 014):** `cabinTemperature.value` comes back `0` on a parked car — treat 0 as no reading. `resStartCounter` read `1` the morning after two remote starts; working guess: starts used since the last drive (`startsLeft = 2 − counter`), to confirm on the first real start in task 015. Alert dates are epoch ms in `createDate`; `name` uses `_` as a separator (`"Đèn cảnh báo _ACC"`).
+
+**Remote commands, live (2026-11-02, task 015):**
+- Lock (car already locked): POST `SUCCESS`; the car logged "Khóa cửa thành công" ~5 s later; `pullDoorLockResult` returned `SUCCESS` (empty data) when polled after the ~150 s wait.
+- Engine start: confirmed by `/car/status/engine` `engine: true` within ~10 s; alert "Động cơ đã được khởi động".
+- `resStartCounter` = remote starts used since the last drive (1 → 2 on this start; cap 2). `resStatus` `"ENGINE START IG RUN"`, `resRequester` `"TCU"` while running.
+- `resTime` = whole minutes left, updated only with the car's reports (`lastTimeCall`, ~1/min while running) and unevenly (10, 8, 6, 5, 4, 3, 3, 1). The run ended ~10 min 20 s after the start alert; the car's report flips `engine` to `false`.
+

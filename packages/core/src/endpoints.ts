@@ -23,14 +23,14 @@ export const ENDPOINTS = {
   doorStatus: "/car/status/door",
   engineStatus: "/car/status/engine",
   currentLocation: "/car/currentLocation",
-  finderLocation: "/car/finder/location", // GET = read position, POST = ping TCU
+  finderLocation: "/car/finder/location", // GET = last position (POST unused by the app)
   geoFence: "/car/geoFence",
   carSetting: "/car/setting",
   nextMaintenance: "/car/nextMaintenance",
   warning: "/car/warning",
-  alertMessages: "/car/alertMessages",
+  alertMessages: "/car/alertMessages", // GET ?carOid; DELETE ?oid&warningType
   carProfile: "/car/profile",
-  accessScreen: "/car/access-screen", // POST {apiName,[status]} wakes the TCU for a fresh read
+  accessScreen: "/car/access-screen", // POST {apiName,[status]} access log; not a wake call
   // trips
   tripRecent: "/car/trip/recent",
   tripSummary: "/car/trip/summary",

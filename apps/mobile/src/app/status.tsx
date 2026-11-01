@@ -11,12 +11,14 @@ import {
   WarningIcon,
   WrenchIcon,
 } from "phosphor-react-native";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { useState } from "react";
+import { Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { engineState, clock as formatClock } from "../car/engine";
 import { freshness } from "../car/freshness";
 import { bodyParts, type Row, type Side } from "../car/status";
 import { useLang, useT } from "../i18n";
+import { useFormatTime } from "../i18n/format";
 import { useCar } from "../services/query";
 import { iconSize, radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -91,7 +93,10 @@ export default function Status() {
   const t = useT();
   const lang = useLang();
   const now = useNow();
-  const { data: car } = useCar();
+  const { data: car, refetch, isFetching, dataUpdatedAt } = useCar();
+  const time = useFormatTime();
+  // Spinner only for the user's pull, not for background focus refreshes.
+  const [pulling, setPulling] = useState(false);
   if (!car)
     return (
       <Screen>
@@ -151,14 +156,20 @@ export default function Status() {
       value: `${car.fuelPct}% · ${num(car.rangeKm)} km`,
       bar: car.fuelPct,
     },
-    {
+    car.batteryV !== null && {
       key: "12v",
       icon: CarBatteryIcon,
       label: t.battery12v,
       value: `${car.batteryV.toFixed(1)} V`,
     },
-    { key: "odo", icon: GaugeIcon, label: t.odometer, value: `${num(car.odometerKm)} km` },
-  ];
+    car.odometerKm !== null && {
+      key: "odo",
+      icon: GaugeIcon,
+      label: t.odometer,
+      value: `${num(car.odometerKm)} km`,
+    },
+  ].filter((x) => x !== false);
+  const serviceInKm = car.serviceInKm;
 
   return (
     <Screen>
@@ -170,11 +181,22 @@ export default function Status() {
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 20, paddingTop: 12, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={pulling}
+            onRefresh={async () => {
+              setPulling(true);
+              await refetch();
+              setPulling(false);
+            }}
+            tintColor={c.fg}
+          />
+        }
       >
-        {car.serviceInKm <= 2000 ? (
+        {serviceInKm !== null && serviceInKm <= 2000 ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => Alert.alert(t.serviceIn(num(car.serviceInKm)))}
+            onPress={() => Alert.alert(t.serviceIn(num(serviceInKm)))}
             style={({ pressed }) => ({
               minHeight: 52,
               paddingHorizontal: 16,
@@ -188,7 +210,7 @@ export default function Status() {
           >
             <WrenchIcon size={iconSize.sm} color={c.warn} />
             <Text variant="label" weight={600} color="warn" style={{ flex: 1 }}>
-              {t.serviceIn(num(car.serviceInKm))}
+              {t.serviceIn(num(serviceInKm))}
             </Text>
             <CaretRightIcon size={16} color={c.warn} />
           </Pressable>
@@ -266,6 +288,11 @@ export default function Status() {
             </View>
           ))}
         </View>
+        {/* The pill's age is the car's own report; this also says when the app last asked Honda. */}
+        <Text variant="caption" color="fg2" style={{ textAlign: "center" }}>
+          {/* Any fetch (pull, focus, foreground) shows here, so the header never changes width. */}
+          {t.reportedChecked(time(car.updatedAt), isFetching ? null : time(dataUpdatedAt))}
+        </Text>
       </ScrollView>
     </Screen>
   );

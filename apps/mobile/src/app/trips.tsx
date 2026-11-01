@@ -220,7 +220,7 @@ export default function Trips() {
           icon={<PathIcon size={56} color={c.fg2} />}
           badge={<SparkleIcon size={20} color={c.acc} />}
           badgeTone="acc"
-          title={t.noTrips}
+          title={data.soon ? t.tripsSoon : t.noTrips}
         />
       );
 

@@ -56,6 +56,7 @@ let car: CarStatus = {
   alerts: 2,
   updatedAt: Date.now() - 2 * 60_000,
   account: "ok",
+  can: { lock: true, engine: true },
 };
 
 /** `days` back at h:m; for today, never later than 30 min ago. */
@@ -106,13 +107,13 @@ const apply = (kind: CommandKind) => {
   if (kind === "start")
     car = {
       ...car,
-      startsLeft: car.startsLeft - 1,
+      startsLeft: (car.startsLeft ?? 0) - 1,
       engine: { on: true, endsAt: Date.now() + RUN_S * 1000 },
     };
   if (kind === "extend" && car.engine.on)
     car = {
       ...car,
-      startsLeft: car.startsLeft - 1,
+      startsLeft: (car.startsLeft ?? 0) - 1,
       engine: { on: true, endsAt: car.engine.endsAt + RUN_S * 1000 },
     };
   if (kind === "stop") car = { ...car, engine: { on: false } };
@@ -144,10 +145,6 @@ export const mockCar: CarService = {
   },
   async status() {
     await wait(scenario === "slow" ? 3000 : 400);
-    return snapshot();
-  },
-  async wake() {
-    await wait(2400);
     car = { ...car, updatedAt: Date.now() };
     return snapshot();
   },

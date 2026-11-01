@@ -20,7 +20,8 @@ import { next } from "../../onboarding/flow";
 import { maskPhone } from "../../onboarding/phone";
 import { useOnboarding } from "../../onboarding/session";
 import { StepHeader } from "../../onboarding/step-header";
-import { type CodeError, mockAuth } from "../../services/auth";
+import type { CodeError } from "../../services/auth";
+import { useAuth } from "../../services/use-auth";
 import { haptics } from "../../theme/haptics";
 import { useReducedMotion } from "../../theme/motion";
 import { iconSize, radius, textStyle } from "../../theme/tokens";
@@ -42,6 +43,7 @@ export default function Code() {
   const t = useT();
   const reduced = useReducedMotion();
   const { phone, setCar } = useOnboarding();
+  const auth = useAuth();
   const input = useRef<TextInputInstance>(null);
   const [code, setCode] = useState("");
   const [state, setState] = useState<State>("typing");
@@ -56,7 +58,7 @@ export default function Code() {
 
   const verify = async (value: string) => {
     setState("checking");
-    const res = await mockAuth.verifyCode(value);
+    const res = await auth.verifyCode(value);
     if (res.ok) {
       setCar(res.car);
       setState("ok");
@@ -82,14 +84,18 @@ export default function Code() {
   };
 
   const newCode = async () => {
-    await mockAuth.sendCode();
+    await auth.sendCode();
     setCode("");
     setState("typing");
     setResend(RESEND_S);
     input.current?.focus();
   };
 
-  const failed = state === "wrong-code" || state === "expired-code";
+  const failed =
+    state === "wrong-code" ||
+    state === "expired-code" ||
+    state === "server-down" ||
+    state === "unknown";
   const ring = (i: number) =>
     failed
       ? c.error
@@ -168,7 +174,13 @@ export default function Code() {
             >
               <WarningCircleIcon size={iconSize.sm} color={c.error} />
               <Text variant="caption" color="error" style={{ fontSize: 14 }}>
-                {state === "expired-code" ? t.expiredCode : t.wrongCode}
+                {state === "expired-code"
+                  ? t.expiredCode
+                  : state === "server-down"
+                    ? t.hondaDown
+                    : state === "unknown"
+                      ? t.hondaError()
+                      : t.wrongCode}
               </Text>
             </View>
             <Pressable

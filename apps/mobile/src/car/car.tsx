@@ -3,7 +3,6 @@ import { View } from "react-native";
 import Animated, {
   Easing,
   interpolate,
-  type SharedValue,
   useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
@@ -23,6 +22,7 @@ import Svg, {
   RadialGradient,
   Stop,
 } from "react-native-svg";
+import { viewBoxX } from "./frame";
 import { type Body, bodyGeometry, type Ground, needsAssist } from "./geometry";
 
 export type CarProps = {
@@ -39,8 +39,12 @@ export type CarProps = {
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
 
 const BLINK_MS = 1600;
-const PUFF_MS = 2700;
-const PUFF_GAP_MS = 900;
+/** Vapor from the design board: 6 puffs, one every 0.45 s, each 2.8–3.5 s. */
+const PUFFS = [0, 1, 2, 3, 4, 5];
+const PUFF_GAP_MS = 450;
+const puffMs = (k: number) => 2800 + (k % 3) * 350;
+/** Puff sprite radius; the animation scales it from 4 to 34. */
+const PUFF_R = 34;
 const AMBER = "#FFB547";
 
 function Gradients() {
@@ -167,64 +171,64 @@ function EngineOn({ g }: { g: ReturnType<typeof bodyGeometry> }) {
 }
 
 /**
- * Exhaust puffs as plain animated Views over the SVG (SVG animated props did not render on device):
- * every 0.9 s a puff leaves the tailpipe, rises, grows 4 → 22 and fades. Off under Reduce Motion.
+ * Exhaust vapor as animated Views over the SVG (SVG animated props did not render on device). Each puff
+ * is a static radial-gradient sprite moved and scaled by Reanimated; the gradient's soft edge stands in
+ * for the board's blur + noise filter (no Skia). Off under Reduce Motion.
  */
 function Puffs({ from, scale }: { from: Point; scale: number }) {
   const reduced = useReducedMotion();
-  const p0 = useSharedValue(0);
-  const p1 = useSharedValue(0);
-  const p2 = useSharedValue(0);
-  useEffect(() => {
-    if (reduced) return;
-    [p0, p1, p2].forEach((p, k) => {
-      p.value = withDelay(
-        k * PUFF_GAP_MS,
-        withRepeat(withTiming(1, { duration: PUFF_MS, easing: Easing.linear }), -1),
-      );
-    });
-  }, [reduced, p0, p1, p2]);
   if (reduced || scale === 0) return null;
   return (
     <>
-      {[p0, p1, p2].map((p, k) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: three fixed puffs
-        <Puff key={k} from={from} k={k} progress={p} scale={scale} />
+      {PUFFS.map((k) => (
+        <Puff key={k} from={from} k={k} scale={scale} />
       ))}
     </>
   );
 }
 
-function Puff({
-  from,
-  k,
-  progress,
-  scale,
-}: {
-  from: Point;
-  k: number;
-  progress: SharedValue<number>;
-  scale: number;
-}) {
+function Puff({ from, k, scale }: { from: Point; k: number; scale: number }) {
+  const p = useSharedValue(0);
+  useEffect(() => {
+    p.value = withDelay(
+      k * PUFF_GAP_MS,
+      withRepeat(withTiming(1, { duration: puffMs(k), easing: Easing.linear }), -1),
+    );
+  }, [k, p]);
+  const j = (k * 7) % 5;
+  const xs = [from.x, from.x - 10 - j, from.x - 32 - 3 * j, from.x - 58 - 4 * j];
+  const ys = [from.y, from.y - 6, from.y - 30 - 3 * j, from.y - 64 - 4 * j];
   const style = useAnimatedStyle(() => {
-    const p = progress.value;
-    const x = interpolate(p, [0, 0.5, 1], [from.x, from.x - 30 - k * 4, from.x - 70 - k * 6]);
-    const y = interpolate(p, [0, 0.5, 1], [from.y, from.y - 14, from.y - 40 - k * 4]);
-    const r = interpolate(p, [0, 0.5, 1], [4, 12, 22]);
+    const t = [0, 0.2, 0.6, 1];
+    const x = interpolate(p.value, t, xs);
+    const y = interpolate(p.value, t, ys);
+    const r = interpolate(p.value, t, [4, 12, 22, 34]);
     return {
-      opacity: interpolate(p, [0, 0.5, 1], [0, 0.42, 0]),
-      left: (x - r) * scale,
-      top: (y - r) * scale,
-      width: 2 * r * scale,
-      height: 2 * r * scale,
-      borderRadius: r * scale,
+      opacity: interpolate(p.value, [0, 0.12, 0.5, 1], [0, 0.85, 0.5, 0]),
+      transform: [
+        { translateX: (x - PUFF_R) * scale },
+        { translateY: (y - PUFF_R) * scale },
+        { scale: r / PUFF_R },
+      ],
     };
   });
+  const size = 2 * PUFF_R * scale;
   return (
     <Animated.View
       pointerEvents="none"
-      style={[{ position: "absolute", backgroundColor: "#C9CED4" }, style]}
-    />
+      style={[{ position: "absolute", left: 0, top: 0, width: size, height: size }, style]}
+    >
+      <Svg width={size} height={size} viewBox={`0 0 ${2 * PUFF_R} ${2 * PUFF_R}`}>
+        <Defs>
+          <RadialGradient id="puff" cx="50%" cy="50%" r="50%">
+            <Stop offset="0" stopColor="#E4E8EC" stopOpacity={0.7} />
+            <Stop offset="0.5" stopColor="#C9CED4" stopOpacity={0.3} />
+            <Stop offset="1" stopColor="#C9CED4" stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={PUFF_R} cy={PUFF_R} r={PUFF_R} fill="url(#puff)" />
+      </Svg>
+    </Animated.View>
   );
 }
 
@@ -239,6 +243,7 @@ function CarImpl({
   label,
 }: CarProps) {
   const g = bodyGeometry(body);
+  const vbx = viewBoxX(body);
   const [scale, setScale] = useState(0);
   const s = g.profile;
   const light = ground === "light";
@@ -254,7 +259,7 @@ function CarImpl({
       style={{ width: "100%", aspectRatio: 720 / 280 }}
       onLayout={(e) => setScale(e.nativeEvent.layout.width / 720)}
     >
-      <Svg width="100%" height="100%" viewBox="0 0 720 280">
+      <Svg width="100%" height="100%" viewBox={`${vbx} 0 720 280`} style={{ overflow: "visible" }}>
         <Gradients />
         {look === "shaded" ? (
           <G>
@@ -351,7 +356,9 @@ function CarImpl({
           </G>
         )}
       </Svg>
-      {engine && look === "shaded" ? <Puffs from={g.exhaust} scale={scale} /> : null}
+      {engine && look === "shaded" ? (
+        <Puffs from={{ x: g.exhaust.x - vbx, y: g.exhaust.y }} scale={scale} />
+      ) : null}
     </View>
   );
 }

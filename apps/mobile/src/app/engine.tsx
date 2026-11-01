@@ -94,7 +94,9 @@ export default function Engine() {
   const toast = useToast();
 
   const engine = car ? engineState(car.engine, now) : ({ running: false } as const);
-  const starts = car?.startsLeft ?? 0;
+  // Unknown count (live, until verified): hide the row and let the car's TCU enforce its limit.
+  const startsKnown = car?.startsLeft != null;
+  const starts = car?.startsLeft ?? MAX_STARTS;
   const pending =
     inFlight(cmd) && (cmd.kind === "start" || cmd.kind === "extend" || cmd.kind === "stop");
   const starting = pending && cmd.kind === "start";
@@ -180,7 +182,8 @@ export default function Engine() {
             {engine.running ? (
               <Digits value={big} style={{ ...textStyle("hero"), lineHeight: 66, color: c.fg }} />
             ) : (
-              <Text style={{ ...textStyle("title"), lineHeight: 44 }}>{big}</Text>
+              // Room for stacked Vietnamese marks (ổ, ẩ) that 44 cut off.
+              <Text style={{ ...textStyle("title"), lineHeight: 54 }}>{big}</Text>
             )}
           </Appear>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -253,36 +256,38 @@ export default function Engine() {
         />
       </View>
 
-      <View
-        accessible
-        accessibilityLabel={t.startsAria(starts, MAX_STARTS)}
-        style={{
-          marginTop: 16,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <KeyIcon size={16} color={c.fg2} />
-          <Text variant="caption" color="fg2">
-            {t.startsLeft(starts)}
-          </Text>
+      {startsKnown ? (
+        <View
+          accessible
+          accessibilityLabel={t.startsAria(starts, MAX_STARTS)}
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <KeyIcon size={16} color={c.fg2} />
+            <Text variant="caption" color="fg2">
+              {t.startsLeft(starts)}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            {Array.from({ length: MAX_STARTS }, (_, i) => i + 1).map((n) => (
+              <View
+                key={n}
+                style={{
+                  width: 24,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: starts >= n ? c.acc : c.s2,
+                }}
+              />
+            ))}
+          </View>
         </View>
-        <View style={{ flexDirection: "row", gap: 6 }}>
-          {Array.from({ length: MAX_STARTS }, (_, i) => i + 1).map((n) => (
-            <View
-              key={n}
-              style={{
-                width: 24,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: starts >= n ? c.acc : c.s2,
-              }}
-            />
-          ))}
-        </View>
-      </View>
+      ) : null}
 
       <View style={{ flex: 1 }} />
 

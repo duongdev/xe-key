@@ -3,9 +3,12 @@ const SIDES: Side[] = ["fl", "fr", "rl", "rr"];
 
 export type Body = {
   doorsLocked: boolean;
-  doorsOpen: Record<Side, boolean>;
-  /** How far each window is open, in cm (0 = shut). */
-  windowsCm: Record<Side, number>;
+  /** Null when the car reports doors only as a whole (Honda). */
+  doorsOpen: Record<Side, boolean> | null;
+  /** Some door is open, side unknown. */
+  anyDoorOpen?: boolean;
+  /** How far each window is open, in cm (0 = shut); null when not reported. */
+  windowsCm: Record<Side, number> | null;
   trunkOpen: boolean;
   hoodOpen: boolean;
 };
@@ -23,20 +26,22 @@ export type Row = { part: "doors" | "windows" | "trunk" | "hood"; tone: Tone; va
 /** Top-down diagram: each side is ok, has an open window (warn), or an open door (open). */
 export function bodyParts(b: Body) {
   const sides = Object.fromEntries(
-    SIDES.map((s) => [s, b.doorsOpen[s] ? "open" : b.windowsCm[s] > 0 ? "warn" : "ok"]),
+    SIDES.map((s) => [s, b.doorsOpen?.[s] ? "open" : (b.windowsCm?.[s] ?? 0) > 0 ? "warn" : "ok"]),
   ) as Record<Side, "ok" | "warn" | "open">;
 
-  const openDoors = SIDES.filter((s) => b.doorsOpen[s]);
-  const openWindows = SIDES.filter((s) => b.windowsCm[s] > 0);
+  const openDoors = SIDES.filter((s) => b.doorsOpen?.[s]);
+  const openWindows = SIDES.filter((s) => (b.windowsCm?.[s] ?? 0) > 0);
 
   const doors: Row =
     openDoors.length > 0
       ? { part: "doors", tone: "warn", value: { kind: "open", sides: openDoors } }
-      : {
-          part: "doors",
-          tone: b.doorsLocked ? "ok" : "warn",
-          value: { kind: b.doorsLocked ? "locked" : "unlocked" },
-        };
+      : b.anyDoorOpen
+        ? { part: "doors", tone: "warn", value: { kind: "open" } }
+        : {
+            part: "doors",
+            tone: b.doorsLocked ? "ok" : "warn",
+            value: { kind: b.doorsLocked ? "locked" : "unlocked" },
+          };
   const first = openWindows[0];
   const windows: Row = !first
     ? { part: "windows", tone: "ok", value: { kind: "closed" } }
@@ -44,7 +49,7 @@ export function bodyParts(b: Body) {
       ? {
           part: "windows",
           tone: "warn",
-          value: { kind: "window", side: first, cm: b.windowsCm[first] },
+          value: { kind: "window", side: first, cm: b.windowsCm?.[first] ?? 0 },
         }
       : { part: "windows", tone: "warn", value: { kind: "windows", count: openWindows.length } };
   const shut = (part: "trunk" | "hood", open: boolean): Row => ({
@@ -53,6 +58,11 @@ export function bodyParts(b: Body) {
     value: { kind: open ? "open" : "closed" },
   });
 
-  const rows = [doors, windows, shut("trunk", b.trunkOpen), shut("hood", b.hoodOpen)];
+  const rows = [
+    doors,
+    ...(b.windowsCm ? [windows] : []),
+    shut("trunk", b.trunkOpen),
+    shut("hood", b.hoodOpen),
+  ];
   return { sides, rows, attention: rows.some((r) => r.tone === "warn") };
 }

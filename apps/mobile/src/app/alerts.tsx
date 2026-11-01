@@ -11,17 +11,19 @@ import {
   TrashIcon,
   WarningIcon,
   WrenchIcon,
+  XCircleIcon,
 } from "phosphor-react-native";
 import { useRef } from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { Pressable, SectionList, View } from "react-native";
 import Swipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
 import type { AlertKind, CarAlert, CarStatus } from "../services/car";
-import { CAR_KEY, carService } from "../services/query";
+import { CAR_KEY, carService, useRefreshOnFocus } from "../services/query";
 import { haptics } from "../theme/haptics";
 import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { Shimmer } from "../ui/appear";
 import { EmptyState } from "../ui/empty-state";
 import { PageHeader } from "../ui/page-header";
 import { Screen } from "../ui/screen";
@@ -38,6 +40,8 @@ const KINDS: Record<AlertKind, { icon: typeof LockIcon; tone: "acc" | "warn" | "
   zone: { icon: MapPinIcon, tone: "acc" },
   service: { icon: WrenchIcon, tone: "warn" },
   renew: { icon: CalendarIcon, tone: "fg2" },
+  command: { icon: CheckCircleIcon, tone: "acc" },
+  diagnosis: { icon: WarningIcon, tone: "warn" },
 };
 
 function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert) => void }) {
@@ -45,15 +49,24 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
   const t = useT();
   const time = useFormatTime();
   const swipe = useRef<SwipeableMethods>(null);
-  const { icon: Icon, tone } = KINDS[alert.kind];
+  const failed = alert.kind === "command" && alert.ok === false;
+  const { icon: Icon, tone } = failed
+    ? { icon: XCircleIcon, tone: "error" as const }
+    : KINDS[alert.kind];
   const color = c[tone];
-  const title = t.alertText[alert.kind](alert.n);
+  // Honda's alerts carry their own words; ours use the dictionary.
+  const title =
+    alert.title ||
+    (alert.kind in t.alertText ? t.alertText[alert.kind as keyof typeof t.alertText](alert.n) : "");
   const start = new Date();
   start.setHours(0, 0, 0, 0);
+  const d = new Date(alert.at);
   const when =
     alert.at >= start.getTime()
       ? time(alert.at)
-      : (t.weekdaysShort[new Date(alert.at).getDay()] ?? "");
+      : alert.at >= start.getTime() - 6 * 86_400_000
+        ? `${t.weekdaysShort[d.getDay()] ?? ""} ${time(alert.at)}`
+        : `${d.getDate()}/${d.getMonth() + 1} ${time(alert.at)}`;
 
   return (
     <Swipeable
@@ -84,7 +97,7 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
     >
       <View
         accessible
-        accessibilityLabel={`${title}, ${when}`}
+        accessibilityLabel={[title, alert.text, when].filter(Boolean).join(", ")}
         accessibilityActions={[{ name: "delete", label: t.delete }]}
         onAccessibilityAction={(e) => e.nativeEvent.actionName === "delete" && onDelete(alert)}
         style={{
@@ -108,9 +121,16 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
         >
           <Icon size={20} color={color} />
         </View>
-        <Text variant="label" weight={alert.unread ? 700 : 500} style={{ flex: 1 }}>
-          {title}
-        </Text>
+        <View style={{ flex: 1, gap: 2, paddingVertical: alert.text ? 12 : 0 }}>
+          <Text variant="label" weight={alert.unread ? 700 : 500} numberOfLines={1}>
+            {title}
+          </Text>
+          {alert.text && alert.text !== title ? (
+            <Text variant="caption" color="fg2" numberOfLines={2} style={{ fontSize: 14 }}>
+              {alert.text}
+            </Text>
+          ) : null}
+        </View>
         <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
           {when}
         </Text>
@@ -130,12 +150,29 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
   );
 }
 
+/** First-load placeholder shaped like an alert row. */
+function SkeletonRow({ wide }: { wide: boolean }) {
+  const { c } = useTheme();
+  const bar = { height: 12, borderRadius: 6, backgroundColor: c.s1 };
+  return (
+    <View style={{ minHeight: 68, flexDirection: "row", alignItems: "center", gap: 14 }}>
+      <Shimmer style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.s1 }} />
+      <View style={{ flex: 1, gap: 8 }}>
+        <Shimmer style={{ ...bar, width: wide ? "70%" : "50%" }} />
+        <Shimmer style={{ ...bar, width: "30%" }} />
+      </View>
+      <Shimmer style={{ ...bar, width: 56 }} />
+    </View>
+  );
+}
+
 export default function Alerts() {
   const { c } = useTheme();
   const t = useT();
   const toast = useToast();
   const qc = useQueryClient();
-  const { data, isPending, isError, refetch } = useQuery({
+  useRefreshOnFocus(KEY);
+  const { data, isPending, isError, isRefetching, refetch } = useQuery({
     queryKey: KEY,
     queryFn: () => carService.alerts(),
   });
@@ -180,8 +217,11 @@ export default function Alerts() {
   const body = (() => {
     if (isPending)
       return (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator color={c.fg2} />
+        <View accessibilityLabel={t.loading} style={{ paddingTop: 14 }}>
+          {[true, false, true, true, false, true].map((wide, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder rows
+            <SkeletonRow key={i} wide={wide} />
+          ))}
         </View>
       );
     if (isError || !data)
@@ -203,34 +243,39 @@ export default function Alerts() {
           title={t.allQuiet}
         />
       );
+    // Honda keeps hundreds of alerts with no paging: a virtualized list keeps scrolling smooth.
     return (
-      <ScrollView
+      <SectionList
         style={{ flex: 1, marginHorizontal: -20 }}
         contentContainerStyle={{ paddingBottom: 24 }}
-      >
-        {[
-          { key: "today", label: t.today, list: today },
-          { key: "earlier", label: t.earlier, list: earlier },
-        ]
-          .filter((g) => g.list.length)
-          .map((g) => (
-            <View key={g.key}>
-              <Text
-                variant="caption"
-                weight={600}
-                color="fg2"
-                style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 6 }}
-              >
-                {g.label}
-              </Text>
-              {g.list.map((a) => (
-                <View key={a.id}>
-                  <AlertRow alert={a} onDelete={remove} />
-                </View>
-              ))}
-            </View>
-          ))}
-      </ScrollView>
+        sections={[
+          { key: "today", title: t.today, data: today },
+          { key: "earlier", title: t.earlier, data: earlier },
+        ].filter((g) => g.data.length)}
+        keyExtractor={(a) => a.id}
+        renderItem={({ item }) => <AlertRow alert={item} onDelete={remove} />}
+        renderSectionHeader={({ section }) => (
+          <Text
+            variant="caption"
+            weight={600}
+            color="fg2"
+            style={{
+              paddingHorizontal: 20,
+              paddingTop: 14,
+              paddingBottom: 6,
+              backgroundColor: c.bg,
+            }}
+          >
+            {section.title}
+          </Text>
+        )}
+        stickySectionHeadersEnabled={false}
+        initialNumToRender={14}
+        windowSize={7}
+        removeClippedSubviews
+        refreshing={isRefetching}
+        onRefresh={() => refetch()}
+      />
     );
   })();
 
