@@ -20,6 +20,7 @@ const mockService: Pick<CarService, "alerts" | "deleteAlert"> = {
 };
 jest.mock("./services/query", () => ({
   CAR_KEY: ["car"],
+  ALERTS_KEY: ["alerts"],
   useRefreshOnFocus: () => {},
   get carService() {
     return mockService;

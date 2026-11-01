@@ -16,7 +16,7 @@ import { randomUUID } from "expo-crypto";
 import { Platform } from "react-native";
 import type { AuthService, FoundCar } from "./auth";
 import { bodyFor, codeError, hondaUsername, paintFor, signInError } from "./honda-map";
-import { keychainCookies, loadCookies, secret } from "./secret";
+import { keychainCookies, loadCookies, secret, password as storedPassword } from "./secret";
 
 // iOS fetch keeps its own shared cookie jar; omit it so only our Keychain jar holds the session (ADR 0008).
 const omitFetch = (url: string, init: RequestInit) => fetch(url, { ...init, credentials: "omit" });
@@ -39,7 +39,7 @@ let pending: { region: Region; phone: string; password: string } | null = null;
 async function saveCredentials(p: NonNullable<typeof pending>) {
   await secret.set("region", p.region);
   await secret.set("phone", p.phone);
-  await secret.set("password", p.password);
+  await storedPassword.set(p.password);
 }
 
 async function signInWith(h: HondaHttp, phone: string, password: string) {
@@ -58,10 +58,11 @@ async function current(): Promise<HondaHttp | null> {
 
 /** Signs in again with the stored password (ADR 0005). False when that fails too. */
 async function relogin(): Promise<boolean> {
+  // Face ID cancelled or failed (password guarded by the setting) counts as a failed re-login.
   const [region, phone, password] = await Promise.all([
     secret.get("region"),
     secret.get("phone"),
-    secret.get("password"),
+    storedPassword.get().catch(() => null),
   ]);
   if (!region || !phone || !password) return false;
   http = client(region as Region);
@@ -163,8 +164,9 @@ export const liveAuth: AuthService = {
     http = null;
     pending = null;
     // deviceId and deviceToken stay so the next sign-in needs no SMS code (ADR 0004).
-    await Promise.all(
-      ["region", "phone", "password", "cookies"].map((k) => secret.del(k as "region")),
-    );
+    await Promise.all([
+      ...(["region", "phone", "cookies"] as const).map((k) => secret.del(k)),
+      storedPassword.del(),
+    ]);
   },
 };

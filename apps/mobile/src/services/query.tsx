@@ -53,6 +53,11 @@ const persister = createAsyncStoragePersister({
     }),
 });
 
+/** After a new sign-in: drop any signed-out snapshot so Home loads the car fresh. */
+export function forgetCar() {
+  queryClient.removeQueries({ queryKey: CAR_KEY });
+}
+
 /** Sign-out and lost sessions: forget the car in memory and on disk. */
 export function wipeCache() {
   queryClient.clear();
@@ -83,6 +88,7 @@ export const carService: CarService = {
 const CACHE_VERSION = "5";
 
 export const CAR_KEY = ["car"] as const;
+export const ALERTS_KEY = ["alerts"] as const;
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   return (
@@ -92,13 +98,51 @@ export function QueryProvider({ children }: { children: ReactNode }) {
         persister,
         buster: CACHE_VERSION,
         dehydrateOptions: {
-          shouldDehydrateQuery: (q) => q.queryKey[0] === CAR_KEY[0] && q.state.status === "success",
+          shouldDehydrateQuery: (q) =>
+            q.queryKey[0] === CAR_KEY[0] &&
+            q.state.status === "success" &&
+            (q.state.data as CarStatus | undefined)?.account !== "signed-out",
         },
       }}
     >
       <CarServiceGate>{children}</CarServiceGate>
     </PersistQueryClientProvider>
   );
+}
+
+/** A blank snapshot for the signed-out screen when nothing was cached. */
+const NO_CAR: CarStatus = {
+  model: "",
+  plate: null,
+  doors: "locked",
+  engine: { on: false },
+  startsLeft: null,
+  body: { doorsOpen: null, windowsCm: null, trunkOpen: false, hoodOpen: false },
+  cabinC: null,
+  fuelPct: 0,
+  rangeKm: 0,
+  batteryV: null,
+  odometerKm: null,
+  serviceInKm: null,
+  alerts: 0,
+  updatedAt: 0,
+  account: "ok",
+  can: { lock: false, engine: false },
+};
+
+/**
+ * Car status; a session that cannot be restored (password changed, or the account signed in on
+ * another phone) becomes Home's signed-out state instead of an error, and the disk copy is dropped.
+ */
+async function carStatus(): Promise<CarStatus> {
+  try {
+    return await carService.status();
+  } catch (e) {
+    if (!(e instanceof SignedOut)) throw e;
+    void persister.removeClient();
+    const last = queryClient.getQueryData<CarStatus>(CAR_KEY) ?? NO_CAR;
+    return { ...last, location: undefined, account: "signed-out", signedOutAt: Date.now() };
+  }
 }
 
 /** Refetches the query when a screen comes back into focus and its data is stale. */
@@ -120,7 +164,7 @@ export function useCar() {
   useRefreshOnFocus(CAR_KEY);
   return useQuery({
     queryKey: CAR_KEY,
-    queryFn: () => carService.status(),
+    queryFn: carStatus,
     // While the engine runs the car reports about once a minute anyway: re-read so a stop or
     // extend made elsewhere shows, and the countdown tracks the car. Parked: no polling.
     refetchInterval: (q) => (q.state.data?.engine.on ? 60_000 : false),

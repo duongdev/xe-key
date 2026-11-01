@@ -6,7 +6,7 @@ import {
   BeVietnamPro_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/be-vietnam-pro";
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
@@ -33,7 +33,10 @@ export default function RootLayout() {
   });
 
   // Plays once per cold start, over the first screen.
-  const [launching, setLaunching] = useState(true);
+  // Cold start only, and only into Home: a deep link (Siri, widget, notification) opens its screen
+  // directly. The pathname at first render is the one the app was opened with.
+  const startPath = usePathname();
+  const [launching, setLaunching] = useState(startPath === "/" || startPath === "/home");
   const endLaunch = useCallback(() => setLaunching(false), []);
 
   useEffect(() => {

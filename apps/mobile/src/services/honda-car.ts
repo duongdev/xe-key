@@ -86,7 +86,8 @@ export function toAlerts(raw: Obj): CarAlert[] {
       id: `${str(a.warningType)}:${str(a.oid)}`,
       kind,
       at: num(a.createDate) ?? 0,
-      unread: a.read !== true,
+      // Honda leaves command results unread forever; its badge counts only warning lights.
+      unread: kind === "diagnosis" && a.read !== true,
       title: str(a.name).replace(/_/g, " ").replace(/\s+/g, " ").trim(),
       text,
       ok: kind === "command" ? !FAILED.test(text) : undefined,

@@ -21,6 +21,7 @@ import { maskPhone } from "../../onboarding/phone";
 import { useOnboarding } from "../../onboarding/session";
 import { StepHeader } from "../../onboarding/step-header";
 import type { CodeError } from "../../services/auth";
+import { forgetCar } from "../../services/query";
 import { useAuth } from "../../services/use-auth";
 import { haptics } from "../../theme/haptics";
 import { useReducedMotion } from "../../theme/motion";
@@ -60,6 +61,7 @@ export default function Code() {
     setState("checking");
     const res = await auth.verifyCode(value);
     if (res.ok) {
+      forgetCar();
       setCar(res.car);
       setState("ok");
       haptics.success();

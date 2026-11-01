@@ -19,7 +19,7 @@ import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
 import { resetLiveCar } from "../services/live-car";
 import { useCar, wipeCache } from "../services/query";
-import { secret } from "../services/secret";
+import { password, secret } from "../services/secret";
 import { useAuth } from "../services/use-auth";
 import { haptics } from "../theme/haptics";
 import { radius } from "../theme/tokens";
@@ -145,12 +145,27 @@ export default function Settings() {
       trackColor={{ true: c.acc, false: c.s2 }}
       onValueChange={async (on) => {
         haptics.selection();
+        // The setting also puts the stored Honda password behind Face ID (ADR 0005).
         if (key === "faceId" && on) {
           const res = await LocalAuthentication.authenticateAsync({
             promptMessage: t.faceIdPrompt,
             disableDeviceFallback: true,
           });
-          update({ faceId: res.success });
+          if (!res.success) return;
+          await password
+            .protect(true)
+            .catch((e: unknown) => console.warn("face id: lock failed", e));
+          update({ faceId: true });
+          return;
+        }
+        if (key === "faceId") {
+          // Reading the guarded password asks Face ID: only the owner can turn this off.
+          try {
+            await password.protect(false);
+            update({ faceId: false });
+          } catch {
+            // Face ID cancelled: the setting stays on.
+          }
           return;
         }
         update({ [key]: on } as Partial<Prefs>);

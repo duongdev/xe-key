@@ -22,7 +22,7 @@ import {
   WarningIcon,
   WifiSlashIcon,
 } from "phosphor-react-native";
-import { type ReactNode, useRef, useSyncExternalStore } from "react";
+import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -42,7 +42,7 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
 import type { CarStatus } from "../services/car";
-import { CAR_KEY, carService, useCar } from "../services/query";
+import { ALERTS_KEY, CAR_KEY, carService, useCar } from "../services/query";
 import { useDistance } from "../services/use-distance";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -242,6 +242,11 @@ export default function Home() {
     mutationFn: () => carService.status(),
     onSuccess: (fresh) => qc.setQueryData(CAR_KEY, fresh),
   });
+  // Alerts aren't saved to disk; load them behind Home so the Alerts screen opens with data.
+  const signedIn = !!car;
+  useEffect(() => {
+    if (signedIn) qc.prefetchQuery({ queryKey: ALERTS_KEY, queryFn: () => carService.alerts() });
+  }, [signedIn, qc]);
   const km = useDistance(car?.location);
   const place = car?.location ? (car.location.name ?? t.carSpot) : t.noGps;
   const placeSub = car?.location ? (km !== null ? `${km} km` : car.location.area) : null;

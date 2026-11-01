@@ -19,7 +19,7 @@ import Swipeable, { type SwipeableMethods } from "react-native-gesture-handler/R
 import { useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
 import type { AlertKind, CarAlert, CarStatus } from "../services/car";
-import { CAR_KEY, carService, useRefreshOnFocus } from "../services/query";
+import { CAR_KEY, carService, ALERTS_KEY as KEY, useRefreshOnFocus } from "../services/query";
 import { haptics } from "../theme/haptics";
 import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -30,7 +30,6 @@ import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
 import { useToast } from "../ui/toast";
 
-const KEY = ["alerts"] as const;
 const DELETE_W = 96;
 
 const KINDS: Record<AlertKind, { icon: typeof LockIcon; tone: "acc" | "warn" | "fg2" }> = {

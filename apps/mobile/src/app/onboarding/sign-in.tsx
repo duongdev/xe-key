@@ -19,6 +19,7 @@ import { useOnboarding } from "../../onboarding/session";
 import { StepHeader } from "../../onboarding/step-header";
 import { usePrefs } from "../../prefs";
 import type { SignInError } from "../../services/auth";
+import { forgetCar } from "../../services/query";
 import { useAuth } from "../../services/use-auth";
 import { haptics } from "../../theme/haptics";
 import { iconSize, textStyle } from "../../theme/tokens";
@@ -77,6 +78,7 @@ export default function SignIn() {
     setPhone(national);
     // Already-trusted device: no SMS code, straight to the car.
     if (res.car) {
+      forgetCar();
       setCar(res.car);
       router.push("/onboarding/found");
       return;
