@@ -26,6 +26,9 @@ WORKDIR /app
 COPY --from=build --chown=node:node /repo/apps/landing/.next/standalone ./
 COPY --from=build --chown=node:node /repo/apps/landing/.next/static ./apps/landing/.next/static
 COPY --from=build --chown=node:node /repo/apps/landing/public ./apps/landing/public
+# SQL migrations, applied on start by src/instrumentation.ts (ADR 0009).
+COPY --from=build --chown=node:node /repo/apps/landing/drizzle ./apps/landing/drizzle
+# Runtime secrets come from Dokploy env: DATABASE_URL, TURNSTILE_SECRET_KEY, SIGNING_SECRET, ADMIN_TOKEN.
 USER node
 EXPOSE 3000
 CMD ["node", "apps/landing/server.js"]

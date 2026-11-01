@@ -3,7 +3,7 @@
 import { CheckCircleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { COPY, type Lang } from "../copy";
-import { type Platform, submitSignup } from "../lib/signup";
+import { type Platform, type SubmitError, submitSignup } from "../lib/signup";
 import { CarShapes } from "./car-shapes";
 import { Footer, Nav, NavCta, Tile } from "./chrome";
 import { Features } from "./features";
@@ -19,17 +19,20 @@ export function Landing({ lang, contactEmail }: { lang: Lang; contactEmail: stri
   const [platform, setPlatform] = useState<Platform>("ios");
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
+  const [surveyToken, setSurveyToken] = useState<string | null>(null);
   const t = COPY[lang];
 
-  const submit = async (turnstileToken: string) => {
+  const submit = async (turnstileToken: string): Promise<SubmitError | null> => {
     const res = await submitSignup({
       email: email.trim(),
       platform,
       language: lang,
       turnstileToken,
     });
-    if (res.ok) setDone(true);
-    else console.error("signup submit failed", res.error);
+    if (!res.ok) return res.error;
+    setSurveyToken(res.surveyToken);
+    setDone(true);
+    return null;
   };
 
   const form = (
@@ -52,7 +55,18 @@ export function Landing({ lang, contactEmail }: { lang: Lang; contactEmail: stri
           <Nav lang={lang} path="/" cta={<NavCta>{t.navCta}</NavCta>} />
           <Hero
             t={t}
-            signup={done ? <Registered t={t} email={email.trim()} platform={platform} /> : form}
+            signup={
+              done ? (
+                <Registered
+                  t={t}
+                  email={email.trim()}
+                  platform={platform}
+                  surveyToken={surveyToken}
+                />
+              ) : (
+                form
+              )
+            }
           />
         </div>
         <HoldDemo t={t} />

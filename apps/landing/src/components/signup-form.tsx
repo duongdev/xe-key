@@ -8,7 +8,7 @@ import {
 import { type FormEvent, useRef, useState } from "react";
 import type { Copy, Lang } from "../copy";
 import { isEmail } from "../lib/email";
-import type { Platform } from "../lib/signup";
+import type { Platform, SubmitError } from "../lib/signup";
 import { verifyHuman } from "../lib/turnstile";
 import s from "./signup-form.module.css";
 
@@ -19,8 +19,8 @@ type Props = {
   platform: Platform;
   onEmail: (v: string) => void;
   onPlatform: (p: Platform) => void;
-  /** Runs only with a valid email and a Turnstile token. */
-  onSubmit: (token: string) => Promise<void>;
+  /** Runs only with a valid email and a Turnstile token; resolves to an error to show, or null. */
+  onSubmit: (token: string) => Promise<SubmitError | null>;
 };
 
 const PLATFORMS: [Platform, string][] = [
@@ -29,7 +29,7 @@ const PLATFORMS: [Platform, string][] = [
 ];
 
 export function SignupForm({ t, lang, email, platform, onEmail, onPlatform, onSubmit }: Props) {
-  const [error, setError] = useState<"email" | "verify" | null>(null);
+  const [error, setError] = useState<"email" | SubmitError | null>(null);
   const [busy, setBusy] = useState(false);
   const check = useRef<HTMLDivElement>(null);
   const bad = error === "email";
@@ -44,7 +44,7 @@ export function SignupForm({ t, lang, email, platform, onEmail, onPlatform, onSu
     setError(null);
     setBusy(true);
     try {
-      await onSubmit(await verifyHuman(check.current, lang));
+      setError(await onSubmit(await verifyHuman(check.current, lang)));
     } catch (err) {
       console.error("sign-up check failed", err);
       setError("verify");
@@ -92,7 +92,7 @@ export function SignupForm({ t, lang, email, platform, onEmail, onPlatform, onSu
       {error ? (
         <div className={s.errline} role="alert">
           <WarningCircleIcon size={16} color="var(--error)" aria-hidden />
-          {error === "email" ? t.err : t.verifyErr}
+          {{ email: t.err, verify: t.verifyErr, rate: t.rateErr, server: t.serverErr }[error]}
         </div>
       ) : null}
       <div className={s.note}>

@@ -24,6 +24,11 @@ const config: NextConfig = {
   outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
   transpilePackages: ["@xekey/car"],
   poweredByHeader: false,
+  // Public build-time values, inlined so dynamic routes use the same origin as the prerendered pages.
+  env: {
+    SITE_URL: process.env.SITE_URL ?? "",
+    CONTACT_EMAIL: process.env.CONTACT_EMAIL ?? "",
+  },
   // Two root layouts (VI and EN, ADR 0008) need a global 404.
   experimental: { globalNotFound: true },
   async headers() {

@@ -1,32 +1,39 @@
 import { CheckCircleIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import type { Copy } from "../copy";
-import { type Platform, submitSurvey } from "../lib/signup";
+import { type Platform, type SubmitError, submitSurvey } from "../lib/signup";
+import { CARS, FEATURES } from "../lib/survey-options";
 import s from "./registered.module.css";
 
-const CARS = ["HR-V", "Civic", "City", "CR-V", "BR-V", "Accord", "other"] as const;
-/** Stable ids for `t.likes`, same order. */
-const FEATURES = ["lock", "climate", "find", "status", "trips", "siri-widgets", "sharing"] as const;
 const COPIED_MS = 1800;
 
-type Props = { t: Copy; email: string; platform: Platform };
+/** `surveyToken` is null for a repeat sign-up: no survey then (ADR 0009). */
+type Props = { t: Copy; email: string; platform: Platform; surveyToken: string | null };
 
-export function Registered({ t, email, platform }: Props) {
+export function Registered({ t, email, platform, surveyToken }: Props) {
   const [car, setCar] = useState<number | null>(null);
   const [likes, setLikes] = useState<number[]>([]);
-  const [survey, setSurvey] = useState<"open" | "sent" | "skipped">("open");
+  const [survey, setSurvey] = useState<"open" | "sent" | "skipped">(
+    surveyToken ? "open" : "skipped",
+  );
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<SubmitError | null>(null);
   const [copied, setCopied] = useState(false);
   const copiedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(copiedTimer.current), []);
 
   const send = async () => {
-    const res = await submitSurvey({
-      email,
-      car: car === null ? null : (CARS[car] ?? null),
-      features: likes.map((i) => FEATURES[i] ?? String(i)),
-    });
+    if (!surveyToken || sending) return;
+    setSending(true);
+    setError(null);
+    const pickedCar = car === null ? null : (CARS[car] ?? null);
+    const features = likes.flatMap((i) => FEATURES[i] ?? []);
+    const res = await submitSurvey({ token: surveyToken, car: pickedCar, features });
+    setSending(false);
     if (res.ok) setSurvey("sent");
-    else console.error("survey submit failed", res.error);
+    // The sign-up is stored; an expired survey just closes.
+    else if (res.error === "expired") setSurvey("skipped");
+    else setError(res.error);
   };
 
   const copyLink = async () => {
@@ -115,7 +122,8 @@ export function Registered({ t, email, platform }: Props) {
             <button
               type="button"
               className="go"
-              disabled={car === null && likes.length === 0}
+              disabled={sending || (car === null && likes.length === 0)}
+              aria-busy={sending}
               onClick={send}
             >
               {t.send}
@@ -124,6 +132,11 @@ export function Registered({ t, email, platform }: Props) {
               {t.skip}
             </button>
           </div>
+          {error ? (
+            <p className={s.err} role="alert">
+              {error === "rate" ? t.rateErr : t.serverErr}
+            </p>
+          ) : null}
         </>
       ) : null}
 

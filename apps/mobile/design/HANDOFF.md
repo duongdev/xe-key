@@ -114,7 +114,7 @@ Every screen ships four states: loading, empty, error, populated.
 
 ## Website (landing page)
 
-A separate deliverable from the Expo app (tasks [011](../../../docs/tasks/done/011-landing-page.md), [012](../../../docs/tasks/012-waitlist-storage.md)). Same tokens, font, icons and motion curves as the app.
+A separate deliverable from the Expo app (tasks [011](../../../docs/tasks/done/011-landing-page.md), [012](../../../docs/tasks/done/012-waitlist-storage.md)). Same tokens, font, icons and motion curves as the app.
 
 | Board | What | Notes |
 |---|---|---|
@@ -166,7 +166,7 @@ Grounded in [research/FINDINGS.md](../../../research/FINDINGS.md). Endpoints mar
 - Paint list per model (sample uses six common Honda colours).
 - Does `/remote/*` need `/auth/pin/verify` first? If yes, add a PIN or Face ID step.
 - RN transport for cookies (see [../CLAUDE.md](../CLAUDE.md) gotcha) — needs an ADR.
-- Website: domain, waitlist storage, privacy page, web framework and hosting (ADR in task 011).
+- Website: domain and contact alias; lawyer review of the privacy text (framework, hosting and storage: ADRs 0006, 0008, 0009).
 
 ## Out of scope for v1
 
