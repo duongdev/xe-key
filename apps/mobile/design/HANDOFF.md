@@ -116,13 +116,13 @@ Every screen ships four states: loading, empty, error, populated.
 
 Spec: [Car.dc.html](boards/Car.dc.html); overviews: [Car-gallery](boards/Car-gallery.dc.html), [Car-contrast](boards/Car-contrast.dc.html), [Car-states](boards/Car-states.dc.html). Port to `react-native-svg`; viewBox `0 0 720 280`.
 
-- **Props:** `model` (`crossover` HR-V · `sedan` Civic RS · `city` City · `suv` CR-V · `mpv` BR-V), `look` (`shaded` | `line`; a third user option "Honda photo" uses `/car/image` instead of the drawing), `paint` (hex), `ground` (`dark` | `light`), `assist` (bool), `doors` (`locked` | `unlocked`), `engine` (bool).
+- **Props:** `body` (`crossover` HR-V · `sedan` Civic RS · `city` City · `suv` CR-V · `mpv` BR-V), `look` (`shaded` | `line`; a third user option "Honda photo" uses `/car/image` instead of the drawing), `paint` (hex), `ground` (`dark` | `light`), `assist` (bool), `doors` (`locked` | `unlocked`), `engine` (bool).
 - **Geometry:** the `S` map in `renderVals()` holds per-model profile paths and wheel data (`w`, `wy`, `wr`, `yb`, optional `gap`, `sport`). Wheel arches are generated, not drawn: arch radius = `wr + (gap ?? 8)`, endpoints where the arch circle meets the rocker line `yb`, large-arc flag 1. Keep that function and unit-test it.
 - **Contrast assist:** relative luminance of `paint` (Rec. 709 weights). On dark ground with lum < 0.18 → backlight glow + light rim; on light ground with lum > 0.7 → dark rim + firmer shadow. Pure function, unit-test it.
 - **States:** unlocked → indicators blink twice (1.6 s), then mirror lamps and handles stay amber. Engine on → head/tail light glow, exhaust puffs every 0.9 s from the tailpipe (puffs rise, grow 4 → 22, fade). The board uses SVG SMIL; in RN use Reanimated.
 - **Only confirmed car state changes the picture**, never a pending command.
 
-## API mapping (`@honda/core`)
+## API mapping (`@xekey/core`)
 
 Grounded in [research/FINDINGS.md](../../../research/FINDINGS.md). Endpoints marked "?" are unverified.
 
@@ -148,3 +148,5 @@ Grounded in [research/FINDINGS.md](../../../research/FINDINGS.md). Endpoints mar
 ## Out of scope for v1
 
 Multi-car switcher and shared access (needs our own backend holding the owner's token — security decision first). Boards kept under "Later" for reference.
+
+Push notifications: Honda pushes only to the official app's token, so v1 has none. Alerts are fetched in-app on open and pull-to-refresh; the Quick setup "notifications" toggle is dropped.

@@ -1,13 +1,11 @@
-# @honda/mobile (Expo)
+# @xekey/mobile — Xe Key
 
-The Expo client — not scaffolded yet. Initialize it here:
+Expo app. Runs in Expo Go on the iOS Simulator.
 
 ```bash
-# from repo root
-pnpm create expo apps/mobile
-# then add the shared client:
-pnpm --filter @honda/mobile add @honda/core@workspace:*
+pnpm --filter @xekey/mobile start   # Metro + opens the iOS Simulator
+pnpm --filter @xekey/mobile test
+pnpm --filter @xekey/mobile typecheck
 ```
 
-Consume the API through `@honda/core` (`login`, `HondaHttp`, endpoints) — keep all
-networking/auth logic in the package, not in screens.
+Consume the API through `@xekey/core` — keep all networking/auth logic in the package, not in screens.
