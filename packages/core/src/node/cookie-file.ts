@@ -11,7 +11,8 @@ export function fileCookies(path: string): CookieStore {
     all: jar.all,
     set(name, value) {
       jar.set(name, value);
-      writeFileSync(path, JSON.stringify(jar.all(), null, 2));
+      // mode on create: no window where a new file holds cookies with default (world-readable) perms.
+      writeFileSync(path, JSON.stringify(jar.all(), null, 2), { mode: 0o600 });
       chmodSync(path, 0o600);
     },
   };
