@@ -20,6 +20,8 @@ import { useT } from "../i18n";
 import { useCar } from "../services/query";
 import { iconSize } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { Appear } from "../ui/appear";
+import { BusyRing } from "../ui/busy-ring";
 import { HoldButton } from "../ui/hold-button";
 import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
@@ -63,8 +65,6 @@ export default function Doors() {
         color: c.warn,
         icon: <ActivityIndicator size="small" color={c.warn} />,
       };
-    if (cmd.status === "failed")
-      return { text: t.notReached, color: c.warn, icon: <WarningIcon size={16} color={c.warn} /> };
     return null;
   })();
 
@@ -104,11 +104,15 @@ export default function Doors() {
             justifyContent: "center",
           }}
         >
-          {unlocked ? (
-            <LockOpenIcon size={72} color={c.warn} />
-          ) : (
-            <LockIcon size={72} color={c.fg} />
-          )}
+          {pending ? <BusyRing size={212} stroke={4} retrying={cmd.status === "retrying"} /> : null}
+          {/* Shackle pops into place when the car confirms the new state. */}
+          <Appear kind="pop" play={car?.doors}>
+            {unlocked ? (
+              <LockOpenIcon size={72} color={c.warn} />
+            ) : (
+              <LockIcon size={72} color={c.fg} />
+            )}
+          </Appear>
         </View>
         <View style={{ alignItems: "center", gap: 6 }}>
           <Text variant="title" color={unlocked ? "warn" : "fg"} accessibilityLiveRegion="polite">

@@ -4,12 +4,12 @@ import {
   ArrowsClockwiseIcon,
   BellIcon,
   CaretRightIcon,
-  CheckCircleIcon,
   ClockIcon,
   CrownIcon,
   DeviceMobileIcon,
   GasPumpIcon,
   GaugeIcon,
+  HourglassIcon,
   LockIcon,
   LockOpenIcon,
   NavigationArrowIcon,
@@ -19,7 +19,7 @@ import {
   SlidersHorizontalIcon,
   SnowflakeIcon,
   ThermometerSimpleIcon,
-  WarningCircleIcon,
+  WarningIcon,
   WifiSlashIcon,
 } from "phosphor-react-native";
 import { type ReactNode, useSyncExternalStore } from "react";
@@ -37,6 +37,7 @@ import { Car } from "../car/car";
 import { MAX_RETRIES } from "../car/command";
 import { engineState, clock as formatClock } from "../car/engine";
 import { freshness } from "../car/freshness";
+import type { Side } from "../car/status";
 import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
@@ -44,10 +45,16 @@ import type { CarStatus } from "../services/car";
 import { CAR_KEY, carService, useCar } from "../services/query";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { Appear, Shimmer } from "../ui/appear";
+import { Banner } from "../ui/banner";
 import { Button } from "../ui/button";
+import { Digits } from "../ui/digits";
 import { HoldButton } from "../ui/hold-button";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
+
+/** No fresh report for this long = the car has gone to sleep. */
+const ASLEEP_MIN = 30;
 
 const useOnline = () =>
   useSyncExternalStore(
@@ -84,9 +91,16 @@ function Chip({
       }}
     >
       {icon}
-      <Text variant="caption" weight={500} style={{ fontSize: 14, color: color ?? c.fg }}>
-        {text}
-      </Text>
+      {/\d:\d\d$/.test(text) ? (
+        <Digits
+          value={text}
+          style={{ ...textStyle("caption", 500), fontSize: 14, color: color ?? c.fg }}
+        />
+      ) : (
+        <Text variant="caption" weight={500} style={{ fontSize: 14, color: color ?? c.fg }}>
+          {text}
+        </Text>
+      )}
       {after}
     </View>
   );
@@ -111,7 +125,7 @@ function Chip({
 
 function Skeleton({ w, h = 22 }: { w: number | `${number}%`; h?: number }) {
   const { c } = useTheme();
-  return <View style={{ width: w, height: h, borderRadius: 6, backgroundColor: c.s2 }} />;
+  return <Shimmer style={{ width: w, height: h, borderRadius: 6, backgroundColor: c.s2 }} />;
 }
 
 function MiniMap() {
@@ -275,41 +289,58 @@ export default function Home() {
         ? t.lock
         : t.holdToUnlock;
 
+  const openWindows = car
+    ? (Object.entries(car.body.windowsCm) as [Side, number][]).filter(([, cm]) => cm > 0)
+    : [];
+  const [firstSide, firstCm] = openWindows[0] ?? ["fl", 0];
+  const asleepMin = car && !wake.isPending ? Math.floor((now - car.updatedAt) / 60_000) : 0;
+  // Offline is about the phone: top. Car conditions (orange) sit with the car data, under location.
+  const offlineBanner = !online ? (
+    <Banner
+      key="offline"
+      tone="neutral"
+      icon={<WifiSlashIcon size={iconSize.sm} color={c.fg2} />}
+      text={t.offline}
+      trailing={<ActivityIndicator size="small" color={c.fg2} />}
+    />
+  ) : null;
+  const carBanners = [
+    online && openWindows.length > 0 && (
+      <Banner
+        key="window"
+        tone="warn"
+        icon={<WarningIcon size={iconSize.sm} color={c.warn} />}
+        text={
+          openWindows.length === 1
+            ? `${t.window} · ${t.windowOpen(t.sideNames[firstSide], firstCm)}`
+            : `${t.windows} · ${t.windowsOpen(openWindows.length)}`
+        }
+        onPress={() => router.push("/status")}
+      />
+    ),
+    online && !expired && asleepMin >= ASLEEP_MIN && (
+      <Banner
+        key="asleep"
+        tone="warn"
+        icon={<HourglassIcon size={iconSize.sm} color={c.warn} />}
+        text={t.carAsleep(asleepMin)}
+        action={{ label: t.wake, onPress: () => wake.mutate() }}
+      />
+    ),
+  ].filter(Boolean);
+
   const statusLine = (() => {
     if (cmd.status === "sent") return { text: t.sending, spin: true };
     if (cmd.status === "accepted") return { text: t.acceptedWaiting, spin: true };
     if (cmd.status === "retrying")
       return { text: t.retrying(cmd.attempt, MAX_RETRIES), spin: true, warn: true };
-    if (cmd.status === "confirmed")
-      return { text: cmd.kind === "unlock" ? t.unlocked : t.locked, done: true };
-    if (cmd.status === "failed") return { text: t.notReached, failed: true };
     if (!car && isPending) return { text: t.connecting, spin: true };
     return null;
   })();
 
   return page(
     <>
-      {!online ? (
-        <View
-          accessibilityRole="alert"
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-            paddingVertical: 10,
-            paddingHorizontal: 14,
-            borderRadius: 16,
-            backgroundColor: c.s1,
-            marginBottom: 12,
-          }}
-        >
-          <WifiSlashIcon size={iconSize.sm} color={c.warn} />
-          <Text variant="label" style={{ flex: 1 }}>
-            {t.offline}
-          </Text>
-          <ActivityIndicator size="small" color={c.fg2} />
-        </View>
-      ) : null}
+      {offlineBanner ? <View style={{ marginBottom: 12 }}>{offlineBanner}</View> : null}
 
       <ScrollView
         style={{ flex: 1, marginHorizontal: -space.gutter }}
@@ -425,14 +456,17 @@ export default function Home() {
             opacity: loading ? 0.35 : online ? 1 : 0.55,
           }}
         >
-          <Car
-            body={body}
-            look={look === "line" ? "line" : "shaded"}
-            paint={loading ? "#3A3A40" : paint}
-            ground={scheme}
-            doors={unlocked ? "unlocked" : "locked"}
-            engine={engineOn}
-          />
+          {/* Car answers: settles in from the left whenever the car reports (wake or confirm). */}
+          <Appear kind="settle-left" play={car?.updatedAt}>
+            <Car
+              body={body}
+              look={look === "line" ? "line" : "shaded"}
+              paint={loading ? "#3A3A40" : paint}
+              ground={scheme}
+              doors={unlocked ? "unlocked" : "locked"}
+              engine={engineOn}
+            />
+          </Appear>
         </View>
 
         <View
@@ -455,19 +489,23 @@ export default function Home() {
               {loading || wake.isPending ? (
                 <Skeleton w={48} />
               ) : (
-                <Text variant="stat" style={{ fontSize: 22 }}>{`${car?.fuelPct}%`}</Text>
+                <Appear kind="rise" index={0}>
+                  <Text variant="stat" style={{ fontSize: 22 }}>{`${car?.fuelPct}%`}</Text>
+                </Appear>
               )}
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               {loading || wake.isPending ? (
                 <Skeleton w={64} />
               ) : (
-                <Text variant="stat" style={{ fontSize: 22 }}>
-                  {car?.rangeKm}
-                  <Text variant="caption" weight={500} color="fg2" style={{ fontSize: 14 }}>
-                    {" km"}
+                <Appear kind="rise" index={1}>
+                  <Text variant="stat" style={{ fontSize: 22 }}>
+                    {car?.rangeKm}
+                    <Text variant="caption" weight={500} color="fg2" style={{ fontSize: 14 }}>
+                      {" km"}
+                    </Text>
                   </Text>
-                </Text>
+                </Appear>
               )}
               <RoadHorizonIcon size={iconSize.sm} color={c.fg2} />
             </View>
@@ -509,7 +547,7 @@ export default function Home() {
                 <Skeleton w="40%" h={12} />
               </>
             ) : (
-              <>
+              <Appear kind="rise" index={2}>
                 <Text variant="label">{car?.location?.name ?? t.noGps}</Text>
                 {car?.location ? (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
@@ -517,11 +555,12 @@ export default function Home() {
                     <Text variant="caption" color="fg2">{`${car.location.distanceKm} km`}</Text>
                   </View>
                 ) : null}
-              </>
+              </Appear>
             )}
           </View>
           <CaretRightIcon size={iconSize.sm} color={c.fg2} />
         </Pressable>
+        {carBanners.length ? <View style={{ gap: 8, marginTop: 12 }}>{carBanners}</View> : null}
       </ScrollView>
 
       <View
@@ -536,24 +575,14 @@ export default function Home() {
         {statusLine?.spin ? (
           <ActivityIndicator size="small" color={statusLine.warn ? c.warn : c.fg2} />
         ) : null}
-        {statusLine?.done ? <CheckCircleIcon size={14} color={c.acc} weight="fill" /> : null}
-        {statusLine?.failed ? <WarningCircleIcon size={14} color={c.warn} /> : null}
         {statusLine ? (
           <Text
             variant="caption"
-            color={statusLine.warn || statusLine.failed ? "warn" : "fg2"}
+            color={statusLine.warn ? "warn" : "fg2"}
             accessibilityLiveRegion="polite"
           >
             {statusLine.text}
           </Text>
-        ) : null}
-        {/* Physical commands (unlock, start) are never resent by a tap; the user holds again. */}
-        {statusLine?.failed && cmd.status === "failed" && cmd.kind === "lock" ? (
-          <Pressable accessibilityRole="button" hitSlop={12} onPress={() => send(cmd.kind)}>
-            <Text variant="caption" weight={600} color="acc">
-              {`· ${t.tryAgain}`}
-            </Text>
-          </Pressable>
         ) : null}
       </View>
 
@@ -636,9 +665,16 @@ export default function Home() {
             ) : (
               <SnowflakeIcon size={iconSize.md} color={c.acc} />
             )}
-            <Text weight={600} style={{ fontSize: 16 }}>
-              {engineOn ? clock : t.start}
-            </Text>
+            {engineOn ? (
+              <Digits
+                value={clock}
+                style={{ ...textStyle("body", 600), fontSize: 16, color: c.fg }}
+              />
+            ) : (
+              <Text weight={600} style={{ fontSize: 16 }}>
+                {t.start}
+              </Text>
+            )}
           </Pressable>
         </View>
       )}

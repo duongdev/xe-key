@@ -11,7 +11,7 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `src/services/car.ts` — `CarService` (status, wake, command with progress events); `mock-car.ts` implements it with dev scenarios (asleep, unreachable, slow, signed-out, expired); `query.tsx` = TanStack Query client persisted to AsyncStorage, NetInfo-driven online state, `useCar()`.
 - `src/car/status.ts` (pure: body → top-down diagram tones + rows), `trips.ts` (pure: 7-day bars, totals).
 - `src/i18n/format.ts` — `formatTime` (pure, tested) + `useFormatTime()` following the Format setting or the device.
-- `src/ui/` also has `page-header.tsx` (back + large title + pill), `empty-state.tsx`, `toast.tsx` (minimal, 009 extends), `pick.ios.ts`/`pick.ts` (option picker).
+- `src/ui/` also has `page-header.tsx` (back + large title + pill), `empty-state.tsx`, `toast.tsx` (result toasts; queue logic in `toast-queue.ts`), `banner.tsx` (ongoing conditions), `appear.tsx` (`Appear` rise/pop/settle-left, `Shimmer`, `Spin`), `busy-ring.tsx`, `launch.tsx`, `pick.ios.ts`/`pick.ts` (option picker).
 - `src/car/engine.ts` — pure engine session (countdown, ring fraction, auto-off, extend vs reminder); `reminder.ts` = local notification 1 min before auto-off (asks permission only when used).
 - `src/ui/segmented-slider.tsx` — named stops on a `ScrubRail` (style, AC level).
 - `src/car/command.ts` — pure command reducer (CONTEXT.md › Commands); `use-command.ts` runs one command at a time and writes the confirmed snapshot to the cache.
@@ -34,6 +34,8 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - Stack: Expo Router; TanStack Query for car data; command lifecycle as a pure reducer (states per `CONTEXT.md › Commands`); `react-native-gesture-handler` + Reanimated for gestures; own typed EN/VI dictionary + `expo-localization`. Settings: Language (System/EN/VI) and Format (System/24h/12h); units fixed metric.
 - Device installs: free Apple ID, dev build over cable (`expo run:ios --device`), re-sign every 7 days. Siri/widgets need App Groups, so they wait for the paid account.
 - Testing: one runner in this package — `jest-expo` for pure logic and React Native Testing Library component tests (see `docs/conventions/tdd.md`). Core and CLI stay on Vitest.
+- Toast = result of the user's action (confirmed/failed command, undo); banner = ongoing condition (offline at top; car conditions under the location card). `useCommand` shows the result toast; screens show only pending steps.
+- Every animation goes through `Appear`/`useTiming`/`useReducedMotion` so Reduce Motion becomes a 150 ms fade; the hold fill is the only exception.
 - Haptics: one per user action, only on change — selection for discrete value changes, light on Button press, medium when a hold arms, success/warning for final results only. Native controls (Switch, keyboard) bring their own; background retries stay silent. See `src/theme/haptics.ts`.
 - Text inputs stay mounted on error (overlay error views): removing a password field makes iOS offer "Save Password".
 - Add deps with `npx expo install` (SDK-matched versions). Decisions: [ADR 0002](../../docs/adr/0002-expo-reanimated-phosphor.md).
@@ -42,6 +44,8 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). How RN reads `Set-Cookie` is settled by a spike in 005.
 - deviceId and stored credentials live in the Keychain ([ADR 0004](../../docs/adr/0004-keychain-device-id.md), [ADR 0005](../../docs/adr/0005-keychain-password-relogin.md)).
 - This package pins `typescript ~6.0` (Expo range); the repo root uses 7.
+- Be Vietnam Pro ignores `fontVariant: tabular-nums` on iOS: use `Digits` for any changing number (timers).
+- Reanimated reads Reduce Motion once at app start; restart the app after toggling it.
 - Native `Switch` draws at the top of its box in a centred row; wrap it in a `height: 31` view.
 - Never put tests (or any non-route file) under `src/app/`: Expo Router bundles every file there. Screen tests live in `src/*.test.tsx`.
 - RNTL 14: `render` and `fireEvent` are async — always `await` them, or later tests render nothing (overlapping `act`).

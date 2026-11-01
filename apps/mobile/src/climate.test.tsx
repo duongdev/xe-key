@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import type { CarService, CarStatus } from "./services/car";
+import { ToastProvider } from "./ui/toast";
 
 jest.mock("expo-router", () => ({ router: { back: jest.fn() } }));
 jest.mock("expo-notifications", () => ({}));
@@ -82,7 +83,9 @@ async function renderEngine() {
   await render(
     <GestureHandlerRootView>
       <QueryClientProvider client={client}>
-        <Engine />
+        <ToastProvider>
+          <Engine />
+        </ToastProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>,
   );
@@ -110,6 +113,6 @@ describe("Climate", () => {
     });
     await act(async () => mockFinish?.());
     expect(screen.getByText("1 left")).toBeOnTheScreen();
-    expect(screen.getByText(/^\d{1,2}:\d\d$/)).toBeOnTheScreen();
+    expect(screen.getByLabelText(/^\d{1,2}:\d\d$/)).toBeOnTheScreen();
   });
 });

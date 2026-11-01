@@ -168,6 +168,17 @@ export const en = {
   tap: "Tap",
   hold: "Hold",
   confirmedAgo: (age: string) => `Confirmed by car ${age}`,
+  resultText: {
+    lock: "Locked · all doors",
+    unlock: "Unlocked",
+    start: "Engine on · 10 min",
+    stop: "Engine off",
+    extend: "+10 min · 1 start used",
+    find: "Location updated",
+  },
+  carAsleep: (min: number) => `Car asleep · ${min} min`,
+  wake: "Wake",
+  engineOffAuto: "Engine off · 10 min",
 
   findCar: "Find my car",
   noGps: "No GPS signal",

@@ -37,6 +37,7 @@ jest.mock("react-native-reanimated", () => {
     withSpring: id,
     withDelay: (_ms: number, v: unknown) => v,
     withRepeat: id,
+    runOnJS: id,
     withSequence: (...v: unknown[]) => v[v.length - 1],
     interpolate: lerp,
     Easing: { linear: id, bezier: curve, in: id, out: id, inOut: id },

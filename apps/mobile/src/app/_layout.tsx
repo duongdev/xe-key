@@ -9,12 +9,13 @@ import {
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PrefsProvider } from "../prefs";
 import { QueryProvider } from "../services/query";
 import { useTheme } from "../theme/use-theme";
+import { Launch } from "../ui/launch";
 import { ToastProvider } from "../ui/toast";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +31,10 @@ export default function RootLayout() {
     BeVietnamPro_700Bold,
     BeVietnamPro_800ExtraBold,
   });
+
+  // Plays once per cold start, over the first screen.
+  const [launching, setLaunching] = useState(true);
+  const endLaunch = useCallback(() => setLaunching(false), []);
 
   useEffect(() => {
     if (loaded || error) SplashScreen.hideAsync();
@@ -47,6 +52,7 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}
               />
+              {launching ? <Launch onDone={endLaunch} /> : null}
             </ToastProvider>
           </QueryProvider>
         </PrefsProvider>

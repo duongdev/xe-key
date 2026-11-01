@@ -1,10 +1,11 @@
-import { memo, useEffect } from "react";
+import { memo, useEffect, useState } from "react";
 import { View } from "react-native";
 import Animated, {
   Easing,
   interpolate,
   type SharedValue,
   useAnimatedProps,
+  useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withDelay,
@@ -36,7 +37,6 @@ export type CarProps = {
 };
 
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
-const ACircle = Animated.createAnimatedComponent(Circle);
 
 const BLINK_MS = 1600;
 const PUFF_MS = 2700;
@@ -156,25 +156,25 @@ function Unlocked({ g, handles }: { g: ReturnType<typeof bodyGeometry>; handles:
   );
 }
 
-function Puff({ from, k, progress }: { from: Point; k: number; progress: SharedValue<number> }) {
-  const props = useAnimatedProps(() => {
-    const p = progress.value;
-    return {
-      cx: interpolate(p, [0, 0.5, 1], [from.x, from.x - 30 - k * 4, from.x - 70 - k * 6]),
-      cy: interpolate(p, [0, 0.5, 1], [from.y, from.y - 14, from.y - 40 - k * 4]),
-      r: interpolate(p, [0, 0.5, 1], [4, 12, 22]),
-      opacity: interpolate(p, [0, 0.5, 1], [0, 0.42, 0]),
-    };
-  });
-  return <ACircle fill="#C9CED4" animatedProps={props} />;
+function EngineOn({ g }: { g: ReturnType<typeof bodyGeometry> }) {
+  return (
+    <G testID="car-engine">
+      <Ellipse cx={g.head.x} cy={g.head.y} rx={44} ry={20} fill="url(#hcHeadGlow)" />
+      <Ellipse cx={g.tail.x} cy={g.tail.y} rx={30} ry={15} fill="url(#hcTailGlow)" />
+      <Ellipse cx={g.exhaust.x} cy={g.exhaust.y} rx={5} ry={3.5} fill="#050506" />
+    </G>
+  );
 }
 
-function EngineOn({ g }: { g: ReturnType<typeof bodyGeometry> }) {
+/**
+ * Exhaust puffs as plain animated Views over the SVG (SVG animated props did not render on device):
+ * every 0.9 s a puff leaves the tailpipe, rises, grows 4 → 22 and fades. Off under Reduce Motion.
+ */
+function Puffs({ from, scale }: { from: Point; scale: number }) {
   const reduced = useReducedMotion();
   const p0 = useSharedValue(0);
   const p1 = useSharedValue(0);
   const p2 = useSharedValue(0);
-
   useEffect(() => {
     if (reduced) return;
     [p0, p1, p2].forEach((p, k) => {
@@ -184,20 +184,47 @@ function EngineOn({ g }: { g: ReturnType<typeof bodyGeometry> }) {
       );
     });
   }, [reduced, p0, p1, p2]);
-
+  if (reduced || scale === 0) return null;
   return (
-    <G testID="car-engine">
-      <Ellipse cx={g.head.x} cy={g.head.y} rx={44} ry={20} fill="url(#hcHeadGlow)" />
-      <Ellipse cx={g.tail.x} cy={g.tail.y} rx={30} ry={15} fill="url(#hcTailGlow)" />
-      <Ellipse cx={g.exhaust.x} cy={g.exhaust.y} rx={5} ry={3.5} fill="#050506" />
-      {!reduced && (
-        <>
-          <Puff from={g.exhaust} k={0} progress={p0} />
-          <Puff from={g.exhaust} k={1} progress={p1} />
-          <Puff from={g.exhaust} k={2} progress={p2} />
-        </>
-      )}
-    </G>
+    <>
+      {[p0, p1, p2].map((p, k) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: three fixed puffs
+        <Puff key={k} from={from} k={k} progress={p} scale={scale} />
+      ))}
+    </>
+  );
+}
+
+function Puff({
+  from,
+  k,
+  progress,
+  scale,
+}: {
+  from: Point;
+  k: number;
+  progress: SharedValue<number>;
+  scale: number;
+}) {
+  const style = useAnimatedStyle(() => {
+    const p = progress.value;
+    const x = interpolate(p, [0, 0.5, 1], [from.x, from.x - 30 - k * 4, from.x - 70 - k * 6]);
+    const y = interpolate(p, [0, 0.5, 1], [from.y, from.y - 14, from.y - 40 - k * 4]);
+    const r = interpolate(p, [0, 0.5, 1], [4, 12, 22]);
+    return {
+      opacity: interpolate(p, [0, 0.5, 1], [0, 0.42, 0]),
+      left: (x - r) * scale,
+      top: (y - r) * scale,
+      width: 2 * r * scale,
+      height: 2 * r * scale,
+      borderRadius: r * scale,
+    };
+  });
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[{ position: "absolute", backgroundColor: "#C9CED4" }, style]}
+    />
   );
 }
 
@@ -212,6 +239,7 @@ function CarImpl({
   label,
 }: CarProps) {
   const g = bodyGeometry(body);
+  const [scale, setScale] = useState(0);
   const s = g.profile;
   const light = ground === "light";
   const assisted = assist && needsAssist(paint, ground);
@@ -224,6 +252,7 @@ function CarImpl({
       accessibilityRole="image"
       accessibilityLabel={label ?? `Honda ${s.name}, side view`}
       style={{ width: "100%", aspectRatio: 720 / 280 }}
+      onLayout={(e) => setScale(e.nativeEvent.layout.width / 720)}
     >
       <Svg width="100%" height="100%" viewBox="0 0 720 280">
         <Gradients />
@@ -322,6 +351,7 @@ function CarImpl({
           </G>
         )}
       </Svg>
+      {engine && look === "shaded" ? <Puffs from={g.exhaust} scale={scale} /> : null}
     </View>
   );
 }

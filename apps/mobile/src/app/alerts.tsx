@@ -149,6 +149,7 @@ export default function Alerts() {
     setAlerts((list) => list.filter((a) => a.id !== alert.id));
     let undone = false;
     toast.show({
+      kind: "undo",
       text: t.deleted,
       action: {
         label: t.undo,

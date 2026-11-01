@@ -1,26 +1,41 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useT } from "../i18n";
 import type { AcLevel, CancelToken } from "../services/car";
 import { CAR_KEY, carService } from "../services/query";
 import { haptics } from "../theme/haptics";
+import { useToast } from "../ui/toast";
 import { type CommandKind, commandReducer, IDLE, inFlight } from "./command";
-
-const DONE_MS = 2600;
 
 /** Runs one command at a time; the car picture changes only via the confirmed snapshot. */
 export function useCommand() {
   const qc = useQueryClient();
   const [state, dispatch] = useReducer(commandReducer, IDLE);
   const token = useRef<CancelToken | null>(null);
+  const toast = useToast();
+  const t = useT();
+  const resend = useRef<(kind: CommandKind) => void>(() => {});
 
+  // Results go to a toast; screens show only the pending steps.
   useEffect(() => {
     if (state.status === "confirmed") {
       haptics.success();
-      const id = setTimeout(() => dispatch({ type: "reset" }), DONE_MS);
-      return () => clearTimeout(id);
+      toast.show({ kind: "success", text: t.resultText[state.kind] });
+      dispatch({ type: "reset" });
     }
-    if (state.status === "failed") haptics.warning();
-  }, [state.status]);
+    if (state.status === "failed") {
+      haptics.warning();
+      const kind = state.kind;
+      // Physical commands (unlock, start, extend) are never resent by a tap; the user holds again.
+      const safe = kind === "lock" || kind === "stop" || kind === "find";
+      toast.show({
+        kind: "error",
+        text: t.notReached,
+        action: safe ? { label: t.retry, onPress: () => resend.current(kind) } : undefined,
+      });
+      dispatch({ type: "reset" });
+    }
+  }, [state, toast, t]);
 
   const send = useCallback(
     async (kind: CommandKind, opts?: { ac?: AcLevel }) => {
@@ -45,6 +60,8 @@ export function useCommand() {
     },
     [state, qc],
   );
+
+  resend.current = (kind) => send(kind);
 
   /** Stops waiting for a pending command. The live adapter must also call Honda's cancel endpoint. */
   const cancel = useCallback(() => {

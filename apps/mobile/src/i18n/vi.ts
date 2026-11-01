@@ -170,6 +170,17 @@ export const vi: Dict = {
   tap: "Chạm",
   hold: "Giữ",
   confirmedAgo: (age) => `Xe xác nhận ${age}`,
+  resultText: {
+    lock: "Đã khóa · tất cả cửa",
+    unlock: "Đã mở khóa",
+    start: "Đã nổ máy · 10 phút",
+    stop: "Đã tắt máy",
+    extend: "+10 phút · đã dùng 1 lượt",
+    find: "Đã cập nhật vị trí",
+  },
+  carAsleep: (min) => `Xe đang ngủ · ${min} phút`,
+  wake: "Đánh thức",
+  engineOffAuto: "Máy đã tắt · 10 phút",
 
   findCar: "Tìm xe",
   noGps: "Mất tín hiệu GPS",

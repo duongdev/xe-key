@@ -13,14 +13,12 @@ import {
   TimerIcon,
   WarningIcon,
 } from "phosphor-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
-  useAnimatedStyle,
   useSharedValue,
-  withRepeat,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
@@ -31,13 +29,17 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import type { AcLevel } from "../services/car";
 import { useCar } from "../services/query";
-import { useReducedMotion } from "../theme/motion";
+import { settle, useReducedMotion } from "../theme/motion";
 import { iconSize, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { Appear, Spin } from "../ui/appear";
+import { BusyRing } from "../ui/busy-ring";
+import { Digits } from "../ui/digits";
 import { HoldButton } from "../ui/hold-button";
 import { Screen } from "../ui/screen";
 import { SegmentedSlider } from "../ui/segmented-slider";
 import { Text } from "../ui/text";
+import { useToast } from "../ui/toast";
 import { useNow } from "../ui/use-now";
 
 const LEVELS: AcLevel[] = ["low", "mid", "high"];
@@ -49,51 +51,21 @@ const LEN = 2 * Math.PI * R;
 
 const ACircle = Animated.createAnimatedComponent(Circle);
 
-/** Pending ring: 1.4 s per turn; amber dashed at half speed when retrying; pulse under Reduce Motion. */
-function BusyRing({ retrying }: { retrying: boolean }) {
-  const { c } = useTheme();
-  const reduced = useReducedMotion();
-  const turn = useSharedValue(0);
-  const pulse = useSharedValue(1);
-  useEffect(() => {
-    if (reduced) {
-      pulse.value = withRepeat(withTiming(0.35, { duration: 700 }), -1, true);
-      return;
-    }
-    turn.value = 0;
-    turn.value = withRepeat(
-      withTiming(360, { duration: retrying ? 2800 : 1400, easing: Easing.linear }),
-      -1,
-    );
-  }, [reduced, retrying, turn, pulse]);
-  const style = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${turn.value}deg` }],
-    opacity: pulse.value,
-  }));
-  return (
-    <Animated.View style={[{ position: "absolute", width: SIZE, height: SIZE }, style]}>
-      <Svg width={SIZE} height={SIZE}>
-        <Circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={R}
-          fill="none"
-          stroke={retrying ? c.warn : c.acc}
-          strokeWidth={8}
-          strokeLinecap="round"
-          strokeDasharray={retrying ? "40 30" : `120 ${LEN - 120}`}
-        />
-      </Svg>
-    </Animated.View>
-  );
-}
-
+/** Sweeps full in 1.2 s (Settle) when the engine starts, then drains once per second. */
 function DrainRing({ fraction }: { fraction: number }) {
   const { c } = useTheme();
-  const offset = useSharedValue(LEN * (1 - fraction));
+  const reduced = useReducedMotion();
+  const offset = useSharedValue(reduced ? LEN * (1 - fraction) : LEN);
+  const swept = useRef(false);
   useEffect(() => {
-    offset.value = withTiming(LEN * (1 - fraction), { duration: 1000, easing: Easing.linear });
-  }, [fraction, offset]);
+    const to = LEN * (1 - fraction);
+    if (!swept.current && !reduced) {
+      swept.current = true;
+      offset.value = withTiming(to, { duration: 1200, easing: settle });
+      return;
+    }
+    offset.value = withTiming(to, { duration: 1000, easing: Easing.linear });
+  }, [fraction, offset, reduced]);
   const props = useAnimatedProps(() => ({ strokeDashoffset: offset.value }));
   return (
     <ACircle
@@ -119,7 +91,7 @@ export default function Engine() {
   const { state: cmd, send, cancel } = useCommand();
   const [ac, setAc] = useState(1);
   const [reminder, setReminder] = useState(false);
-  const [note, setNote] = useState<{ text: string; icon: typeof LockIcon } | null>(null);
+  const toast = useToast();
 
   const engine = car ? engineState(car.engine, now) : ({ running: false } as const);
   const starts = car?.startsLeft ?? 0;
@@ -132,20 +104,18 @@ export default function Engine() {
   // Auto-off: running → off without a command means the 10 minutes ran out.
   const [wasRunning, setWasRunning] = useState(engine.running);
   useEffect(() => {
-    if (wasRunning && !engine.running && !pending) setNote({ text: t.autoOff, icon: TimerIcon });
+    if (wasRunning && !engine.running && !pending)
+      toast.show({ kind: "info", icon: "power", text: t.engineOffAuto });
     setWasRunning(engine.running);
-  }, [engine.running, pending, t.autoOff, wasRunning]);
+  }, [engine.running, pending, t.engineOffAuto, wasRunning, toast]);
 
   useEffect(() => {
     if (cmd.status === "confirmed" && cmd.kind === "stop") {
-      setNote({ text: t.engineOff, icon: PowerIcon });
       setReminder(false);
       cancelReminder().catch((e: unknown) => console.warn("reminder cancel failed", e));
     }
-    if (cmd.status === "confirmed" && cmd.kind === "extend")
-      setNote({ text: t.extendUsed, icon: PlusIcon });
     if (cmd.status === "confirmed" && cmd.kind === "start") setReminder(false);
-  }, [cmd, t]);
+  }, [cmd]);
 
   const big = engine.running
     ? clock(engine.left)
@@ -164,10 +134,8 @@ export default function Engine() {
       return { text: t.acceptedWaiting, icon: CheckIcon, color: c.fg2 };
     if (cmd.status === "retrying")
       return { text: t.retrying(cmd.attempt, MAX_RETRIES), icon: WarningIcon, color: c.warn };
-    if (cmd.status === "failed") return { text: t.notReached, icon: WarningIcon, color: c.warn };
     if (engine.running)
       return { text: t.cooling(TARGET_C[level]), icon: SnowflakeIcon, color: c.acc };
-    if (note) return { text: note.text, icon: note.icon, color: c.fg2 };
     return { text: t.doorsStayLocked, icon: LockIcon, color: c.fg2 };
   })();
 
@@ -201,16 +169,20 @@ export default function Engine() {
           <Circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke={c.s2} strokeWidth={8} />
           {engine.running ? <DrainRing fraction={engine.fraction} /> : null}
         </Svg>
-        {pending && !engine.running ? <BusyRing retrying={retrying} /> : null}
+        {pending && !engine.running ? <BusyRing size={SIZE} retrying={retrying} /> : null}
         <View style={{ alignItems: "center", gap: 6 }} accessible accessibilityLiveRegion="polite">
-          <Text
-            style={{
-              ...textStyle(engine.running ? "hero" : "title"),
-              lineHeight: engine.running ? 66 : 44,
-            }}
-          >
-            {big}
-          </Text>
+          {engine.running ? (
+            <Spin periodMs={8000}>
+              <SnowflakeIcon size={20} color={c.acc} />
+            </Spin>
+          ) : null}
+          <Appear kind="rise" play={engine.running}>
+            {engine.running ? (
+              <Digits value={big} style={{ ...textStyle("hero"), lineHeight: 66, color: c.fg }} />
+            ) : (
+              <Text style={{ ...textStyle("title"), lineHeight: 44 }}>{big}</Text>
+            )}
+          </Appear>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             {engine.running ? (
               <TimerIcon size={16} color={c.fg2} />
@@ -319,7 +291,7 @@ export default function Engine() {
           accessibilityRole="button"
           onPress={() => {
             cancel();
-            setNote({ text: t.noStartUsed, icon: CheckIcon });
+            toast.show({ kind: "info", text: t.noStartUsed });
           }}
           style={({ pressed }) => ({
             height: 68,
@@ -405,7 +377,6 @@ export default function Engine() {
           disabled={car?.account !== "ok"}
           icon={<PowerIcon size={iconSize.md} color={c.onacc} />}
           onAction={() => {
-            setNote(null);
             send("start", { ac: level });
           }}
         />
