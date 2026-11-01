@@ -23,11 +23,19 @@ const mockCar: CarStatus = {
   doors: "locked",
   engine: { on: false },
   startsLeft: 2,
-  closed: { doors: true, trunk: true, hood: true },
+  body: {
+    doorsOpen: { fl: false, fr: false, rl: false, rr: false },
+    windowsCm: { fl: 0, fr: 0, rl: 0, rr: 0 },
+    trunkOpen: false,
+    hoodOpen: false,
+  },
   cabinC: 34,
   fuelPct: 62,
   rangeKm: 418,
-  location: { name: "x", distanceKm: 1 },
+  location: null,
+  batteryV: 12.4,
+  odometerKm: 1,
+  serviceInKm: 1,
   alerts: 0,
   updatedAt: Date.now(),
   account: "ok",
@@ -37,6 +45,9 @@ let mockFinish: (() => void) | null = null;
 const mockService: CarService = {
   status: async () => mockCar,
   wake: async () => mockCar,
+  trips: async () => ({ trips: [], driving: null }),
+  alerts: async () => [],
+  deleteAlert: async () => {},
   command: (_kind, onEvent, opts) =>
     new Promise((resolve) => {
       onEvent({ type: "accepted" });

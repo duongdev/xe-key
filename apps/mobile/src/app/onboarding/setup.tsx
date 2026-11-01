@@ -88,12 +88,14 @@ export default function Setup() {
                 {hint}
               </Text>
             </View>
-            <Switch
-              accessibilityLabel={title}
-              value={on}
-              onValueChange={set}
-              trackColor={{ true: c.acc, false: c.s2 }}
-            />
+            <View style={{ height: 31, justifyContent: "center" }}>
+              <Switch
+                accessibilityLabel={title}
+                value={on}
+                onValueChange={set}
+                trackColor={{ true: c.acc, false: c.s2 }}
+              />
+            </View>
           </View>
         ))}
       </View>

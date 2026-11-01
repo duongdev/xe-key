@@ -487,7 +487,7 @@ export default function Home() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            car ? `${car.location.name}, ${car.location.distanceKm} km` : undefined
+            car?.location ? `${car.location.name}, ${car.location.distanceKm} km` : t.noGps
           }
           onPress={() => router.push("/find")}
           style={({ pressed }) => ({
@@ -510,11 +510,13 @@ export default function Home() {
               </>
             ) : (
               <>
-                <Text variant="label">{car?.location.name}</Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <NavigationArrowIcon size={14} color={c.fg2} />
-                  <Text variant="caption" color="fg2">{`${car?.location.distanceKm} km`}</Text>
-                </View>
+                <Text variant="label">{car?.location?.name ?? t.noGps}</Text>
+                {car?.location ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <NavigationArrowIcon size={14} color={c.fg2} />
+                    <Text variant="caption" color="fg2">{`${car.location.distanceKm} km`}</Text>
+                  </View>
+                ) : null}
               </>
             )}
           </View>

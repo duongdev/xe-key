@@ -4,11 +4,14 @@
 Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-first.
 
 ## Layout
-- `src/app/` — Expo Router routes. `_layout.tsx` loads fonts, prefs, gesture root. `onboarding/*` = 8 steps; `home.tsx` = Home; `engine.tsx` = Climate; `doors.tsx` = Doors; `[screen].tsx` = stub for screens 006/008 build; `dev.tsx` = kitchen sink (with mock-car scenario switch).
+- `src/app/` — Expo Router routes. `_layout.tsx` loads fonts, prefs, gesture root. `onboarding/*` = 8 steps; `home.tsx` = Home; `engine.tsx` = Climate; `doors.tsx` = Doors; `find.tsx`, `status.tsx`, `trips.tsx`, `alerts.tsx`, `settings.tsx`; `dev.tsx` = kitchen sink (with mock-car scenario switch).
 - `src/onboarding/` — flow steps (pure), VN phone format (pure), regions, step header, in-memory session.
 - `src/i18n/` — typed EN/VI dictionaries; `useT()` follows the Language pref or the device.
 - `src/prefs.tsx` — non-secret settings in AsyncStorage (onboarded, region, car look, toggles).
 - `src/services/car.ts` — `CarService` (status, wake, command with progress events); `mock-car.ts` implements it with dev scenarios (asleep, unreachable, slow, signed-out, expired); `query.tsx` = TanStack Query client persisted to AsyncStorage, NetInfo-driven online state, `useCar()`.
+- `src/car/status.ts` (pure: body → top-down diagram tones + rows), `trips.ts` (pure: 7-day bars, totals).
+- `src/i18n/format.ts` — `formatTime` (pure, tested) + `useFormatTime()` following the Format setting or the device.
+- `src/ui/` also has `page-header.tsx` (back + large title + pill), `empty-state.tsx`, `toast.tsx` (minimal, 009 extends), `pick.ios.ts`/`pick.ts` (option picker).
 - `src/car/engine.ts` — pure engine session (countdown, ring fraction, auto-off, extend vs reminder); `reminder.ts` = local notification 1 min before auto-off (asks permission only when used).
 - `src/ui/segmented-slider.tsx` — named stops on a `ScrubRail` (style, AC level).
 - `src/car/command.ts` — pure command reducer (CONTEXT.md › Commands); `use-command.ts` runs one command at a time and writes the confirmed snapshot to the cache.
@@ -39,6 +42,7 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `@xekey/core` root must stay free of Node built-ins; `HondaHttp` takes an injected fetch + cookie store ([ADR 0003](../../docs/adr/0003-portable-core.md)). How RN reads `Set-Cookie` is settled by a spike in 005.
 - deviceId and stored credentials live in the Keychain ([ADR 0004](../../docs/adr/0004-keychain-device-id.md), [ADR 0005](../../docs/adr/0005-keychain-password-relogin.md)).
 - This package pins `typescript ~6.0` (Expo range); the repo root uses 7.
+- Native `Switch` draws at the top of its box in a centred row; wrap it in a `height: 31` view.
 - Never put tests (or any non-route file) under `src/app/`: Expo Router bundles every file there. Screen tests live in `src/*.test.tsx`.
 - RNTL 14: `render` and `fireEvent` are async — always `await` them, or later tests render nothing (overlapping `act`).
 - Physical commands (unlock, start) are never resent by a tap (e.g. "Try again"); the user holds again.

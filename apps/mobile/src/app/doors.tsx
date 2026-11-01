@@ -38,9 +38,14 @@ export default function Doors() {
   const age = car ? freshness(car.updatedAt, now) : null;
   const ageText = !age || age.unit === "live" ? t.live : t.age(age.n, age.unit);
   const parts = [
-    { key: "doors", icon: DoorIcon, label: t.doors, closed: car?.closed.doors ?? true },
-    { key: "trunk", icon: CarProfileIcon, label: t.trunk, closed: car?.closed.trunk ?? true },
-    { key: "hood", icon: EngineIcon, label: t.hood, closed: car?.closed.hood ?? true },
+    {
+      key: "doors",
+      icon: DoorIcon,
+      label: t.doors,
+      closed: !Object.values(car?.body.doorsOpen ?? {}).some(Boolean),
+    },
+    { key: "trunk", icon: CarProfileIcon, label: t.trunk, closed: !car?.body.trunkOpen },
+    { key: "hood", icon: EngineIcon, label: t.hood, closed: !car?.body.hoodOpen },
   ];
 
   const hint = (() => {

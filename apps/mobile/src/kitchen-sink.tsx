@@ -150,7 +150,16 @@ function CarCard({ title, ...car }: CarProps & { title: string }) {
   );
 }
 
-const SCENARIOS: Scenario[] = ["normal", "asleep", "unreachable", "slow", "signed-out", "expired"];
+const SCENARIOS: Scenario[] = [
+  "normal",
+  "asleep",
+  "unreachable",
+  "slow",
+  "signed-out",
+  "expired",
+  "empty",
+  "error",
+];
 
 /** Drives every Home state from the mock service. Offline: toggle the Mac's network. */
 function MockScenarios() {
@@ -167,7 +176,7 @@ function MockScenarios() {
           onPress={() => {
             setScenario(s);
             setNow(s);
-            queryClient.invalidateQueries({ queryKey: CAR_KEY });
+            queryClient.invalidateQueries();
           }}
         />
       ))}

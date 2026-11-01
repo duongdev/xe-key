@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PrefsProvider } from "../prefs";
 import { QueryProvider } from "../services/query";
 import { useTheme } from "../theme/use-theme";
+import { ToastProvider } from "../ui/toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,10 +42,12 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <PrefsProvider>
           <QueryProvider>
-            <StatusBar style="auto" />
-            <Stack
-              screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}
-            />
+            <ToastProvider>
+              <StatusBar style="auto" />
+              <Stack
+                screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}
+              />
+            </ToastProvider>
           </QueryProvider>
         </PrefsProvider>
       </SafeAreaProvider>
