@@ -180,7 +180,8 @@ export default function Engine() {
             {engine.running ? (
               <Digits value={big} style={{ ...textStyle("hero"), lineHeight: 66, color: c.fg }} />
             ) : (
-              <Text style={{ ...textStyle("title"), lineHeight: 44 }}>{big}</Text>
+              // Room for stacked Vietnamese marks (ổ, ẩ) that 44 cut off.
+              <Text style={{ ...textStyle("title"), lineHeight: 54 }}>{big}</Text>
             )}
           </Appear>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
