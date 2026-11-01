@@ -1,3 +1,5 @@
+require("react-native-gesture-handler/jestSetup");
+
 // ponytail: hand mock of the Reanimated API we use. Reanimated 4's own Jest setup needs a DOM
 // (web build). Animations jump to their target; extend this when a test needs frame timing.
 jest.mock("react-native-reanimated", () => {
@@ -20,6 +22,7 @@ jest.mock("react-native-reanimated", () => {
     default: { View, createAnimatedComponent: id },
     createAnimatedComponent: id,
     useSharedValue: (value: unknown) => ({ value }),
+    isSharedValue: (v: unknown) => typeof v === "object" && v !== null && "value" in v,
     useAnimatedStyle: (fn: () => object) => fn(),
     useAnimatedProps: (fn: () => object) => fn(),
     useReducedMotion: () => false,

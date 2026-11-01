@@ -1,6 +1,10 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "includes": [
       "**/*.ts",
@@ -27,12 +31,27 @@
       "style": {
         "useFilenamingConvention": {
           "level": "error",
-          "options": { "strictCase": true, "filenameCases": ["kebab-case"] }
+          "options": {
+            "strictCase": true,
+            "filenameCases": ["kebab-case"]
+          }
+        }
+      },
+      "correctness": {
+        "noReactNativeRawText": {
+          "level": "error",
+          "options": {
+            "skip": ["SvgText", "TSpan"]
+          }
         }
       }
     }
   },
   "javascript": {
-    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
   }
 }

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, type ViewStyle } from "react-native";
+import { ActivityIndicator, Pressable, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { haptics } from "../theme/haptics";
 import { useTiming } from "../theme/motion";
@@ -7,10 +7,11 @@ import type { Colors } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Text } from "./text";
 
-type Tone = "primary" | "secondary" | "warn";
+type Tone = "primary" | "neutral" | "secondary" | "warn";
 
 const tones: Record<Tone, { bg: keyof Colors; fg: keyof Colors }> = {
   primary: { bg: "acc", fg: "onacc" },
+  neutral: { bg: "fg", fg: "bg" },
   secondary: { bg: "s1", fg: "fg" },
   warn: { bg: "warn", fg: "onwarn" },
 };
@@ -21,12 +22,21 @@ type Props = {
   icon?: ReactNode;
   tone?: Tone;
   disabled?: boolean;
+  loading?: boolean;
+  height?: 64 | 68;
   style?: ViewStyle;
 };
 
-const HEIGHT = 68;
-
-export function Button({ label, onPress, icon, tone = "primary", disabled, style }: Props) {
+export function Button({
+  label,
+  onPress,
+  icon,
+  tone = "primary",
+  disabled,
+  loading,
+  height = 68,
+  style,
+}: Props) {
   const { c } = useTheme();
   const timing = useTiming();
   const scale = useSharedValue(1);
@@ -37,7 +47,8 @@ export function Button({ label, onPress, icon, tone = "primary", disabled, style
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      disabled={disabled}
+      disabled={disabled || loading}
+      accessibilityState={{ disabled: !!disabled, busy: !!loading }}
       onPress={onPress}
       onPressIn={() => {
         haptics.light();
@@ -50,8 +61,8 @@ export function Button({ label, onPress, icon, tone = "primary", disabled, style
       <Animated.View
         style={[
           {
-            minHeight: HEIGHT,
-            borderRadius: HEIGHT / 2,
+            minHeight: height,
+            borderRadius: height / 2,
             backgroundColor: c[t.bg],
             opacity: disabled ? 0.4 : 1,
             flexDirection: "row",
@@ -64,15 +75,16 @@ export function Button({ label, onPress, icon, tone = "primary", disabled, style
           style,
         ]}
       >
-        {icon}
-        <Text
-          variant="label"
-          weight={600}
-          color={t.fg}
-          style={{ textAlign: "center", flexShrink: 1 }}
-        >
-          {label}
-        </Text>
+        {loading ? (
+          <ActivityIndicator color={c[t.fg]} />
+        ) : (
+          <>
+            {icon}
+            <Text weight={600} color={t.fg} style={{ textAlign: "center", flexShrink: 1 }}>
+              {label}
+            </Text>
+          </>
+        )}
       </Animated.View>
     </Pressable>
   );
