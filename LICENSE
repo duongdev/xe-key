@@ -1,0 +1,46 @@
+Xe Key — Proprietary License
+Copyright (c) 2026 Dương Đỗ (duongdev). All rights reserved.
+
+This source code is made publicly viewable so that others may read it and
+propose improvements. It is NOT open-source software. No license to use the
+software is granted by making it public.
+
+1. Permitted
+   You MAY:
+   a. View and read this source code.
+   b. Fork this repository and modify your fork for the SOLE purpose of
+      preparing and submitting a contribution (a pull request) back to this
+      project.
+
+2. Not permitted
+   Except as allowed in Section 1, you MAY NOT, without the prior written
+   permission of the copyright holder:
+   a. Use, run, execute, deploy, or otherwise operate the software, in whole or
+      in part, for any purpose — personal, internal, or commercial.
+   b. Copy, reproduce, or distribute the software or any derivative of it.
+   c. Sell, rent, lease, sublicense, or offer the software (or any service based
+      on it) to any third party, whether for a fee or free of charge.
+   d. Remove or alter this license or any copyright notice.
+
+3. Contributions
+   Contributions are governed by CONTRIBUTING.md. By submitting a contribution
+   you agree to its terms, including the contributor license agreement that
+   grants the copyright holder the rights needed to use your contribution under
+   this license.
+
+4. Third-party rights
+   This license covers only the original work authored by the copyright holder.
+   It grants NO rights to any third party's intellectual property referenced,
+   analyzed, or interoperated with by this project — including, without
+   limitation, Honda Motor Co. and its affiliates, their applications, APIs,
+   trademarks, firmware, keys, or services. The reverse-engineering material in
+   this repository is provided for interoperability and educational study only.
+
+5. No warranty
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+   DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For any use beyond Section 1, contact the copyright holder for a separate
+license.
