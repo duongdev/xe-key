@@ -112,6 +112,28 @@ Reduce Motion: springs → 150 ms fades, spinners → pulsing dot. The hold fill
 
 Every screen ships four states: loading, empty, error, populated.
 
+## Website (landing page)
+
+A separate deliverable from the Expo app (tasks [011](../../../docs/tasks/011-landing-page.md), [012](../../../docs/tasks/012-waitlist-storage.md)). Same tokens, font, icons and motion curves as the app.
+
+| Board | What | Notes |
+|---|---|---|
+| [Landing](boards/Landing.dc.html) | Desktop, 1440 wide | Live: language switch, hero states, hold demo, feature tour, form, FAQ |
+| [Landing-mobile](boards/Landing-mobile.dc.html) | Mobile, 390 wide | Same page, stacked layout |
+| [Registered](boards/Registered.dc.html) | Waitlist success panel | Desktop and mobile, starts signed up |
+
+- **Goal:** waitlist. The copy never gives a launch date or says which platform comes first.
+- **Language:** Vietnamese by default, EN switch in the nav. All copy is in the board's `C` dictionary (`vi`, `en`); port it as is. Words match the app dictionary: khóa, điều hòa, nổ máy, nhấn giữ. No speed promise (Honda can take ~20 s to answer).
+- **Sections, in order:** nav · hero · three steps + hold demo · feature tour · all features · car shapes · straight talk + FAQ · final sign-up · footer.
+- **Hero:** red Civic RS (`sedan`, `#9E1B22`) loops locked → unlocked → engine on every 3.4 s. Four chips follow the state (state, cabin 34° → 26°, fuel, location). The pills under the car pick a state and stop the loop.
+- **Hold demo:** same rule as the app: 600 ms fill, release early cancels, fake send 1.4 s, the car blinks only after the fake confirm. White City.
+- **Feature tour:** 6 tabs and a phone showing the real screen boards (Main, Engine, Find, Status, Trips, Notifications). Autoplay every 6 s with a progress bar; any tap, swipe (50 px) or arrow stops it.
+- **All features:** 12 cards, including Siri, widgets, sharing and multiple cars (not in app v1). A `.soon` tag style exists for launch-later items; the owner decides which ones get it.
+- **Waitlist form:** platform pick (iPhone / Android, default iPhone) + email. Inline error under the field. Success in the hero shows the Registered panel: check draws in, email and platform echoed, optional survey (car model: one pick; most-wanted features: many picks; Send disabled until a pick; Skip), thank-you line, copy-link button. The end-of-page form shows a one-line success instead.
+- **Data per sign-up:** email, platform, language, car (optional), features (optional), created time.
+- **Reduce Motion:** no hero loop, no tour autoplay, no floating chips. The hold fill stays.
+- **Legal:** footer says Xe Key is independent and not affiliated with Honda. No Honda logo anywhere.
+
 ## Car illustration
 
 Spec: [Car.dc.html](boards/Car.dc.html); overviews: [Car-gallery](boards/Car-gallery.dc.html), [Car-contrast](boards/Car-contrast.dc.html), [Car-states](boards/Car-states.dc.html). Port to `react-native-svg`; viewBox `0 0 720 280`.
@@ -144,6 +166,7 @@ Grounded in [research/FINDINGS.md](../../../research/FINDINGS.md). Endpoints mar
 - Paint list per model (sample uses six common Honda colours).
 - Does `/remote/*` need `/auth/pin/verify` first? If yes, add a PIN or Face ID step.
 - RN transport for cookies (see [../CLAUDE.md](../CLAUDE.md) gotcha) — needs an ADR.
+- Website: domain, waitlist storage, privacy page, web framework and hosting (ADR in task 011).
 
 ## Out of scope for v1
 

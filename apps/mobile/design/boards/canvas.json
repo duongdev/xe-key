@@ -230,7 +230,31 @@
       "title": "Sign-in errors"
     },
     "Toasts.dc.html": { "x": 4740, "y": 10060, "w": 1350, "h": 844, "title": "Toasts & banners" },
-    "Motion.dc.html": { "x": 0, "y": 11504, "w": 1600, "h": 1000, "title": "Motion (live)" }
+    "Motion.dc.html": { "x": 0, "y": 11504, "w": 1600, "h": 1000, "title": "Motion (live)" },
+    "Landing.dc.html": {
+      "x": 0,
+      "y": 12904,
+      "w": 1440,
+      "h": 6479,
+      "title": "Landing · desktop",
+      "is_interactive": true
+    },
+    "Landing-mobile.dc.html": {
+      "x": 1520,
+      "y": 12904,
+      "w": 390,
+      "h": 6917,
+      "title": "Landing · mobile",
+      "is_interactive": true
+    },
+    "Registered.dc.html": {
+      "x": 2470,
+      "y": 12904,
+      "w": 1100,
+      "h": 780,
+      "title": "Waitlist · registered",
+      "is_interactive": true
+    }
   },
   "order": [
     "Main.dc.html",
@@ -268,7 +292,10 @@
     "Empty-states.dc.html",
     "Signin-errors.dc.html",
     "Toasts.dc.html",
-    "Motion.dc.html"
+    "Motion.dc.html",
+    "Landing.dc.html",
+    "Landing-mobile.dc.html",
+    "Registered.dc.html"
   ],
   "notes": {
     "t1": {
@@ -297,6 +324,14 @@
       "maxW": 1800
     },
     "t9": { "x": 0, "y": 11204, "text": "Motion", "kind": "title1", "maxW": 1600 },
+    "t10": { "x": 0, "y": 12604, "text": "Website: landing page", "kind": "title1", "maxW": 2390 },
+    "g7": {
+      "x": 1990,
+      "y": 12904,
+      "w": 400,
+      "fill": "blue",
+      "text": "Landing rationale\n\nGoal: waitlist before launch (no TestFlight invite yet). Platform pick (iPhone / Android) on the form measures Android demand. One email field, shown twice (hero + end). Inline error, success replaces the form.\nVI first, EN toggle in the nav. Copy is short and plain, same voice as the app.\nFeature tour: tabs + swipeable phone with the real screens, autoplays every 6 s until the user touches it.\nPitch = speed: three steps, and a live hold-to-unlock demo. The car changes only after the fake confirm, same rule as the app.\nHonest block before the FAQ: password goes only to Honda, one phone at a time, not made by Honda.\nNo Honda logo anywhere. Footer says not affiliated.\nHero: big red Civic RS cycles locked, unlocked, engine on every 3.4 s (HUD chips follow; the pills below pick a state and stop the loop; Reduce Motion stops autoplay).\nFeatures list everything planned; mark launch-later ones with the .soon tag when the launch scope is set.\nVI copy follows the app dictionary: khóa, điều hòa, nổ máy, nhấn giữ. No time promise: Honda can take ~20 s to answer.\nRegistered state (hero): check draws in, email + platform echoed, optional 2-question survey (car model, most wanted features) to size demand, then a share link. The end-of-page form keeps a one-line success.\nOpen: email provider for the list, privacy page, domain."
+    },
     "t8": {
       "x": 0,
       "y": 9760,
