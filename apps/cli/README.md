@@ -1,4 +1,4 @@
-# @honda/cli
+# @xekey/cli
 
 Command-line client for Honda CONNECT One. Ports `research/honda_login.py`.
 

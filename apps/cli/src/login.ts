@@ -10,7 +10,7 @@ import {
   resolveDeviceId,
   saveSession,
   verifyCode,
-} from "@honda/core";
+} from "@xekey/core";
 import { ask, askHidden } from "./prompt.js";
 
 const SESSION_FILE = process.env.HONDA_SESSION_FILE ?? "honda_session.json";

@@ -1,7 +1,7 @@
-# @honda/cli
+# @xekey/cli
 
 ## Purpose
-Interactive CLI over `@honda/core`. Login + (later) status/remote commands.
+Interactive CLI over `@xekey/core`. Login + (later) status/remote commands.
 
 ## Layout
 - `src/index.ts` — entry, region arg.
@@ -12,5 +12,5 @@ Interactive CLI over `@honda/core`. Login + (later) status/remote commands.
 - IO glue: verified by manual smoke (a real login), not mocks.
 
 ## Gotchas
-- Runs via `tsx` (`pnpm start`); it imports `@honda/core` through the workspace link.
+- Runs via `tsx` (`pnpm start`); it imports `@xekey/core` through the workspace link.
 - Default session file is `honda_session.json` in the cwd (gitignored).

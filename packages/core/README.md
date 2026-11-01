@@ -1,4 +1,4 @@
-# @honda/core
+# @xekey/core
 
 TypeScript client for the Honda CONNECT One (APAC) API. Shared by the CLI and the
 Expo app.
@@ -7,7 +7,7 @@ Plain REST over the iPLAss backend: session cookies (`JSESSIONID` + `iprmtkn`) +
 the `app: OneApp` header. No payload encryption.
 
 ```ts
-import { HondaHttp, baseUrl, login, verifyCode, buildSession } from "@honda/core";
+import { HondaHttp, baseUrl, login, verifyCode, buildSession } from "@xekey/core";
 
 const http = new HondaHttp(baseUrl("vietnam"));
 const res = await login(http, phone, password, deviceId);

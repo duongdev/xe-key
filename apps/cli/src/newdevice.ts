@@ -10,7 +10,7 @@ import {
   REGIONS,
   type Region,
   saveSession,
-} from "@honda/core";
+} from "@xekey/core";
 import { ask, askHidden } from "./prompt.js";
 
 // Completes a device change to map the full onboarding flow. Registers THIS fresh

@@ -1,5 +1,5 @@
 #!/usr/bin/env -S npx tsx
-import { REGIONS, type Region } from "@honda/core";
+import { REGIONS, type Region } from "@xekey/core";
 import { runLogin } from "./login.js";
 
 const region = (process.argv[2] ?? "vietnam").toLowerCase();

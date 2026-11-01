@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { HondaHttp, type HttpResponse, loadSession } from "@honda/core";
+import { HondaHttp, type HttpResponse, loadSession } from "@xekey/core";
 
 // Reads run automatically, one at a time with a pause and early stop.
 // Commands actuate the car and fire ONLY when named in HONDA_FIRE (comma list).

@@ -14,13 +14,13 @@ shared TypeScript package, so the CLI and a future Expo app share one API client
 ## Why now
 
 The reverse-engineering is done and the API is mapped; the product work (CLI + Expo
-client) needs a real toolchain and a shared `@honda/core` to build on.
+client) needs a real toolchain and a shared `@xekey/core` to build on.
 
 ## Acceptance criteria
 
 - [x] pnpm workspace with `packages/*` + `apps/*`, turbo, Biome, tsconfig base.
-- [x] `@honda/core` ports the login/verify/session logic from `research/honda_login.py`.
-- [x] `@honda/cli` reproduces the interactive login against `@honda/core`.
+- [x] `@xekey/core` ports the login/verify/session logic from `research/honda_login.py`.
+- [x] `@xekey/cli` reproduces the interactive login against `@xekey/core`.
 - [x] Pure logic (envelope, region, device) unit-tested; typecheck + lint green.
 - [x] Secrets gitignored; RE artifacts moved to `research/`.
 

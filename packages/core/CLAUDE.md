@@ -1,4 +1,4 @@
-# @honda/core
+# @xekey/core
 
 ## Purpose
 The API client for Honda CONNECT One (APAC). Auth, session, endpoints, HTTP. No UI,

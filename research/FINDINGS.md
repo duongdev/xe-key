@@ -255,7 +255,7 @@ behavioral special-case is Korea's HERE map key.
 - `getServerUrl()` returns the same host without `/rest/command` (used for images / web links).
 - HERE keys are the app's own map keys (geocoding / reverse-geocoding), bundled in `BuildConfig`;
   needed only for client-side map display, not for the API itself.
-- Base URLs and metadata are in `@honda/core` (`REGIONS`, `REGION_META`). Only Vietnam is
+- Base URLs and metadata are in `@xekey/core` (`REGIONS`, `REGION_META`). Only Vietnam is
   verifiable live (the only account we have).
 
 ## Round 6 — device-change / onboarding flow (cracked via proxy deviceId rewrite)

@@ -1,5 +1,5 @@
 {
-  "name": "@honda/cli",
+  "name": "@xekey/cli",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,6 +12,6 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@honda/core": "workspace:*"
+    "@xekey/core": "workspace:*"
   }
 }

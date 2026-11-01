@@ -13,7 +13,7 @@
     "test": "turbo run test",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "cli": "pnpm --filter @honda/cli start",
+    "cli": "pnpm --filter @xekey/cli start",
     "probe": "tsx apps/cli/src/probe.ts",
     "prepare": "husky",
     "newdevice": "tsx apps/cli/src/newdevice.ts"
