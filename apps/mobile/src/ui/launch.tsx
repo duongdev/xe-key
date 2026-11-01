@@ -44,7 +44,8 @@ export function Launch({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     const off = onLaunchTarget((target) => {
-      setCar((c) => c ?? target);
+      // Follow Home's latest layout (data can arrive and move the car before the reveal).
+      setCar(target);
       setGo(true);
     });
     const id = setTimeout(() => setGo(true), TARGET_WAIT_MS);

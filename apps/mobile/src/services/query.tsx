@@ -18,6 +18,7 @@ import type { CarService, CarStatus } from "./car";
 import { SignedOut } from "./honda";
 import { liveCar } from "./live-car";
 import { mockCar } from "./mock-car";
+import { pickSnapshot } from "./snapshot";
 
 onlineManager.setEventListener((setOnline) =>
   NetInfo.addEventListener((s) => setOnline(s.isConnected !== false)),
@@ -31,7 +32,6 @@ focusManager.setEventListener((setFocused) => {
 export const queryClient = new QueryClient({
   // A session that cannot be restored takes the saved car data with it.
   queryCache: new QueryCache({ onError: (e) => e instanceof SignedOut && wipeCache() }),
-  // No polling while parked: each Honda read may wake the car's TCU (task 014, Q22).
   defaultOptions: { queries: { gcTime: 7 * 24 * 3_600_000, staleTime: 30_000, retry: 1 } },
 });
 
@@ -53,9 +53,14 @@ const persister = createAsyncStoragePersister({
     }),
 });
 
-/** After a new sign-in: drop any signed-out snapshot so Home loads the car fresh. */
+/** Pull-to-refresh: a fresh read through the same checks as every other read. */
+export function refreshCar() {
+  return queryClient.fetchQuery({ queryKey: CAR_KEY, queryFn: carStatus, staleTime: 0 });
+}
+
+/** After a new sign-in (maybe another account): drop everything so Home loads fresh. */
 export function forgetCar() {
-  queryClient.removeQueries({ queryKey: CAR_KEY });
+  queryClient.clear();
 }
 
 /** Sign-out and lost sessions: forget the car in memory and on disk. */
@@ -136,10 +141,12 @@ const NO_CAR: CarStatus = {
  */
 async function carStatus(): Promise<CarStatus> {
   try {
-    return await carService.status();
+    return pickSnapshot(queryClient.getQueryData<CarStatus>(CAR_KEY), await carService.status());
   } catch (e) {
     if (!(e instanceof SignedOut)) throw e;
     void persister.removeClient();
+    // Nothing from this account (alerts, trips) outlives its session.
+    queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== CAR_KEY[0] });
     const last = queryClient.getQueryData<CarStatus>(CAR_KEY) ?? NO_CAR;
     return { ...last, location: undefined, account: "signed-out", signedOutAt: Date.now() };
   }
@@ -165,8 +172,9 @@ export function useCar() {
   return useQuery({
     queryKey: CAR_KEY,
     queryFn: carStatus,
-    // While the engine runs the car reports about once a minute anyway: re-read so a stop or
-    // extend made elsewhere shows, and the countdown tracks the car. Parked: no polling.
-    refetchInterval: (q) => (q.state.data?.engine.on ? 60_000 : false),
+    // Re-read every 60 s while the app is open (never in the background), so changes made elsewhere
+    // (key fob, official app) show within a minute. Reads return Honda's stored copy and don't
+    // wake the car (lastTimeCall only moves when the car reports, 2026-11-02).
+    refetchInterval: 60_000,
   });
 }

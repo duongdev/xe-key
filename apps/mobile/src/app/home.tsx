@@ -42,7 +42,7 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { usePrefs } from "../prefs";
 import type { CarStatus } from "../services/car";
-import { ALERTS_KEY, CAR_KEY, carService, useCar } from "../services/query";
+import { ALERTS_KEY, carService, refreshCar, useCar } from "../services/query";
 import { useDistance } from "../services/use-distance";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -238,10 +238,7 @@ export default function Home() {
   const { state: cmd, send } = useCommand();
   const carBox = useRef<React.ComponentRef<typeof View>>(null);
   // "Wake" is a fresh read: Honda has no wake call (FINDINGS Round 3 correction).
-  const wake = useMutation({
-    mutationFn: () => carService.status(),
-    onSuccess: (fresh) => qc.setQueryData(CAR_KEY, fresh),
-  });
+  const wake = useMutation({ mutationFn: refreshCar });
   // Alerts aren't saved to disk; load them behind Home so the Alerts screen opens with data.
   const signedIn = !!car;
   useEffect(() => {
@@ -418,8 +415,9 @@ export default function Home() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             {loading ? (
               <>
-                <Skeleton w={110} h={34} />
-                <Skeleton w={84} h={34} />
+                {/* Same height as the chips (40), so the car doesn't move when data arrives. */}
+                <Skeleton w={110} h={40} />
+                <Skeleton w={84} h={40} />
               </>
             ) : (
               <>
@@ -484,8 +482,9 @@ export default function Home() {
             opacity: loading ? 0.35 : online ? 1 : 0.55,
           }}
         >
-          {/* Car answers: settles in from the left whenever the car reports (wake or confirm). */}
-          <Appear kind="settle-left" play={car?.updatedAt}>
+          {/* Car answers: settles in from the left when its lock or engine state changes, not on
+              every read (live data re-reads often). */}
+          <Appear kind="settle-left" play={car ? `${car.doors}-${engineOn}` : undefined}>
             <Car
               body={body}
               look={look === "line" ? "line" : "shaded"}

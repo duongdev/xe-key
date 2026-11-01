@@ -31,6 +31,8 @@ export type CarStatus = {
   /** When the car last reported (not when we fetched). */
   updatedAt: number;
   account: "ok" | "signed-out" | "expired";
+  /** Set when a command confirmed this state; older reads can't undo it (see `pickSnapshot`). */
+  confirmedAt?: number;
   /** Commands the car's Honda CONNECT package allows (Entitlement). */
   can: { lock: boolean; engine: boolean };
   signedOutAt?: number;

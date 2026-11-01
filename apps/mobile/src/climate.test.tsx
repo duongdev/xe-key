@@ -112,7 +112,8 @@ describe("Climate", () => {
       nativeEvent: { actionName: "activate" },
     });
     await act(async () => mockFinish?.());
-    expect(screen.getByText("1 left")).toBeOnTheScreen();
+    // The confirmed snapshot lands after in-flight re-reads are cancelled.
+    expect(await screen.findByText("1 left")).toBeOnTheScreen();
     expect(screen.getByLabelText(/^\d{1,2}:\d\d$/)).toBeOnTheScreen();
   });
 });
