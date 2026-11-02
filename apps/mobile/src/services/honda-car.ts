@@ -1,4 +1,5 @@
 import { RUN_S } from "../car/engine";
+import type { ServiceInfo, ServiceVisit } from "../car/service";
 import type { CarAlert, CarStatus, Trip } from "./car";
 import { decodePolyline } from "./polyline";
 
@@ -65,8 +66,6 @@ export function toCarStatus(raw: HondaRaw): CarStatus {
             at: num(raw.finder.time) ?? updatedAt,
           },
     batteryV: num(info.batteryVoltage),
-    odometerKm: null,
-    serviceInKm: null,
     alerts: num(raw.top.unreadAlertMessages) ?? 0,
     updatedAt,
     account: raw.car.isExpired === true ? "expired" : "ok",
@@ -152,4 +151,39 @@ export function pinResult(reply: unknown): PinResult {
 /** `/car/trip/detail` → route points (empty when Honda has none). */
 export function toTripRoute(detail: unknown) {
   return decodePolyline(str(obj(detail).tripRoute));
+}
+
+/**
+ * Service reminder (FINDINGS Round 11): target and date from `/car/topPage`, km / days left and
+ * plan price from `/car/nextMaintenance`, dealer visits from `/maintenance` (+ detail prices).
+ */
+export function toService(
+  top: Obj,
+  next: Obj,
+  list: unknown,
+  prices: Record<string, number>,
+): ServiceInfo {
+  const info = obj(top.vehicleInfo);
+  const level = next.maintenanceReminderLevel ?? info.maintenanceReminderLevel;
+  const visits: ServiceVisit[] = (Array.isArray(list) ? list : [])
+    .map(obj)
+    .map((v) => ({
+      id: String(v.oid ?? ""),
+      type: str(v.type).trim(),
+      date: num(v.maintenanceDate) ?? 0,
+      km: num(v.endMileage) ?? 0,
+      priceVnd: prices[String(v.oid ?? "")] ?? null,
+    }))
+    .filter((v) => v.id && v.date && v.km)
+    .sort((a, b) => b.date - a.date);
+  return {
+    overdue: is(level, "OVER_DUE"),
+    // 0 means "no target" here, not a real reading.
+    targetKm: num(info.nextMaintenanceMileage) || null,
+    dueDate: num(info.nextMaintenanceDate) || null,
+    kmLeft: num(obj(next.nextMaintenanceMileage).value),
+    daysLeft: num(obj(next.timeToMaintenance).value) ?? num(info.remainingDayToMaintenance),
+    planVnd: num(obj(next.nextMaintenancePlan).grandTotal),
+    visits,
+  };
 }

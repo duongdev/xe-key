@@ -103,6 +103,8 @@ export const carService: CarService = {
   tripDetail: (id) => impl.tripDetail(id),
   forgetPin: () => impl.forgetPin(),
   hondaCar: () => impl.hondaCar(),
+  service: () => impl.service(),
+  visitPrice: (id) => impl.visitPrice(id),
   alerts: () => impl.alerts(),
   deleteAlert: (id) => impl.deleteAlert(id),
 };
@@ -144,8 +146,6 @@ const NO_CAR: CarStatus = {
   fuelPct: 0,
   rangeKm: 0,
   batteryV: null,
-  odometerKm: null,
-  serviceInKm: null,
   alerts: 0,
   updatedAt: 0,
   account: "ok",

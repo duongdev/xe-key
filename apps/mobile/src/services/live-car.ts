@@ -18,6 +18,7 @@ import {
   pinResult,
   toAlerts,
   toCarStatus,
+  toService,
   toTripRoute,
   toTrips,
 } from "./honda-car";
@@ -84,6 +85,12 @@ async function status(): Promise<CarStatus> {
   const raw: HondaRaw = { car: c, top, door, engine, finder };
   const s = toCarStatus(raw);
   return { ...s, location: await withPlace(s.location ?? null) };
+}
+
+async function visitPrice(id: string): Promise<number | null> {
+  const d = await data((h) => h.get(`/maintenance/detail?mtcoid=${encodeURIComponent(id)}`));
+  const n = Number(d.totalPrice);
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 const POLL_MS = 5000;
@@ -227,6 +234,20 @@ export const liveCar: CarService = {
         : null,
     };
   },
+  async service() {
+    await car();
+    const q = `?carOid=${encodeURIComponent(carOid ?? "")}`;
+    // `/maintenance` needs no uoid: Honda uses the signed-in user (FINDINGS Round 11).
+    const [top, next, list] = await Promise.all([
+      data((h) => h.get(`/car/topPage${q}`)),
+      data((h) => h.get(`/car/nextMaintenance${q}`)),
+      data((h) => h.get("/maintenance")),
+    ]);
+    const s = toService(top, next, list, {});
+    const newest = await Promise.all(s.visits.slice(0, 3).map((v) => visitPrice(v.id)));
+    return { ...s, visits: s.visits.map((v, i) => ({ ...v, priceVnd: newest[i] ?? null })) };
+  },
+  visitPrice,
   async alerts() {
     await car();
     return toAlerts(

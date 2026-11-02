@@ -1,3 +1,4 @@
+import { router, useLocalSearchParams } from "expo-router";
 import {
   CarBatteryIcon,
   CaretRightIcon,
@@ -11,6 +12,7 @@ import {
   WarningIcon,
   WrenchIcon,
 } from "phosphor-react-native";
+import { useEffect } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { engineState, clock as formatClock } from "../car/engine";
@@ -19,6 +21,7 @@ import { bodyParts, type Row, type Side } from "../car/status";
 import { useLang, useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
 import { useCar } from "../services/query";
+import { useService } from "../services/use-service";
 import { iconSize, radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader, Pill } from "../ui/page-header";
@@ -97,6 +100,14 @@ export default function Status() {
   const { data: car, refetch, isFetching, dataUpdatedAt } = useCar();
   const time = useFormatTime();
   const pull = usePullRefresh(refetch);
+  const svc = useService();
+  // Home's service banner opens Status with the sheet on top.
+  const { service: openService } = useLocalSearchParams<{ service?: string }>();
+  useEffect(() => {
+    if (!openService) return;
+    router.setParams({ service: undefined });
+    router.push("/service");
+  }, [openService]);
   if (!car)
     return (
       <Screen>
@@ -111,6 +122,11 @@ export default function Status() {
     age.unit === "live" ? t.live : age.unit === "m" ? t.minShort(age.n) : t.age(age.n, age.unit);
   const engine = engineState(car.engine, now);
   const num = (n: number) => n.toLocaleString(lang === "vi" ? "vi-VN" : "en-US");
+  const day = (ms: number) =>
+    new Date(ms).toLocaleDateString(lang === "vi" ? "vi-VN" : "en-GB", {
+      day: "numeric",
+      month: "short",
+    });
 
   const rowText = (r: Row): { title: string; value: string } => {
     const v = r.value;
@@ -142,6 +158,7 @@ export default function Status() {
   };
   const summary = parts.rows.map((r) => `${rowText(r).title}: ${rowText(r).value}`).join(", ");
 
+  const odo = svc?.odo;
   const tiles = [
     {
       key: "engine",
@@ -162,14 +179,36 @@ export default function Status() {
       label: t.battery12v,
       value: `${car.batteryV.toFixed(1)} V`,
     },
-    car.odometerKm !== null && {
+    odo && {
       key: "odo",
       icon: GaugeIcon,
       label: t.odometer,
-      value: `${num(car.odometerKm)} km`,
+      value: `≈ ${num(odo.km)} km`,
+      sub: t.estimated,
+      onPress: () => Alert.alert(t.odometer, t.odoSource(num(odo.from.km), day(odo.from.date))),
     },
-  ].filter((x) => x !== false);
-  const serviceInKm = car.serviceInKm;
+    svc?.level && serviceTile(svc.info, svc.level),
+  ].filter((x) => !!x);
+
+  function serviceTile(s: NonNullable<typeof svc>["info"], level: string) {
+    const due = s.dueDate === null ? "" : day(s.dueDate);
+    const overdue = level === "overdue";
+    return {
+      key: "service",
+      icon: WrenchIcon,
+      label: level === "ok" ? t.nextService : t.service,
+      value: overdue ? t.overdue : s.kmLeft !== null ? t.inKm(num(s.kmLeft)) : due,
+      sub: overdue
+        ? t.wasDueAt(num(s.targetKm ?? 0), due)
+        : s.daysLeft !== null
+          ? `${t.orDays(s.daysLeft, due)} · ${t.whicheverFirst}`
+          : undefined,
+      wide: true,
+      onPress: () => router.push("/service"),
+    };
+  }
+  const svcBanner =
+    svc && !svc.hidden && (svc.level === "soon" || svc.level === "overdue") ? svc : null;
 
   return (
     <Screen scroll>
@@ -189,13 +228,14 @@ export default function Status() {
           />
         }
       >
-        {serviceInKm !== null && serviceInKm <= 2000 ? (
+        {svcBanner ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => Alert.alert(t.serviceIn(num(serviceInKm)))}
+            onPress={() => router.push("/service")}
             style={({ pressed }) => ({
               minHeight: 52,
               paddingHorizontal: 16,
+              paddingVertical: 8,
               borderRadius: 16,
               backgroundColor: `${c.warn}1F`,
               flexDirection: "row",
@@ -205,9 +245,28 @@ export default function Status() {
             })}
           >
             <WrenchIcon size={iconSize.sm} color={c.warn} />
-            <Text variant="label" weight={600} color="warn" style={{ flex: 1 }}>
-              {t.serviceIn(num(serviceInKm))}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text variant="label" weight={600} color="warn">
+                {svcBanner.level === "overdue"
+                  ? t.serviceOverdue
+                  : t.serviceIn(num(svcBanner.info.kmLeft ?? 0))}
+              </Text>
+              {(() => {
+                const s = svcBanner.info;
+                const due = s.dueDate === null ? "" : day(s.dueDate);
+                const line =
+                  svcBanner.level === "overdue"
+                    ? t.wasDueAt(num(s.targetKm ?? 0), due)
+                    : s.daysLeft !== null
+                      ? t.orDays(s.daysLeft, due)
+                      : null;
+                return line ? (
+                  <Text variant="caption" color="warn">
+                    {line}
+                  </Text>
+                ) : null;
+              })()}
+            </View>
             <CaretRightIcon size={16} color={c.warn} />
           </Pressable>
         ) : null}
@@ -247,42 +306,63 @@ export default function Status() {
         </View>
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-          {tiles.map(({ key, icon: Icon, label, value, bar }) => (
-            <View
-              key={key}
-              accessible
-              accessibilityLabel={`${label}: ${value}`}
-              style={{
-                width: "48.5%",
-                padding: 14,
-                borderRadius: radius.card - 2,
-                backgroundColor: c.s1,
-                gap: 6,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Icon size={16} color={c.fg2} />
-                <Text variant="caption" color="fg2">
-                  {label}
-                </Text>
-              </View>
-              <Text
-                variant="stat"
-                style={{ fontSize: 20, lineHeight: 26 }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
+          {tiles.map((tile) => {
+            const { key, icon: Icon, label, value } = tile;
+            const bar = "bar" in tile ? tile.bar : undefined;
+            const sub = "sub" in tile ? tile.sub : undefined;
+            const onPress = "onPress" in tile ? tile.onPress : undefined;
+            const wide = "wide" in tile && tile.wide;
+            return (
+              <Pressable
+                key={key}
+                disabled={!onPress}
+                onPress={() => onPress?.()}
+                accessibilityRole={onPress ? "button" : undefined}
+                accessibilityLabel={[label, value, sub].filter(Boolean).join(": ")}
+                style={({ pressed }) => ({
+                  width: wide ? "100%" : "48.5%",
+                  padding: 14,
+                  borderRadius: radius.card - 2,
+                  backgroundColor: c.s1,
+                  gap: 6,
+                  opacity: pressed ? 0.7 : 1,
+                })}
               >
-                {value}
-              </Text>
-              {bar !== undefined ? (
-                <View style={{ height: 6, borderRadius: 3, backgroundColor: c.s2 }}>
-                  <View
-                    style={{ width: `${bar}%`, height: 6, borderRadius: 3, backgroundColor: c.acc }}
-                  />
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Icon size={16} color={c.fg2} />
+                  <Text variant="caption" color="fg2" style={{ flex: 1 }}>
+                    {label}
+                  </Text>
+                  {wide ? <CaretRightIcon size={14} color={c.fg2} /> : null}
                 </View>
-              ) : null}
-            </View>
-          ))}
+                <Text
+                  variant="stat"
+                  style={{ fontSize: 20, lineHeight: 26 }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {value}
+                </Text>
+                {sub ? (
+                  <Text variant="caption" color="fg2" style={{ fontSize: 12 }}>
+                    {sub}
+                  </Text>
+                ) : null}
+                {bar !== undefined ? (
+                  <View style={{ height: 6, borderRadius: 3, backgroundColor: c.s2 }}>
+                    <View
+                      style={{
+                        width: `${bar}%`,
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: c.acc,
+                      }}
+                    />
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })}
         </View>
         {/* The pill's age is the car's own report; this also says when the app last asked Honda. */}
         <Text variant="caption" color="fg2" style={{ textAlign: "center" }}>

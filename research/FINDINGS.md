@@ -382,3 +382,43 @@ user typed the PIN.
   idle or place names: those come from the `/car/trip` day row and the geocoder.
 - The app loaded detail for several trips in a row on one token (no rate error seen).
 
+
+## Round 11 — odometer and service (live + APK, 2026-11-02)
+
+Read-only GETs with the saved session; no commands, PIN or bookings. One VN car, TCU gen 3.
+
+**No live odometer.** No reply carries the car's current odometer: not `/car`, `/car/profile`,
+`/car/topPage`, `/car/dashboard`, `/car/nextMaintenance` or `/car/warning`. In the APK,
+`odometer` is only ever *sent* to Honda — the user types it to prove ownership
+(`PUT /vehicleOwnership/verify` `carOid, odometer`; "Enter current mileage from odometer";
+"The odometer does not match") and in the AO-region home location (`POST /homelocation/sethome`).
+Honda can read it from the car, but no app reply returns it.
+
+**Service history — `GET /maintenance?uoid=<user oid>`** (legacy screen "Service history",
+same host as the g3 calls). One row per dealer visit, newest first:
+`{oid, type (local name: "Bảo dưỡng định kỳ" periodic, "Phụ kiện" accessories, "Sơn và thân vỏ"
+body & paint), maintenanceDate, maintenanceEndDate (epoch ms, local midnight), endMileage (km,
+whole number)}`. `endMileage` is the odometer the dealer wrote on the repair order. This car:
+12 rows from 915 km (2024) to 33,220 km (2026-08-07). `uoid` is optional: `/maintenance` with no query returns the same rows for the signed-in user.
+- `GET /maintenance/detail?mtcoid=<row oid>` adds `startMileage`, `endMileage` (same value on a
+  one-day visit), `maintenanceStartDate`, `orderNo`, `totalPrice` (VND), `dealer{name,…}`,
+  `serviceType[{value, displayName}]`, `parts` (null here).
+- Cadence: changes only when a dealer closes a repair order (dealer system), not from the TCU.
+
+**Next service.** `/car/topPage` `vehicleInfo.nextMaintenanceMileage` is the **odometer target**
+of the next periodic service (30,000 here), with `nextMaintenanceDate` (epoch ms) and
+`remainingDayToMaintenance`. `/car/nextMaintenance` gives the reminder window instead:
+`nextMaintenanceMileage{unit:"Km/h" (mislabel), threshold: 5000, value}` and
+`timeToMaintenance{unit:"Days", threshold: 180, value}`, where `value` is km / days left (0 when
+`maintenanceReminderLevel` is `"OVER_DUE"`), plus `nextMaintenancePlan` (parts, `wage`, `total`,
+`grandTotal`, VND; `nameTH` holds the local-language name). This car is `OVER_DUE`: last
+periodic service 26,262 km, target 30,000 km, and a later visit already read 33,220 km.
+
+**Writes, not read:** `PUT /car/maintenanceMode` (`status`, `warningOid`) toggles maintenance
+mode; `PUT /vehicleOwnership/list|start|skip|verify` run the ownership flow.
+
+**Odometer we can show — estimate.** `last service endMileage + trip km since that date`
+(`/car/trip/summary?summaryType=Day` rows, Round 9). Label it "about" and the source date:
+trips the TCU missed (offline, sleep) make it read low. Then "km left" = `nextMaintenanceMileage`
+target − estimate; when the reminder `value` from `/car/nextMaintenance` is above 0, prefer it.
+Not checked yet: how close the trip sum since 2026-08-07 comes to the dealer reading.

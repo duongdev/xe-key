@@ -1,5 +1,6 @@
 import type { CommandEvent, CommandKind } from "../car/command";
 import type { Engine } from "../car/engine";
+import type { ServiceInfo } from "../car/service";
 import type { Body } from "../car/status";
 import type { SummaryRow } from "../car/summary";
 import type { TripSummary } from "../car/trips";
@@ -28,8 +29,6 @@ export type CarStatus = {
   /** Last GPS fix; null when the car has no signal; undefined until fetched (never saved to disk). */
   location?: CarLocation | null;
   batteryV: number | null;
-  odometerKm: number | null;
-  serviceInKm: number | null;
   alerts: number;
   /** When the car last reported (not when we fetched). */
   updatedAt: number;
@@ -124,6 +123,10 @@ export interface CarService {
   /** Drops this session's PIN token. */
   forgetPin(): void;
   hondaCar(): Promise<HondaCar>;
+  /** Service reminder + dealer history; prices only for the 3 newest visits. */
+  service(): Promise<ServiceInfo>;
+  /** Price of one dealer visit (VND), for the full history list. */
+  visitPrice(id: string): Promise<number | null>;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }

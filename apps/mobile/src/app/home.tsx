@@ -21,6 +21,7 @@ import {
   ThermometerSimpleIcon,
   WarningIcon,
   WifiSlashIcon,
+  WrenchIcon,
 } from "phosphor-react-native";
 import { type ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
 import {
@@ -39,11 +40,12 @@ import { engineState, clock as formatClock } from "../car/engine";
 import { freshness } from "../car/freshness";
 import type { Side } from "../car/status";
 import { useCommand } from "../car/use-command";
-import { useT } from "../i18n";
+import { useLang, useT } from "../i18n";
 import { usePrefs } from "../prefs";
 import type { CarStatus } from "../services/car";
 import { ALERTS_KEY, loadAlerts, refreshCar, useCar } from "../services/query";
 import { useDistance } from "../services/use-distance";
+import { useService } from "../services/use-service";
 import { haptics } from "../theme/haptics";
 import { iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
@@ -234,6 +236,8 @@ function SignedOut({ car }: { car: CarStatus }) {
 export default function Home() {
   const { c, scheme } = useTheme();
   const t = useT();
+  const lang = useLang();
+  const svc = useService();
   const insets = useSafeAreaInsets();
   const { prefs } = usePrefs();
   const qc = useQueryClient();
@@ -347,6 +351,21 @@ export default function Home() {
       />
     ),
   ].filter(Boolean);
+  // One banner at a time: door / window / asleep first, then service (HANDOFF › Service).
+  if (!carBanners.length && svc && !svc.hidden && (svc.level === "soon" || svc.level === "overdue"))
+    carBanners.push(
+      <Banner
+        key="service"
+        tone="warn"
+        icon={<WrenchIcon size={iconSize.sm} color={c.warn} />}
+        text={
+          svc.level === "overdue"
+            ? t.serviceOverdue
+            : t.serviceIn((svc.info.kmLeft ?? 0).toLocaleString(lang === "vi" ? "vi-VN" : "en-US"))
+        }
+        onPress={() => router.push("/status?service=1")}
+      />,
+    );
 
   const statusLine = (() => {
     if (cmd.status === "sent") return { text: t.sending, spin: true };

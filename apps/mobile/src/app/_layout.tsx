@@ -17,6 +17,7 @@ import { PrefsProvider } from "../prefs";
 import { QueryProvider } from "../services/query";
 import { useTheme } from "../theme/use-theme";
 import { Launch } from "../ui/launch";
+import { historyDetent } from "../ui/service-visit";
 import { ToastProvider } from "../ui/toast";
 
 SplashScreen.preventAutoHideAsync();
@@ -95,6 +96,26 @@ export default function RootLayout() {
                       sheetCornerRadius: 24,
                       contentStyle: { backgroundColor: c.s1 },
                     }}
+                  />
+                  <Stack.Screen
+                    name="service"
+                    options={{
+                      presentation: "formSheet",
+                      sheetAllowedDetents: "fitToContents",
+                      sheetGrabberVisible: true,
+                      sheetCornerRadius: 24,
+                      contentStyle: { backgroundColor: c.s1 },
+                    }}
+                  />
+                  <Stack.Screen
+                    name="service-history"
+                    options={() => ({
+                      presentation: "formSheet",
+                      sheetAllowedDetents: [historyDetent()],
+                      sheetGrabberVisible: true,
+                      sheetCornerRadius: 24,
+                      contentStyle: { backgroundColor: c.s1 },
+                    })}
                   />
                   <Stack.Screen
                     name="pin"

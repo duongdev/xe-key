@@ -59,8 +59,6 @@ let car: CarStatus = {
     at: Date.now() - 14 * 60_000,
   },
   batteryV: 12.4,
-  odometerKm: 24_816,
-  serviceInKm: 1_200,
   alerts: 2,
   updatedAt: Date.now() - 2 * 60_000,
   account: "ok",
@@ -289,6 +287,34 @@ export const mockCar: CarService = {
       color: "NH-883P Meteoroid Gray",
       photo: null,
     };
+  },
+  async service() {
+    await wait(300);
+    const day = (n: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    };
+    // "Soon" (Service board, frame 2); visits use Honda's local type names.
+    return {
+      overdue: false,
+      targetKm: 30_000,
+      dueDate: day(12),
+      kmLeft: 800,
+      daysLeft: 12,
+      planVnd: 2_450_000,
+      visits: [
+        { id: "v4", type: "Phụ kiện", date: day(-87), km: 28_220, priceVnd: 1_250_000 },
+        { id: "v3", type: "Bảo dưỡng định kỳ", date: day(-235), km: 26_262, priceVnd: 2_180_000 },
+        { id: "v2", type: "Sơn và thân vỏ", date: day(-396), km: 21_904, priceVnd: 6_400_000 },
+        { id: "v1", type: "Bảo dưỡng định kỳ", date: day(-480), km: 15_150, priceVnd: null },
+      ],
+    };
+  },
+  async visitPrice() {
+    await wait(300);
+    return 1_980_000;
   },
   async alerts() {
     await wait(400);

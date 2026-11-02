@@ -1,4 +1,12 @@
-import { lastDays, pinResult, toAlerts, toCarStatus, toTripRoute, toTrips } from "./honda-car";
+import {
+  lastDays,
+  pinResult,
+  toAlerts,
+  toCarStatus,
+  toService,
+  toTripRoute,
+  toTrips,
+} from "./honda-car";
 
 // Values shaped like the live probe (research/FINDINGS.md Round 7); personal data is made up.
 const raw = {
@@ -34,8 +42,6 @@ describe("toCarStatus", () => {
       fuelPct: 15,
       rangeKm: 87,
       batteryV: 12.6,
-      odometerKm: null,
-      serviceInKm: null,
       alerts: 9,
       updatedAt: 1_793_544_550_000,
       account: "ok",
@@ -255,5 +261,50 @@ describe("toTripRoute", () => {
       { lat: 40.7, lng: -120.95 },
     ]);
     expect(toTripRoute({ oid: "1" })).toEqual([]);
+  });
+});
+
+describe("toService", () => {
+  // Shapes from FINDINGS Round 11 (live, OVER_DUE car).
+  const top = {
+    vehicleInfo: {
+      maintenanceReminderLevel: "OVER_DUE",
+      nextMaintenanceMileage: 30000,
+      nextMaintenanceDate: 1784394000000,
+      remainingDayToMaintenance: 0,
+    },
+  };
+  const next = {
+    maintenanceReminderLevel: "OVER_DUE",
+    nextMaintenanceMileage: { unit: "Km/h", threshold: 5000, value: 0 },
+    timeToMaintenance: { unit: "Days", threshold: 180, value: 0 },
+    nextMaintenancePlan: { total: 1076000, grandTotal: 1276000 },
+  };
+  const list = [
+    { oid: "2", maintenanceDate: 1768842000000, endMileage: 26262, type: "Bảo dưỡng định kỳ" },
+    { oid: "1", maintenanceDate: 1786035600000, endMileage: 33220, type: "Phụ kiện" },
+    { oid: "3", maintenanceDate: null, endMileage: 1 },
+  ];
+  it("reads target, left, plan and visits newest first", () => {
+    const s = toService(top, next, list, { "2": 1196036 });
+    expect(s).toMatchObject({
+      overdue: true,
+      targetKm: 30000,
+      dueDate: 1784394000000,
+      kmLeft: 0,
+      daysLeft: 0,
+      planVnd: 1276000,
+    });
+    expect(s.visits.map((v) => [v.id, v.km, v.priceVnd])).toEqual([
+      ["1", 33220, null],
+      ["2", 26262, 1196036],
+    ]);
+  });
+  it("is empty-safe", () => {
+    expect(toService({}, {}, null, {})).toMatchObject({
+      overdue: false,
+      targetKm: null,
+      visits: [],
+    });
   });
 });

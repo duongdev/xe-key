@@ -20,6 +20,8 @@ export type Prefs = {
   /** Dev builds only (Settings › Developer); release builds always talk to Honda. Renamed from
    * `api` so devices that saved the old mock default start on live. */
   honda: "mock" | "live";
+  /** Service target the user marked as done ("Already serviced"); see `hideKey`. */
+  serviceHidden: string | null;
 };
 
 const DEFAULTS: Prefs = {
@@ -33,6 +35,7 @@ const DEFAULTS: Prefs = {
   format: "system",
   fuel: "kml",
   honda: "live",
+  serviceHidden: null,
 };
 
 const KEY = "prefs.v1";
