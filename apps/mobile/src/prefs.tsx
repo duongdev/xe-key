@@ -15,9 +15,13 @@ export type Prefs = {
   siri: boolean;
   language: "system" | "en" | "vi";
   format: "system" | "24h" | "12h";
+  /** Fuel use unit; Honda sends km/l. */
+  fuel: "kml" | "l100";
   /** Dev builds only (Settings › Developer); release builds always talk to Honda. Renamed from
    * `api` so devices that saved the old mock default start on live. */
   honda: "mock" | "live";
+  /** Service target the user marked as done ("Already serviced"); see `hideKey`. */
+  serviceHidden: string | null;
 };
 
 const DEFAULTS: Prefs = {
@@ -29,7 +33,9 @@ const DEFAULTS: Prefs = {
   siri: false,
   language: "system",
   format: "system",
+  fuel: "kml",
   honda: "live",
+  serviceHidden: null,
 };
 
 const KEY = "prefs.v1";

@@ -344,7 +344,81 @@ success, engine started/stopped, and these failures:
   `tripEndTime` (ms), `duration` (s), `mileage.value` (whole km, unit mislabelled "Km/h"),
   `avgSpeed`, `maxSpeed`, `fuelConsumption` (km/l), `dayDuration`/`nightDuration` (s),
   `accelPercentage`/`brakePercentage` (value null on our car).
+- The Honda PIN is **4 digits** in every region; `POST /auth/pin/verify` form `pin` → `pinToken`.
+  APK check: PIN entry is hard-coded to 4 in `BaseFragment_G3.pushString` (Trips / carlog screens)
+  and `SecurityPinCodeFingerprint.pushString` (sends at length 4); `SetPinFragment` sets
+  `mPinLength = 4` for set/change and 6 only for the SMS code during "Forgot PIN" reset. No country
+  branch around any of these; the app is one codebase for all 8 regions (Round 5).
 - No place names or route here. The route (`tripRoute`, an encoded polyline) is only in
   `/car/trip/detail?oid=&pinToken=`; `/car/trip/recent` and `/car/trip/favorite` also need the PIN token.
-- `/car/trip/summary?sumDay=1|7` → `INVALID_ARGUMENT`; the valid `sumDay` values are still unknown.
+- `/car/trip/summary?sumDay=1|7` → `INVALID_ARGUMENT`: wrong parameter (see Round 9).
 
+## Round 9 — driving behaviour without the PIN
+
+- The app builds `GET /car/trip/summary?summaryType=Day|Month|Year` (`CarServiceBean.getTripSummary`,
+  enum `SummaryType`). `sumDay` is from an older code path. **No PIN token, no uoid**: all three
+  return `SUCCESS` with the session alone.
+- Reply: a list, newest first. `Day` = one row per day the car was driven (46 rows, 09 May → 01 Nov
+  2026, so ~6 months back), `Month` = one per month (6), `Year` = one (2026). Row fields:
+  `title` ("01 Nov 2026" / "Nov 2026" / "2026"), `summaryDate` (ms), `day`/`month`/`year` (0 when
+  not used), `tripCount`, `duration`/`dayDuration`/`nightDuration` (s), `mileage.value` (km,
+  labelled "Km/h"), `avgSpeed`, `maxSpeed` (km/h), `fuelConsumption` (km/l),
+  `accelPercentage`/`brakePercentage` (%), `warningMessage`.
+- **This is the official app's "Driving behaviour" screen** (`DrivingBehaviourFragment`): per period
+  it shows max speed, average speed, distance, time and two bars from `brakePercentage` and
+  `accelPercentage` (null → 0). There is **no score number** in the API or the app.
+- On our car every accel/brake value is `0` (summary) or `null` (per-trip rows), and every
+  `warningMessage` is empty, so the bars would always be empty for us.
+- `/car/topPage` `lastDrive` is the latest `Day` summary row (same shape).
+
+## Round 10 — PIN and trip detail replies (live, 2026-11-02)
+
+Captured as shapes only (key names and value types) from Xe Key in Expo Go on the user's phone; the
+user typed the PIN.
+- `POST /auth/pin/verify` form `pin` → `{status, results: {data: {pinToken: string}, error: null}}`.
+- `GET /car/trip/detail?oid=&pinToken=` → `{status, results: {data: {oid, tripStartTime: number,
+  tripEndTime: number, tripRoute: string (encoded polyline), duration: {unit, value: string
+  "h:mm"}, mileage: {unit, value: number}, favorite: boolean}, error: null}}`. No speeds, fuel,
+  idle or place names: those come from the `/car/trip` day row and the geocoder.
+- The app loaded detail for several trips in a row on one token (no rate error seen).
+
+
+## Round 11 — odometer and service (live + APK, 2026-11-02)
+
+Read-only GETs with the saved session; no commands, PIN or bookings. One VN car, TCU gen 3.
+
+**No live odometer.** No reply carries the car's current odometer: not `/car`, `/car/profile`,
+`/car/topPage`, `/car/dashboard`, `/car/nextMaintenance` or `/car/warning`. In the APK,
+`odometer` is only ever *sent* to Honda — the user types it to prove ownership
+(`PUT /vehicleOwnership/verify` `carOid, odometer`; "Enter current mileage from odometer";
+"The odometer does not match") and in the AO-region home location (`POST /homelocation/sethome`).
+Honda can read it from the car, but no app reply returns it.
+
+**Service history — `GET /maintenance?uoid=<user oid>`** (legacy screen "Service history",
+same host as the g3 calls). One row per dealer visit, newest first:
+`{oid, type (local name: "Bảo dưỡng định kỳ" periodic, "Phụ kiện" accessories, "Sơn và thân vỏ"
+body & paint), maintenanceDate, maintenanceEndDate (epoch ms, local midnight), endMileage (km,
+whole number)}`. `endMileage` is the odometer the dealer wrote on the repair order. This car:
+12 rows from 915 km (2024) to 33,220 km (2026-08-07). `uoid` is optional: `/maintenance` with no query returns the same rows for the signed-in user.
+- `GET /maintenance/detail?mtcoid=<row oid>` adds `startMileage`, `endMileage` (same value on a
+  one-day visit), `maintenanceStartDate`, `orderNo`, `totalPrice` (VND), `dealer{name,…}`,
+  `serviceType[{value, displayName}]`, `parts` (null here).
+- Cadence: changes only when a dealer closes a repair order (dealer system), not from the TCU.
+
+**Next service.** `/car/topPage` `vehicleInfo.nextMaintenanceMileage` is the **odometer target**
+of the next periodic service (30,000 here), with `nextMaintenanceDate` (epoch ms) and
+`remainingDayToMaintenance`. `/car/nextMaintenance` gives the reminder window instead:
+`nextMaintenanceMileage{unit:"Km/h" (mislabel), threshold: 5000, value}` and
+`timeToMaintenance{unit:"Days", threshold: 180, value}`, where `value` is km / days left (0 when
+`maintenanceReminderLevel` is `"OVER_DUE"`), plus `nextMaintenancePlan` (parts, `wage`, `total`,
+`grandTotal`, VND; `nameTH` holds the local-language name). This car is `OVER_DUE`: last
+periodic service 26,262 km, target 30,000 km, and a later visit already read 33,220 km.
+
+**Writes, not read:** `PUT /car/maintenanceMode` (`status`, `warningOid`) toggles maintenance
+mode; `PUT /vehicleOwnership/list|start|skip|verify` run the ownership flow.
+
+**Odometer we can show — estimate.** `last service endMileage + trip km since that date`
+(`/car/trip/summary?summaryType=Day` rows, Round 9). Label it "about" and the source date:
+trips the TCU missed (offline, sleep) make it read low. Then "km left" = `nextMaintenanceMileage`
+target − estimate; when the reminder `value` from `/car/nextMaintenance` is above 0, prefer it.
+Not checked yet: how close the trip sum since 2026-08-07 comes to the dealer reading.

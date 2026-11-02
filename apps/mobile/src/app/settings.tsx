@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import * as LocalAuthentication from "expo-local-authentication";
+import { getCalendars, getLocales } from "expo-localization";
 import { router } from "expo-router";
 import {
   CaretRightIcon,
@@ -7,25 +9,32 @@ import {
   ClockIcon,
   CodeIcon,
   CrownIcon,
+  GasPumpIcon,
   GlobeIcon,
   HardDrivesIcon,
+  LockKeyIcon,
   ScanSmileyIcon,
   SignOutIcon,
   SquaresFourIcon,
 } from "phosphor-react-native";
 import { type ReactNode, useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Switch, View } from "react-native";
-import { useT } from "../i18n";
+import { fuelAverage } from "../car/behaviour";
+import { useLang, useT } from "../i18n";
+import { formatTime } from "../i18n/format";
+import { formatFuel } from "../i18n/fuel";
 import { type Prefs, usePrefs } from "../prefs";
 import { resetLiveCar } from "../services/live-car";
-import { useCar, wipeCache } from "../services/query";
-import { password, secret } from "../services/secret";
+import { carService, useCar, wipeCache } from "../services/query";
+import { hondaPin, password, secret } from "../services/secret";
+import { forgetPin } from "../services/trip-pin";
 import { useAuth } from "../services/use-auth";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader } from "../ui/page-header";
-import { pick } from "../ui/pick";
+import { askPin } from "../ui/pin-sheet";
 import { Screen, useBottomPad } from "../ui/screen";
+import { selectSheet } from "../ui/select-sheet";
 import { Text } from "../ui/text";
 
 type Tint = "acc" | "warn" | "fg2";
@@ -133,6 +142,16 @@ export default function Settings() {
   const { prefs, update } = usePrefs();
   const { data: car } = useCar();
   const auth = useAuth();
+  const lang = useLang();
+  // Samples in the select sheets show the user's own values.
+  const deviceVi = getLocales()[0]?.languageCode === "vi";
+  const deviceClock = getCalendars()[0]?.uses24hourClock === false ? "12h" : "24h";
+  // The System label already says "Follows iPhone" in VI ("Theo iPhone"); don't repeat it there.
+  const systemSample = (v: string) =>
+    t.languages.system === t.followsPhone ? v : `${t.followsPhone} · ${v}`;
+  // Same query as Trips (cached there); only read for the Fuel use sample.
+  const summary = useQuery({ queryKey: ["summary"], queryFn: () => carService.summary() }).data;
+  const myKmPerL = summary ? fuelAverage(summary.day, new Date()).kmPerL : null;
   const [deviceId, setDeviceId] = useState<string | null>(null);
   useEffect(() => {
     if (__DEV__) secret.get("deviceId").then(setDeviceId);
@@ -172,6 +191,11 @@ export default function Settings() {
     />
   );
 
+  const [pinSaved, setPinSaved] = useState(false);
+  useEffect(() => {
+    hondaPin.saved().then(setPinSaved);
+  }, []);
+
   const signOut = () =>
     Alert.alert(t.signOutConfirm, t.signOutBody, [
       { text: t.cancel, style: "cancel" },
@@ -181,6 +205,7 @@ export default function Settings() {
         onPress: async () => {
           await auth.signOut();
           resetLiveCar();
+          void forgetPin();
           wipeCache();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
@@ -208,15 +233,7 @@ export default function Settings() {
                   tint="acc"
                   label={prefs.carName ?? car?.model ?? ""}
                   value={car?.plate ?? undefined}
-                  onPress={() =>
-                    Alert.prompt(
-                      t.rename,
-                      undefined,
-                      (v) => update({ carName: v.trim() || null }),
-                      "plain-text",
-                      prefs.carName ?? car?.model,
-                    )
-                  }
+                  onPress={() => router.push("/car")}
                 />,
               ]}
             </Group>
@@ -245,6 +262,53 @@ export default function Settings() {
             />,
           ]}
         </Group>
+        <Group title={t.hondaPin}>
+          {[
+            <Row
+              key="pin-faceid"
+              icon={ScanSmileyIcon}
+              tint="acc"
+              label={t.pinRemember}
+              right={
+                <View style={{ height: 31 }}>
+                  <Switch
+                    accessibilityLabel={t.pinRemember}
+                    value={pinSaved}
+                    trackColor={{ true: c.acc, false: c.s2 }}
+                    onValueChange={async (on) => {
+                      // On needs the PIN once: the sheet stores it behind Face ID.
+                      if (on)
+                        return askPin({ remember: true }, async () =>
+                          setPinSaved(await hondaPin.saved()),
+                        );
+                      await hondaPin.del();
+                      setPinSaved(false);
+                    }}
+                  />
+                </View>
+              }
+            />,
+            <Row
+              key="pin-forget"
+              icon={LockKeyIcon}
+              tint="fg2"
+              label={t.forgetPin}
+              onPress={() =>
+                Alert.alert(t.forgetPinConfirm, t.forgetPinBody, [
+                  { text: t.cancel, style: "cancel" },
+                  {
+                    text: t.forgetPin,
+                    style: "destructive",
+                    onPress: async () => {
+                      await forgetPin();
+                      setPinSaved(false);
+                    },
+                  },
+                ])
+              }
+            />,
+          ]}
+        </Group>
         <Group title={t.app}>
           {[
             <Row key="siri" icon={ChatTextIcon} tint="fg2" label={t.siri} right={toggle("siri")} />,
@@ -255,7 +319,48 @@ export default function Settings() {
               label={t.language}
               value={t.languages[prefs.language]}
               onPress={() =>
-                pick(t.language, t.languages, t.cancel, (language) => update({ language }))
+                selectSheet({
+                  title: t.language,
+                  value: prefs.language,
+                  // Each language named in itself; System shows what it follows now.
+                  options: [
+                    {
+                      key: "system",
+                      label: t.languages.system,
+                      sample: systemSample(deviceVi ? "Tiếng Việt" : "English"),
+                    },
+                    { key: "en", label: "English" },
+                    { key: "vi", label: "Tiếng Việt" },
+                  ],
+                  onSelect: (k) => update({ language: k as Prefs["language"] }),
+                })
+              }
+            />,
+            <Row
+              key="fuel"
+              icon={GasPumpIcon}
+              tint="fg2"
+              label={t.fuelUse}
+              value={t.fuelUnits[prefs.fuel]}
+              onPress={() =>
+                selectSheet({
+                  title: t.fuelUse,
+                  value: prefs.fuel,
+                  note: t.fuelUseNote,
+                  options: (["kml", "l100"] as const).map((k) => {
+                    const f = formatFuel(myKmPerL, k, lang);
+                    const own = f ? `${f.value} ${f.unit}` : null;
+                    return {
+                      key: k,
+                      label: t.fuelUnits[k],
+                      sample:
+                        k === "kml"
+                          ? [own, t.hondasUnit].filter(Boolean).join(" · ")
+                          : (own ?? undefined),
+                    };
+                  }),
+                  onSelect: (k) => update({ fuel: k as Prefs["fuel"] }),
+                })
               }
             />,
             <Row
@@ -264,9 +369,23 @@ export default function Settings() {
               tint="fg2"
               label={t.timeFormat}
               value={t.formats[prefs.format]}
-              onPress={() =>
-                pick(t.timeFormat, t.formats, t.cancel, (format) => update({ format }))
-              }
+              onPress={() => {
+                const now = Date.now();
+                selectSheet({
+                  title: t.timeFormat,
+                  value: prefs.format,
+                  options: [
+                    {
+                      key: "system",
+                      label: t.formats.system,
+                      sample: systemSample(formatTime(now, deviceClock, lang)),
+                    },
+                    { key: "24h", label: t.formats["24h"], sample: formatTime(now, "24h", lang) },
+                    { key: "12h", label: t.formats["12h"], sample: formatTime(now, "12h", lang) },
+                  ],
+                  onSelect: (k) => update({ format: k as Prefs["format"] }),
+                });
+              }}
             />,
           ]}
         </Group>

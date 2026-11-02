@@ -1,4 +1,12 @@
-import { lastDays, toAlerts, toCarStatus, toTrips } from "./honda-car";
+import {
+  lastDays,
+  pinResult,
+  toAlerts,
+  toCarStatus,
+  toService,
+  toTripRoute,
+  toTrips,
+} from "./honda-car";
 
 // Values shaped like the live probe (research/FINDINGS.md Round 7); personal data is made up.
 const raw = {
@@ -34,8 +42,6 @@ describe("toCarStatus", () => {
       fuelPct: 15,
       rangeKm: 87,
       batteryV: 12.6,
-      odometerKm: null,
-      serviceInKm: null,
       alerts: 9,
       updatedAt: 1_793_544_550_000,
       account: "ok",
@@ -181,6 +187,9 @@ describe("toTrips", () => {
     mileage: { unit: "Km/h", value: 10 },
     avgSpeed: { unit: "Km/h", value: 19.1 },
     fuelConsumption: { unit: "km/l", value: 9.5 },
+    maxSpeed: { unit: "Km/h", value: 58 },
+    dayDuration: 1169,
+    nightDuration: 615,
     brakePercentage: { unit: "%", value: null },
   };
 
@@ -193,7 +202,10 @@ describe("toTrips", () => {
         km: 10,
         minutes: 30,
         avgKmh: 19.1,
+        maxKmh: 58,
         kmPerL: 9.5,
+        daySeconds: 1169,
+        nightSeconds: 615,
         from: null,
         to: null,
       },
@@ -214,5 +226,85 @@ describe("lastDays", () => {
     expect(days[0]).toEqual({ day: 2, month: 11, year: 2026 });
     expect(days[2]).toEqual({ day: 31, month: 10, year: 2026 });
     expect(days[6]).toEqual({ day: 27, month: 10, year: 2026 });
+  });
+});
+
+describe("pinResult", () => {
+  const env = (status: string, data: unknown, code?: string) => ({
+    status,
+    results: { data, error: code ? { code } : null },
+  });
+  it("reads the token, a wrong PIN and Honda's lock", () => {
+    expect(pinResult(env("SUCCESS", { pinToken: "tk" }))).toEqual({ ok: true, token: "tk" });
+    expect(pinResult(env("FAILURE", { pinFailureCount: 2 }))).toEqual({
+      ok: false,
+      error: "wrong",
+    });
+    expect(pinResult(env("FAILURE", null, "PIN_IS_LOCKED"))).toEqual({
+      ok: false,
+      error: "locked",
+    });
+    expect(pinResult(env("FAILURE", null, "WRONG_PIN"))).toEqual({ ok: false, error: "wrong" });
+    expect(pinResult(env("FAILURE", null, "SESSION_EXPIRED"))).toEqual({
+      ok: false,
+      error: "other",
+    });
+    expect(pinResult(env("SUCCESS", {}))).toEqual({ ok: false, error: "other" });
+    expect(pinResult(null)).toEqual({ ok: false, error: "other" });
+  });
+});
+
+describe("toTripRoute", () => {
+  it("decodes the route of a trip detail reply", () => {
+    expect(toTripRoute({ oid: "1", tripRoute: "_p~iF~ps|U_ulLnnqC" })).toEqual([
+      { lat: 38.5, lng: -120.2 },
+      { lat: 40.7, lng: -120.95 },
+    ]);
+    expect(toTripRoute({ oid: "1" })).toEqual([]);
+  });
+});
+
+describe("toService", () => {
+  // Shapes from FINDINGS Round 11 (live, OVER_DUE car).
+  const top = {
+    vehicleInfo: {
+      maintenanceReminderLevel: "OVER_DUE",
+      nextMaintenanceMileage: 30000,
+      nextMaintenanceDate: 1784394000000,
+      remainingDayToMaintenance: 0,
+    },
+  };
+  const next = {
+    maintenanceReminderLevel: "OVER_DUE",
+    nextMaintenanceMileage: { unit: "Km/h", threshold: 5000, value: 0 },
+    timeToMaintenance: { unit: "Days", threshold: 180, value: 0 },
+    nextMaintenancePlan: { total: 1076000, grandTotal: 1276000 },
+  };
+  const list = [
+    { oid: "2", maintenanceDate: 1768842000000, endMileage: 26262, type: "Bảo dưỡng định kỳ" },
+    { oid: "1", maintenanceDate: 1786035600000, endMileage: 33220, type: "Phụ kiện" },
+    { oid: "3", maintenanceDate: null, endMileage: 1 },
+  ];
+  it("reads target, left, plan and visits newest first", () => {
+    const s = toService(top, next, list, { "2": 1196036 });
+    expect(s).toMatchObject({
+      overdue: true,
+      targetKm: 30000,
+      dueDate: 1784394000000,
+      kmLeft: 0,
+      daysLeft: 0,
+      planVnd: 1276000,
+    });
+    expect(s.visits.map((v) => [v.id, v.km, v.priceVnd])).toEqual([
+      ["1", 33220, null],
+      ["2", 26262, 1196036],
+    ]);
+  });
+  it("is empty-safe", () => {
+    expect(toService({}, {}, null, {})).toMatchObject({
+      overdue: false,
+      targetKm: null,
+      visits: [],
+    });
   });
 });

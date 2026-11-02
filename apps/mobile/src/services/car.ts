@@ -1,7 +1,11 @@
 import type { CommandEvent, CommandKind } from "../car/command";
 import type { Engine } from "../car/engine";
+import type { ServiceInfo } from "../car/service";
 import type { Body } from "../car/status";
+import type { SummaryRow } from "../car/summary";
 import type { TripSummary } from "../car/trips";
+import type { PinResult } from "./honda-car";
+import type { SavedTrip } from "./trip-places";
 
 export type AcLevel = "low" | "mid" | "high";
 
@@ -25,8 +29,6 @@ export type CarStatus = {
   /** Last GPS fix; null when the car has no signal; undefined until fetched (never saved to disk). */
   location?: CarLocation | null;
   batteryV: number | null;
-  odometerKm: number | null;
-  serviceInKm: number | null;
   alerts: number;
   /** When the car last reported (not when we fetched). */
   updatedAt: number;
@@ -57,15 +59,13 @@ export type Trip = TripSummary & {
   to: string | null;
   endedAt?: number | null;
   avgKmh?: number | null;
+  maxKmh?: number | null;
   kmPerL?: number | null;
+  daySeconds?: number | null;
+  nightSeconds?: number | null;
 };
-export type Driving = {
-  score: number;
-  scoreDelta: number;
-  accel: number;
-  hardBrakes: number;
-  speed: number;
-};
+/** Honda's driving summary rows (FINDINGS Round 9), newest first. */
+export type Summary = { day: SummaryRow[]; month: SummaryRow[]; year: SummaryRow[] };
 
 export type AlertKind =
   | "unlocked"
@@ -90,6 +90,18 @@ export type CarAlert = {
   ok?: boolean;
 };
 
+/** What Honda says about the car itself ("Your car" › From Honda; Reset). */
+export type HondaCar = {
+  model: string;
+  year: string | null;
+  vin: string | null;
+  plate: string | null;
+  /** Honda's paint text, e.g. "NH-883P Trắng ngà". */
+  color: string | null;
+  /** Honda's car photo; needs the session cookie. Null when Honda has none. */
+  photo: { uri: string; headers: Record<string, string> } | null;
+};
+
 export interface CarService {
   /** Last snapshot Honda holds; may be old. */
   status(): Promise<CarStatus>;
@@ -99,7 +111,25 @@ export interface CarService {
     onEvent: (e: CommandEvent) => void,
     opts?: { ac?: AcLevel; cancel?: CancelToken },
   ): Promise<CarStatus | null>;
-  trips(): Promise<{ trips: Trip[]; driving: Driving | null }>;
+  /** Recent trips (last 7 days), newest first. */
+  trips(): Promise<Trip[]>;
+  summary(): Promise<Summary>;
+  /** Trips of the calendar day that starts at `day` (local midnight). */
+  dayTrips(day: number): Promise<Trip[]>;
+  /** Checks the Honda PIN; on success the PIN token is kept in memory for this app session. */
+  verifyPin(pin: string): Promise<PinResult>;
+  /** Route and place names of a trip. Needs this session's PIN token; throws `NoPin` without it. */
+  tripDetail(id: string): Promise<SavedTrip>;
+  /** Drops this session's PIN token. */
+  forgetPin(): void;
+  hondaCar(): Promise<HondaCar>;
+  /** Service reminder + dealer history; prices only for the 3 newest visits. */
+  service(): Promise<ServiceInfo>;
+  /** Price of one dealer visit (VND), for the full history list. */
+  visitPrice(id: string): Promise<number | null>;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }
+
+/** A trip detail was asked for without this session's Honda PIN token. */
+export class NoPin extends Error {}
