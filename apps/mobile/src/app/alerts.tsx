@@ -155,7 +155,7 @@ function AlertRow({ alert, onDelete }: { alert: CarAlert; onDelete: (a: CarAlert
             right: 20,
             bottom: 0,
             height: 1,
-            backgroundColor: c.s1,
+            backgroundColor: c.sep,
           }}
         />
       </View>

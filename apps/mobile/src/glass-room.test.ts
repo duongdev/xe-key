@@ -20,7 +20,11 @@ test("every file placing a GlassButton raises its row", () => {
     if (f.endsWith("/ui/glass.tsx")) return false;
     const s = fs.readFileSync(f, "utf8");
     if (!s.includes("<GlassButton")) return false;
-    const floated = /<GlassButton[^>]*position: "absolute"/s.test(s);
+    // Every GlassButton in the file floats when its props (the next lines) set position absolute.
+    const floated = s
+      .split("<GlassButton")
+      .slice(1)
+      .every((props) => props.slice(0, 300).includes('position: "absolute"'));
     return !s.includes("zIndex: 1") && !s.includes("<PageHeader") && !floated;
   });
   expect(missing).toEqual([]);

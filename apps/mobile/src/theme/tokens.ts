@@ -5,6 +5,8 @@ const dark = {
   s1: "#17171A",
   s2: "#232327",
   line: "#2E2E33",
+  /** List dividers on bg (1 pt, none above the first row). Rows inside an s1 card use s2. */
+  sep: "#1F1F23",
   fg: "#F2F2F3",
   fg2: "#A1A1A8",
   acc: "#7CC7FF",
@@ -13,6 +15,8 @@ const dark = {
   onwarn: "#1A1000",
   error: "#FF8A80",
   danger: "#D93A3F",
+  /** Night driving share (Trips day/night bar). */
+  night: "#5B6BFF",
 } as const;
 
 export type Colors = { readonly [K in keyof typeof dark]: string };
@@ -22,6 +26,7 @@ const light: Colors = {
   s1: "#FFFFFF",
   s2: "#E6E6EB",
   line: "#D6D6DC",
+  sep: "#E3E3E8",
   fg: "#0B0B0C",
   fg2: "#5C5C63",
   acc: "#0A6FC2",
@@ -30,6 +35,7 @@ const light: Colors = {
   onwarn: "#FFFFFF",
   error: "#C42B22",
   danger: "#D93A3F",
+  night: "#4453E6",
 };
 
 export function colors(scheme: Scheme | null | undefined): Colors {

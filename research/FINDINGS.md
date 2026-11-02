@@ -344,7 +344,30 @@ success, engine started/stopped, and these failures:
   `tripEndTime` (ms), `duration` (s), `mileage.value` (whole km, unit mislabelled "Km/h"),
   `avgSpeed`, `maxSpeed`, `fuelConsumption` (km/l), `dayDuration`/`nightDuration` (s),
   `accelPercentage`/`brakePercentage` (value null on our car).
+- The Honda PIN is **4 digits** in every region; `POST /auth/pin/verify` form `pin` → `pinToken`.
+  APK check: PIN entry is hard-coded to 4 in `BaseFragment_G3.pushString` (Trips / carlog screens)
+  and `SecurityPinCodeFingerprint.pushString` (sends at length 4); `SetPinFragment` sets
+  `mPinLength = 4` for set/change and 6 only for the SMS code during "Forgot PIN" reset. No country
+  branch around any of these; the app is one codebase for all 8 regions (Round 5).
 - No place names or route here. The route (`tripRoute`, an encoded polyline) is only in
   `/car/trip/detail?oid=&pinToken=`; `/car/trip/recent` and `/car/trip/favorite` also need the PIN token.
-- `/car/trip/summary?sumDay=1|7` → `INVALID_ARGUMENT`; the valid `sumDay` values are still unknown.
+- `/car/trip/summary?sumDay=1|7` → `INVALID_ARGUMENT`: wrong parameter (see Round 9).
+
+## Round 9 — driving behaviour without the PIN
+
+- The app builds `GET /car/trip/summary?summaryType=Day|Month|Year` (`CarServiceBean.getTripSummary`,
+  enum `SummaryType`). `sumDay` is from an older code path. **No PIN token, no uoid**: all three
+  return `SUCCESS` with the session alone.
+- Reply: a list, newest first. `Day` = one row per day the car was driven (46 rows, 09 May → 01 Nov
+  2026, so ~6 months back), `Month` = one per month (6), `Year` = one (2026). Row fields:
+  `title` ("01 Nov 2026" / "Nov 2026" / "2026"), `summaryDate` (ms), `day`/`month`/`year` (0 when
+  not used), `tripCount`, `duration`/`dayDuration`/`nightDuration` (s), `mileage.value` (km,
+  labelled "Km/h"), `avgSpeed`, `maxSpeed` (km/h), `fuelConsumption` (km/l),
+  `accelPercentage`/`brakePercentage` (%), `warningMessage`.
+- **This is the official app's "Driving behaviour" screen** (`DrivingBehaviourFragment`): per period
+  it shows max speed, average speed, distance, time and two bars from `brakePercentage` and
+  `accelPercentage` (null → 0). There is **no score number** in the API or the app.
+- On our car every accel/brake value is `0` (summary) or `null` (per-trip rows), and every
+  `warningMessage` is empty, so the bars would always be empty for us.
+- `/car/topPage` `lastDrive` is the latest `Day` summary row (same shape).
 

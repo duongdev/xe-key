@@ -46,7 +46,12 @@ const mockCar: CarStatus = {
 let mockFinish: (() => void) | null = null;
 const mockService: CarService = {
   status: async () => mockCar,
-  trips: async () => ({ trips: [], driving: null }),
+  trips: async () => [],
+  summary: async () => ({ day: [], month: [], year: [] }),
+  dayTrips: async () => [],
+  verifyPin: async () => ({ ok: false, error: "other" }),
+  tripDetail: async () => ({ route: [], from: null, to: null }),
+  forgetPin: () => {},
   alerts: async () => [],
   deleteAlert: async () => {},
   command: (_kind, onEvent, opts) =>

@@ -7,6 +7,7 @@ describe("colors", () => {
       s1: "#17171A",
       s2: "#232327",
       line: "#2E2E33",
+      sep: "#1F1F23",
       fg: "#F2F2F3",
       fg2: "#A1A1A8",
       acc: "#7CC7FF",
@@ -15,6 +16,7 @@ describe("colors", () => {
       onwarn: "#1A1000",
       error: "#FF8A80",
       danger: "#D93A3F",
+      night: "#5B6BFF",
     });
   });
 
@@ -24,6 +26,7 @@ describe("colors", () => {
       s1: "#FFFFFF",
       s2: "#E6E6EB",
       line: "#D6D6DC",
+      sep: "#E3E3E8",
       fg: "#0B0B0C",
       fg2: "#5C5C63",
       acc: "#0A6FC2",
@@ -32,6 +35,7 @@ describe("colors", () => {
       onwarn: "#FFFFFF",
       error: "#C42B22",
       danger: "#D93A3F",
+      night: "#4453E6",
     });
   });
 

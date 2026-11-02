@@ -1,248 +1,129 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import {
-  GaugeIcon,
-  LightningIcon,
+  LockKeyIcon,
+  MapPinIcon,
   PathIcon,
-  RoadHorizonIcon,
   SparkleIcon,
-  TrafficSignalIcon,
-  TrendDownIcon,
-  TrendUpIcon,
   WarningIcon,
+  XIcon,
 } from "phosphor-react-native";
-import { ActivityIndicator, ScrollView, View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
-import { tripTotals, weekBars } from "../car/trips";
+import { useEffect, useRef, useState } from "react";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { type PeriodKind, periodOf } from "../car/summary";
 import { useLang, useT } from "../i18n";
-import { useFormatTime } from "../i18n/format";
-import type { Driving, Trip } from "../services/car";
+import type { Trip } from "../services/car";
 import { carService } from "../services/query";
+import { tripCache, useSavedTrips } from "../services/trip-cache";
+import {
+  autoFaceId,
+  faceIdUnlock,
+  loadPlaces,
+  openedTrip,
+  usePinSession,
+} from "../services/trip-pin";
+import { lacking, withPlaces } from "../services/trip-places";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
-import { PageHeader, Pill } from "../ui/page-header";
+import { PageHeader } from "../ui/page-header";
+import { askPin } from "../ui/pin-sheet";
+import { SolidPressable } from "../ui/press-glass";
 import { Screen, useBottomPad } from "../ui/screen";
+import { SummaryCard } from "../ui/summary-card";
 import { Text } from "../ui/text";
-
-const BAR_PT = 64;
-const DAY = 86_400_000;
-
-function ScoreRing({ score, delta }: { score: number; delta: number }) {
-  const { c } = useTheme();
-  const t = useT();
-  const r = 42;
-  const len = 2 * Math.PI * r;
-  const Trend = delta >= 0 ? TrendUpIcon : TrendDownIcon;
-  return (
-    <View
-      accessible
-      accessibilityLabel={`${t.score}: ${score}`}
-      style={{ width: 104, height: 104, alignItems: "center", justifyContent: "center" }}
-    >
-      <Svg width={104} height={104} style={{ position: "absolute" }}>
-        <Circle cx={52} cy={52} r={r} fill="none" stroke={c.s2} strokeWidth={8} />
-        <Circle
-          cx={52}
-          cy={52}
-          r={r}
-          fill="none"
-          stroke={c.acc}
-          strokeWidth={8}
-          strokeLinecap="round"
-          strokeDasharray={len}
-          strokeDashoffset={len * (1 - score / 100)}
-          transform="rotate(-90 52 52)"
-        />
-      </Svg>
-      <Text variant="stat" style={{ fontSize: 28, lineHeight: 32 }}>
-        {score}
-      </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-        <Trend size={12} color={c.acc} />
-        <Text variant="caption" color="acc" style={{ fontSize: 12, lineHeight: 14 }}>
-          {Math.abs(delta)}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function Behaviour({ d }: { d: Driving }) {
-  const { c } = useTheme();
-  const t = useT();
-  const rows = [
-    {
-      key: "accel",
-      icon: LightningIcon,
-      label: t.acceleration,
-      value: t.gentle,
-      fill: d.accel,
-      warn: false,
-    },
-    {
-      key: "brake",
-      icon: TrafficSignalIcon,
-      label: t.braking,
-      value: t.hardBrakes(d.hardBrakes),
-      fill: Math.max(0.1, 1 - d.hardBrakes * 0.19),
-      warn: d.hardBrakes > 0,
-    },
-    { key: "speed", icon: GaugeIcon, label: t.speed, value: t.ok, fill: d.speed, warn: false },
-  ];
-  return (
-    <View style={{ flex: 1, gap: 12 }}>
-      {rows.map(({ key, icon: Icon, label, value, fill, warn }) => (
-        <View
-          key={key}
-          accessible
-          accessibilityLabel={`${label}: ${value}`}
-          style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-        >
-          <Icon size={16} color={warn ? c.warn : c.acc} />
-          <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: c.s2 }}>
-            <View
-              style={{
-                width: `${fill * 100}%`,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: warn ? c.warn : c.acc,
-              }}
-            />
-          </View>
-          <Text variant="caption" color="fg2" style={{ minWidth: 52, textAlign: "right" }}>
-            {value}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-function TripRow({ trip, first }: { trip: Trip; first: boolean }) {
-  const { c } = useTheme();
-  const t = useT();
-  const time = useFormatTime();
-  const now = new Date();
-  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const lang = useLang();
-  // Live trips have no place names (needs the Honda PIN), so their lines show start and end time.
-  const timed = trip.from === null || trip.to === null;
-  const when =
-    trip.startedAt >= dayStart
-      ? timed
-        ? t.today
-        : time(trip.startedAt)
-      : trip.startedAt >= dayStart - DAY
-        ? t.yesterday
-        : (t.weekdaysShort[new Date(trip.startedAt).getDay()] ?? "");
-  const from = timed ? time(trip.startedAt) : trip.from;
-  const to = timed ? (trip.endedAt ? time(trip.endedAt) : "") : trip.to;
-  const n = (v: number) => v.toLocaleString(lang === "vi" ? "vi-VN" : "en-US");
-  const stats = [
-    trip.avgKmh != null ? `${n(Math.round(trip.avgKmh))} km/h` : null,
-    trip.kmPerL != null ? `${n(trip.kmPerL)} km/l` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  return (
-    <View
-      accessible
-      accessibilityLabel={[
-        when,
-        `${from} → ${to}`,
-        `${trip.km} km`,
-        t.minShort(trip.minutes),
-        stats,
-      ]
-        .filter(Boolean)
-        .join(", ")}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        paddingVertical: 12,
-        borderTopWidth: first ? 0 : 1,
-        borderTopColor: c.s1,
-      }}
-    >
-      <Text variant="caption" color="fg2" style={{ width: 48 }}>
-        {when}
-      </Text>
-      <View style={{ alignItems: "center", gap: 2 }}>
-        <View
-          style={{ width: 7, height: 7, borderRadius: 4, borderWidth: 1.5, borderColor: c.fg2 }}
-        />
-        <View
-          style={{
-            width: 1,
-            height: 12,
-            borderLeftWidth: 1,
-            borderStyle: "dotted",
-            borderColor: c.fg2,
-          }}
-        />
-        <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: c.acc }} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text variant="label" weight={400} color="fg2">
-          {from}
-        </Text>
-        <Text variant="label" weight={600}>
-          {to}
-        </Text>
-        {stats ? (
-          <Text variant="caption" color="fg2" style={{ marginTop: 2 }}>
-            {stats}
-          </Text>
-        ) : null}
-      </View>
-      <View style={{ alignItems: "flex-end", gap: 4 }}>
-        <View
-          style={{
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            borderRadius: 8,
-            backgroundColor: c.s1,
-          }}
-        >
-          <Text variant="caption" weight={600}>{`${trip.km} km`}</Text>
-        </View>
-        <Text variant="caption" color="fg2">
-          {t.minShort(trip.minutes)}
-        </Text>
-      </View>
-    </View>
-  );
-}
+import { useToast } from "../ui/toast";
+import { TripRow, TripRowSkeleton } from "../ui/trip-row";
+import { usePullRefresh } from "../ui/use-pull-refresh";
 
 export default function Trips() {
   const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
   const lang = useLang();
-  const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ["trips"],
-    queryFn: () => carService.trips(),
+  const [today] = useState(() => new Date());
+  const [kind, setKind] = useState<PeriodKind>("week");
+  const [period, setPeriod] = useState(() => periodOf("week", today));
+  const [picked, setPicked] = useState<number | null>(null);
+  const recent = useQuery({ queryKey: ["trips"], queryFn: () => carService.trips() });
+  const summary = useQuery({ queryKey: ["summary"], queryFn: () => carService.summary() });
+  const day = useQuery({
+    queryKey: ["dayTrips", picked],
+    queryFn: () => carService.dayTrips(picked ?? 0),
+    enabled: picked !== null,
+    placeholderData: keepPreviousData,
+  });
+
+  const saved = useSavedTrips();
+  const pin = usePinSession();
+  const toast = useToast();
+  const listed = picked === null ? (recent.data ?? []) : (day.data ?? []);
+  const missing = lacking(listed, saved);
+
+  // Face ID by itself, once per app session, only when listed trips lack places (HANDOFF).
+  useEffect(() => {
+    const trips = recent.data;
+    if (!trips) return;
+    autoFaceId(trips, t.pinFaceIdReason).then((r) => {
+      if (r === "ok") void loadPlaces(lacking(trips, tripCache.all()));
+      if (r === "changed") askPin({ changed: true }, () => afterPin.current());
+    });
+  }, [recent.data, t.pinFaceIdReason]);
+
+  // After the PIN sheet: load places, then go on to the trip that asked for it (or say so).
+  const unlocked = (next?: Trip) => {
+    if (missing.length) void loadPlaces(missing);
+    if (next) showTrip(next);
+    else toast.show({ kind: "success", text: t.placesShown });
+  };
+
+  // The Face ID effect runs once per data load; it reads the latest handler through this ref.
+  const afterPin = useRef(unlocked);
+  afterPin.current = unlocked;
+
+  const showTrip = (trip: Trip) => {
+    openedTrip.set(trip);
+    router.push(`/trip/${trip.id}`);
+  };
+  // Details always need this session's PIN or Face ID first.
+  const openTrip = async (trip: Trip) => {
+    const r = await faceIdUnlock(t.pinFaceIdReason);
+    if (r !== "ok") return askPin({ changed: r === "changed" }, () => unlocked(trip));
+    if (missing.length) void loadPlaces(missing);
+    showTrip(trip);
+  };
+
+  // Refetches keep the shown values in place (no skeleton over loaded content).
+  const pull = usePullRefresh(async () => {
+    const res = await Promise.all([
+      recent.refetch(),
+      summary.refetch(),
+      picked !== null ? day.refetch() : null,
+    ]);
+    // Values stay; say so instead of dropping them.
+    if (res.some((r) => r?.isError)) toast.show({ kind: "error", text: t.refreshFailed });
+    if (pin.unlocked) await loadPlaces(lacking(listed, tripCache.all()));
   });
 
   const body = (() => {
-    if (isPending)
-      return (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator color={c.fg2} />
-        </View>
-      );
-    if (isError || !data)
+    if (recent.isError && summary.isError)
       return (
         <EmptyState
           icon={<PathIcon size={56} color={c.fg2} />}
           badge={<WarningIcon size={20} color={c.warn} />}
           badgeTone="warn"
           title={t.loadFailed}
-          action={{ label: t.retry, onPress: () => refetch() }}
+          action={{
+            label: t.retry,
+            onPress: () => {
+              recent.refetch();
+              summary.refetch();
+            },
+          }}
         />
       );
-    if (data.trips.length === 0)
+    const loaded = !recent.isPending && !summary.isPending;
+    if (loaded && !recent.data?.length && !summary.data?.day.length)
       return (
         <EmptyState
           icon={<PathIcon size={56} color={c.fg2} />}
@@ -252,107 +133,142 @@ export default function Trips() {
         />
       );
 
-    const today = new Date();
-    const bars = weekBars(data.trips, today);
-    const weekLabel = bars.map((b) => `${t.weekdays[b.weekday]} ${Math.round(b.km)} km`).join(", ");
-    const sorted = [...data.trips].sort((a, b) => b.startedAt - a.startedAt);
+    const list = withPlaces(listed, saved);
+    const pickedDate = picked === null ? null : new Date(picked);
+    const header = pickedDate
+      ? `${t.weekdaysShort[pickedDate.getDay()] ?? ""} ${pickedDate.toLocaleDateString(
+          lang === "vi" ? "vi-VN" : "en-GB",
+          { day: "numeric", month: "short" },
+        )}${day.data && !day.isPlaceholderData ? ` · ${t.tripCount(day.data.length)}` : ""}`
+      : t.recentTrips;
     return (
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 12, paddingTop: 12, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
+            tintColor={c.fg2}
+          />
+        }
       >
-        <View
-          accessible
-          accessibilityLabel={weekLabel}
-          style={{
-            padding: 16,
-            paddingBottom: 12,
-            borderRadius: radius.card,
-            backgroundColor: c.s1,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              height: BAR_PT + 22,
+        {summary.data || summary.isPending ? (
+          <SummaryCard
+            summary={summary.data}
+            kind={kind}
+            period={period}
+            picked={picked}
+            today={today}
+            onKind={(k) => {
+              setKind(k);
+              setPeriod(periodOf(k, today));
+              setPicked(null);
             }}
-          >
-            {bars.map((b) => (
+            onPeriod={(p) => {
+              setPeriod(p);
+              setPicked(null);
+            }}
+            onPick={setPicked}
+          />
+        ) : null}
+
+        {missing.length && !pin.unlocked ? (
+          <View style={{ padding: 16, gap: 14, borderRadius: radius.card, backgroundColor: c.s1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View
-                key={`${b.weekday}-${b.today}`}
-                style={{ flex: 1, alignItems: "center", gap: 6 }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: `${c.acc}24`,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <View
-                  style={{
-                    width: 22,
-                    height: Math.max(4, b.height * BAR_PT),
-                    borderRadius: 6,
-                    backgroundColor: b.today ? c.acc : b.km ? c.line : c.s2,
-                  }}
-                />
-                <Text
-                  variant="caption"
-                  weight={b.today ? 700 : 600}
-                  color={b.today ? "fg" : "fg2"}
-                  style={{ fontSize: 12, lineHeight: 14 }}
-                >
-                  {t.weekdays[b.weekday]}
+                <MapPinIcon size={20} color={c.acc} />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text weight={600}>
+                  {Object.keys(saved).length ? t.pinBannerNew(missing.length) : t.pinBannerHidden}
+                </Text>
+                <Text variant="caption" color="fg2" style={{ fontSize: 14 }}>
+                  {pin.faceIdFailed
+                    ? t.pinFaceIdFailed
+                    : Object.keys(saved).length
+                      ? t.pinBannerNewSub
+                      : t.pinBannerHiddenSub}
                 </Text>
               </View>
-            ))}
-          </View>
-        </View>
-
-        {data.driving ? (
-          <View
-            style={{
-              padding: 16,
-              borderRadius: radius.card,
-              backgroundColor: c.s1,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 20,
-            }}
-          >
-            <ScoreRing score={data.driving.score} delta={data.driving.scoreDelta} />
-            <Behaviour d={data.driving} />
+            </View>
+            <SolidPressable
+              accessibilityRole="button"
+              onPress={() => askPin({}, () => unlocked())}
+              style={{
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: c.s2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <LockKeyIcon size={18} color={c.fg} />
+              <Text weight={600}>{t.showPlaces}</Text>
+            </SolidPressable>
           </View>
         ) : null}
 
-        <View style={{ marginTop: 4 }}>
-          {sorted.map((trip, i) => (
-            <TripRow key={trip.id} trip={trip} first={i === 0} />
-          ))}
+        {/* Always here, so a bar tap swaps its text instead of pushing the rows down. */}
+        <View
+          style={{
+            height: 36,
+            marginTop: 8,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text weight={600} accessibilityRole="header">
+            {header}
+          </Text>
+          {picked !== null ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setPicked(null)}
+              style={{
+                height: 32,
+                paddingHorizontal: 12,
+                borderRadius: 16,
+                backgroundColor: c.s1,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <XIcon size={12} color={c.fg2} />
+              <Text variant="caption" weight={600} color="fg2">
+                {t.showRecent}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+        <View style={{ opacity: picked !== null && day.isFetching && day.data ? 0.5 : 1 }}>
+          {(picked === null ? recent.isPending : !day.data)
+            ? [0, 1, 2, 3].map((i) => <TripRowSkeleton key={i} first={i === 0} />)
+            : list.map((trip, i) => (
+                <TripRow key={trip.id} trip={trip} first={i === 0} onPress={() => openTrip(trip)} />
+              ))}
         </View>
       </ScrollView>
     );
   })();
 
-  const totals = data?.trips.length ? tripTotals(data.trips, new Date()) : null;
   return (
     <Screen scroll>
-      <PageHeader
-        title={t.trips}
-        right={
-          totals ? (
-            <View style={{ flexDirection: "row", gap: 6 }}>
-              <Pill
-                icon={<PathIcon size={14} color={c.fg2} />}
-                text={String(totals.trips)}
-                label={t.tripsLabel(totals.trips)}
-              />
-              <Pill
-                icon={<RoadHorizonIcon size={14} color={c.fg2} />}
-                text={`${totals.km.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")} km`}
-                label={t.weekKm(totals.km)}
-              />
-            </View>
-          ) : null
-        }
-      />
+      <PageHeader title={t.trips} />
       {body}
     </Screen>
   );

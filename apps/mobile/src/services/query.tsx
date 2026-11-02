@@ -19,7 +19,9 @@ import type { CarAlert, CarService, CarStatus } from "./car";
 import { SignedOut } from "./honda";
 import { liveCar } from "./live-car";
 import { mockCar } from "./mock-car";
+import { hondaPin } from "./secret";
 import { pickSnapshot } from "./snapshot";
+import { tripCache } from "./trip-cache";
 
 onlineManager.setEventListener((setOnline) =>
   NetInfo.addEventListener((s) => setOnline(s.isConnected !== false)),
@@ -67,6 +69,9 @@ export function refreshCar() {
 /** After a new sign-in (maybe another account): drop everything so Home loads fresh. */
 export function forgetCar() {
   queryClient.clear();
+  // Places, routes and the Honda PIN belong to the old account.
+  tripCache.clear();
+  hondaPin.del().catch(() => {});
 }
 
 /** Sign-out and lost sessions: forget the car in memory and on disk. */
@@ -92,6 +97,11 @@ export const carService: CarService = {
   status: () => impl.status(),
   command: (...a) => impl.command(...a),
   trips: () => impl.trips(),
+  summary: () => impl.summary(),
+  dayTrips: (day) => impl.dayTrips(day),
+  verifyPin: (pin) => impl.verifyPin(pin),
+  tripDetail: (id) => impl.tripDetail(id),
+  forgetPin: () => impl.forgetPin(),
   alerts: () => impl.alerts(),
   deleteAlert: (id) => impl.deleteAlert(id),
 };

@@ -9,6 +9,7 @@ import {
   CrownIcon,
   GlobeIcon,
   HardDrivesIcon,
+  LockKeyIcon,
   ScanSmileyIcon,
   SignOutIcon,
   SquaresFourIcon,
@@ -19,12 +20,14 @@ import { useT } from "../i18n";
 import { type Prefs, usePrefs } from "../prefs";
 import { resetLiveCar } from "../services/live-car";
 import { useCar, wipeCache } from "../services/query";
-import { password, secret } from "../services/secret";
+import { hondaPin, password, secret } from "../services/secret";
+import { forgetPin } from "../services/trip-pin";
 import { useAuth } from "../services/use-auth";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader } from "../ui/page-header";
 import { pick } from "../ui/pick";
+import { askPin } from "../ui/pin-sheet";
 import { Screen, useBottomPad } from "../ui/screen";
 import { Text } from "../ui/text";
 
@@ -172,6 +175,11 @@ export default function Settings() {
     />
   );
 
+  const [pinSaved, setPinSaved] = useState(false);
+  useEffect(() => {
+    hondaPin.saved().then(setPinSaved);
+  }, []);
+
   const signOut = () =>
     Alert.alert(t.signOutConfirm, t.signOutBody, [
       { text: t.cancel, style: "cancel" },
@@ -181,6 +189,7 @@ export default function Settings() {
         onPress: async () => {
           await auth.signOut();
           resetLiveCar();
+          void forgetPin();
           wipeCache();
           update({ onboarded: false, region: null, carName: null, faceId: false });
           router.dismissAll();
@@ -242,6 +251,53 @@ export default function Settings() {
               tint="acc"
               label={t.faceIdSetting}
               right={toggle("faceId")}
+            />,
+          ]}
+        </Group>
+        <Group title={t.hondaPin}>
+          {[
+            <Row
+              key="pin-faceid"
+              icon={ScanSmileyIcon}
+              tint="acc"
+              label={t.pinRemember}
+              right={
+                <View style={{ height: 31 }}>
+                  <Switch
+                    accessibilityLabel={t.pinRemember}
+                    value={pinSaved}
+                    trackColor={{ true: c.acc, false: c.s2 }}
+                    onValueChange={async (on) => {
+                      // On needs the PIN once: the sheet stores it behind Face ID.
+                      if (on)
+                        return askPin({ remember: true }, async () =>
+                          setPinSaved(await hondaPin.saved()),
+                        );
+                      await hondaPin.del();
+                      setPinSaved(false);
+                    }}
+                  />
+                </View>
+              }
+            />,
+            <Row
+              key="pin-forget"
+              icon={LockKeyIcon}
+              tint="fg2"
+              label={t.forgetPin}
+              onPress={() =>
+                Alert.alert(t.forgetPinConfirm, t.forgetPinBody, [
+                  { text: t.cancel, style: "cancel" },
+                  {
+                    text: t.forgetPin,
+                    style: "destructive",
+                    onPress: async () => {
+                      await forgetPin();
+                      setPinSaved(false);
+                    },
+                  },
+                ])
+              }
             />,
           ]}
         </Group>

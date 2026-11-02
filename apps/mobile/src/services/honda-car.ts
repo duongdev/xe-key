@@ -1,5 +1,6 @@
 import { RUN_S } from "../car/engine";
 import type { CarAlert, CarStatus, Trip } from "./car";
+import { decodePolyline } from "./polyline";
 
 // Honda replies are loosely typed (FINDINGS Round 7); everything is read null-safe.
 type Obj = Record<string, unknown>;
@@ -111,7 +112,10 @@ export function toTrips(rows: unknown): Trip[] {
         km: num(obj(o.mileage).value) ?? 0,
         minutes: seconds === null ? 0 : Math.round(seconds / 60),
         avgKmh: num(obj(o.avgSpeed).value),
+        maxKmh: num(obj(o.maxSpeed).value),
         kmPerL: num(obj(o.fuelConsumption).value),
+        daySeconds: num(o.dayDuration),
+        nightSeconds: num(o.nightDuration),
         from: null,
         to: null,
       },
@@ -125,4 +129,27 @@ export function lastDays(today: Date) {
     const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
     return { day: d.getDate(), month: d.getMonth() + 1, year: d.getFullYear() };
   });
+}
+
+export type PinResult =
+  | { ok: true; token: string }
+  | { ok: false; error: "wrong" | "locked" | "other" };
+
+/** `/auth/pin/verify` reply. Honda also sends `pinFailureCount` (of 5); the design shows no count. */
+export function pinResult(reply: unknown): PinResult {
+  const r = obj(reply);
+  const results = obj(r.results);
+  const token = str(obj(results.data).pinToken);
+  if (is(r.status, "SUCCESS") && token) return { ok: true, token };
+  if (is(obj(results.error).code, "PIN_IS_LOCKED")) return { ok: false, error: "locked" };
+  const code = str(obj(results.error).code).toUpperCase();
+  const counted = num(obj(results.data).pinFailureCount) !== null;
+  if (counted || code === "WRONG_PIN" || code === "PIN_NOT_MATCH")
+    return { ok: false, error: "wrong" };
+  return { ok: false, error: "other" };
+}
+
+/** `/car/trip/detail` → route points (empty when Honda has none). */
+export function toTripRoute(detail: unknown) {
+  return decodePolyline(str(obj(detail).tripRoute));
 }

@@ -1,7 +1,10 @@
 import type { CommandEvent, CommandKind } from "../car/command";
 import type { Engine } from "../car/engine";
 import type { Body } from "../car/status";
+import type { SummaryRow } from "../car/summary";
 import type { TripSummary } from "../car/trips";
+import type { PinResult } from "./honda-car";
+import type { SavedTrip } from "./trip-places";
 
 export type AcLevel = "low" | "mid" | "high";
 
@@ -57,15 +60,13 @@ export type Trip = TripSummary & {
   to: string | null;
   endedAt?: number | null;
   avgKmh?: number | null;
+  maxKmh?: number | null;
   kmPerL?: number | null;
+  daySeconds?: number | null;
+  nightSeconds?: number | null;
 };
-export type Driving = {
-  score: number;
-  scoreDelta: number;
-  accel: number;
-  hardBrakes: number;
-  speed: number;
-};
+/** Honda's driving summary rows (FINDINGS Round 9), newest first. */
+export type Summary = { day: SummaryRow[]; month: SummaryRow[]; year: SummaryRow[] };
 
 export type AlertKind =
   | "unlocked"
@@ -99,7 +100,20 @@ export interface CarService {
     onEvent: (e: CommandEvent) => void,
     opts?: { ac?: AcLevel; cancel?: CancelToken },
   ): Promise<CarStatus | null>;
-  trips(): Promise<{ trips: Trip[]; driving: Driving | null }>;
+  /** Recent trips (last 7 days), newest first. */
+  trips(): Promise<Trip[]>;
+  summary(): Promise<Summary>;
+  /** Trips of the calendar day that starts at `day` (local midnight). */
+  dayTrips(day: number): Promise<Trip[]>;
+  /** Checks the Honda PIN; on success the PIN token is kept in memory for this app session. */
+  verifyPin(pin: string): Promise<PinResult>;
+  /** Route and place names of a trip. Needs this session's PIN token; throws `NoPin` without it. */
+  tripDetail(id: string): Promise<SavedTrip>;
+  /** Drops this session's PIN token. */
+  forgetPin(): void;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }
+
+/** A trip detail was asked for without this session's Honda PIN token. */
+export class NoPin extends Error {}

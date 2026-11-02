@@ -79,7 +79,24 @@ export default function RootLayout() {
               <ThemeProvider value={navTheme}>
                 <Stack
                   screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}
-                />
+                >
+                  {/* Native iOS sheet: system dim, grabber, drag to close, keyboard handling. */}
+                  {/* iOS page sheet: Trips zooms out behind, drag down to close. */}
+                  <Stack.Screen
+                    name="trip/[id]"
+                    options={{ presentation: "modal", contentStyle: { backgroundColor: c.s1 } }}
+                  />
+                  <Stack.Screen
+                    name="pin"
+                    options={{
+                      presentation: "formSheet",
+                      sheetAllowedDetents: "fitToContents",
+                      sheetGrabberVisible: true,
+                      sheetCornerRadius: 24,
+                      contentStyle: { backgroundColor: c.s1 },
+                    }}
+                  />
+                </Stack>
               </ThemeProvider>
               {launching ? <Launch onDone={endLaunch} /> : null}
             </ToastProvider>

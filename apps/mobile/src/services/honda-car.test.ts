@@ -1,4 +1,4 @@
-import { lastDays, toAlerts, toCarStatus, toTrips } from "./honda-car";
+import { lastDays, pinResult, toAlerts, toCarStatus, toTripRoute, toTrips } from "./honda-car";
 
 // Values shaped like the live probe (research/FINDINGS.md Round 7); personal data is made up.
 const raw = {
@@ -181,6 +181,9 @@ describe("toTrips", () => {
     mileage: { unit: "Km/h", value: 10 },
     avgSpeed: { unit: "Km/h", value: 19.1 },
     fuelConsumption: { unit: "km/l", value: 9.5 },
+    maxSpeed: { unit: "Km/h", value: 58 },
+    dayDuration: 1169,
+    nightDuration: 615,
     brakePercentage: { unit: "%", value: null },
   };
 
@@ -193,7 +196,10 @@ describe("toTrips", () => {
         km: 10,
         minutes: 30,
         avgKmh: 19.1,
+        maxKmh: 58,
         kmPerL: 9.5,
+        daySeconds: 1169,
+        nightSeconds: 615,
         from: null,
         to: null,
       },
@@ -214,5 +220,40 @@ describe("lastDays", () => {
     expect(days[0]).toEqual({ day: 2, month: 11, year: 2026 });
     expect(days[2]).toEqual({ day: 31, month: 10, year: 2026 });
     expect(days[6]).toEqual({ day: 27, month: 10, year: 2026 });
+  });
+});
+
+describe("pinResult", () => {
+  const env = (status: string, data: unknown, code?: string) => ({
+    status,
+    results: { data, error: code ? { code } : null },
+  });
+  it("reads the token, a wrong PIN and Honda's lock", () => {
+    expect(pinResult(env("SUCCESS", { pinToken: "tk" }))).toEqual({ ok: true, token: "tk" });
+    expect(pinResult(env("FAILURE", { pinFailureCount: 2 }))).toEqual({
+      ok: false,
+      error: "wrong",
+    });
+    expect(pinResult(env("FAILURE", null, "PIN_IS_LOCKED"))).toEqual({
+      ok: false,
+      error: "locked",
+    });
+    expect(pinResult(env("FAILURE", null, "WRONG_PIN"))).toEqual({ ok: false, error: "wrong" });
+    expect(pinResult(env("FAILURE", null, "SESSION_EXPIRED"))).toEqual({
+      ok: false,
+      error: "other",
+    });
+    expect(pinResult(env("SUCCESS", {}))).toEqual({ ok: false, error: "other" });
+    expect(pinResult(null)).toEqual({ ok: false, error: "other" });
+  });
+});
+
+describe("toTripRoute", () => {
+  it("decodes the route of a trip detail reply", () => {
+    expect(toTripRoute({ oid: "1", tripRoute: "_p~iF~ps|U_ulLnnqC" })).toEqual([
+      { lat: 38.5, lng: -120.2 },
+      { lat: 40.7, lng: -120.95 },
+    ]);
+    expect(toTripRoute({ oid: "1" })).toEqual([]);
   });
 });

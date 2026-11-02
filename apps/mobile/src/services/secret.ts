@@ -42,6 +42,38 @@ export const password = {
   },
 };
 
+const PIN_SAVED = "hondaPinSaved";
+// Biometry-only (current set): enrolling a new face makes the item unreadable, same as Face ID off.
+const biometric = { ...OPTS, requireAuthentication: true };
+
+/**
+ * The Honda PIN, only when the user turns on "Remember with Face ID" (HANDOFF › Honda PIN; ADR 0005
+ * pattern). Off means it is never stored. `saved()` reads a flag, so it never asks for Face ID.
+ */
+export const hondaPin = {
+  saved: async () => (await SecureStore.getItemAsync(PIN_SAVED, OPTS)) === "1",
+  /** Asks for Face ID with `reason`. Null when cancelled, failed, or the face set changed. */
+  async get(reason: string): Promise<string | null> {
+    try {
+      return await SecureStore.getItemAsync("hondaPin", {
+        ...biometric,
+        authenticationPrompt: reason,
+      });
+    } catch {
+      return null;
+    }
+  },
+  async set(pin: string) {
+    await SecureStore.deleteItemAsync("hondaPin", OPTS);
+    await SecureStore.setItemAsync("hondaPin", pin, biometric);
+    await SecureStore.setItemAsync(PIN_SAVED, "1", OPTS);
+  },
+  async del() {
+    await SecureStore.deleteItemAsync("hondaPin", OPTS);
+    await SecureStore.deleteItemAsync(PIN_SAVED, OPTS);
+  },
+};
+
 /** In-memory jar that writes through to the Keychain, so the session survives restarts. */
 export function keychainCookies(seed: Record<string, string>): CookieStore {
   const jar = new Map(Object.entries(seed));

@@ -1,6 +1,14 @@
 import type { CommandKind } from "../car/command";
 import { RUN_S } from "../car/engine";
-import type { CarAlert, CarService, CarStatus, Trip } from "./car";
+import { periodStats, type SummaryRow } from "../car/summary";
+import {
+  type CarAlert,
+  type CarService,
+  type CarStatus,
+  NoPin,
+  type Summary,
+  type Trip,
+} from "./car";
 
 /** Dev-only knob to drive every Home state from the kitchen sink. */
 export type Scenario =
@@ -84,6 +92,87 @@ const TRIPS: Trip[] = [
   { id: "t6", startedAt: ago(5, 10, 0), km: 26, minutes: 47, from: "Thủ Đức", to: "Cần Giờ" },
 ];
 
+const asLive = (t: Trip): Trip => ({
+  ...t,
+  from: null,
+  to: null,
+  endedAt: t.startedAt + t.minutes * 60_000,
+  avgKmh: Math.round(t.km / (t.minutes / 60)),
+  maxKmh: Math.round(t.km / (t.minutes / 60)) + 25,
+  kmPerL: 9.5,
+  daySeconds: t.minutes * 45,
+  nightSeconds: t.minutes * 15,
+});
+
+/** ~6 months of Day rows like Honda's, with month and year rows summed from them. */
+let summaryCache: Summary | null = null;
+let mockPin = false;
+function summaryRows(): Summary {
+  if (summaryCache) return summaryCache;
+  let seed = 7;
+  const rnd = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const today = new Date();
+  const day: SummaryRow[] = [];
+  for (let i = 0; i < 180; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+    const known = TRIPS.filter((t) => t.startedAt >= d.getTime() && t.startedAt < next);
+    const drove = known.length > 0 || (i > 6 && rnd() < 0.55);
+    if (!drove) continue;
+    const trips = known.length || 1 + Math.floor(rnd() * 3);
+    const km = known.length ? known.reduce((n, t) => n + t.km, 0) : Math.round(6 + rnd() * 50);
+    const seconds = known.length
+      ? known.reduce((n, t) => n + t.minutes * 60, 0)
+      : Math.round((km / (18 + rnd() * 20)) * 3600);
+    const night = Math.round(seconds * (rnd() < 0.3 ? rnd() * 0.5 : 0));
+    day.push({
+      date: d.getTime(),
+      trips,
+      km,
+      seconds,
+      daySeconds: seconds - night,
+      nightSeconds: night,
+      avgKmh: Math.round((km / (seconds / 3600)) * 10) / 10,
+      maxKmh: Math.round(40 + rnd() * 70),
+      kmPerL: Math.round((8 + rnd() * 5) * 10) / 10,
+      accelPct: 0,
+      brakePct: 0,
+    });
+  }
+  const group = (key: (d: Date) => number) => {
+    const by = new Map<number, SummaryRow[]>();
+    for (const r of day) {
+      const k = key(new Date(r.date));
+      by.set(k, [...(by.get(k) ?? []), r]);
+    }
+    return [...by.entries()].map(([date, rows]): SummaryRow => {
+      const s = periodStats(rows);
+      return {
+        date,
+        trips: s.trips,
+        km: s.km,
+        seconds: s.seconds,
+        daySeconds: rows.reduce((n, r) => n + r.daySeconds, 0),
+        nightSeconds: rows.reduce((n, r) => n + r.nightSeconds, 0),
+        avgKmh: s.avgKmh,
+        maxKmh: s.maxKmh,
+        kmPerL: s.kmPerL,
+        accelPct: s.accelPct,
+        brakePct: s.brakePct,
+      };
+    });
+  };
+  summaryCache = {
+    day,
+    month: group((d) => new Date(d.getFullYear(), d.getMonth(), 1).getTime()),
+    year: group((d) => new Date(d.getFullYear(), 0, 1).getTime()),
+  };
+  return summaryCache;
+}
+
 let alerts: CarAlert[] = [
   { id: "a1", kind: "unlocked", n: 15, at: ago(0, 7, 50), unread: true },
   { id: "a2", kind: "auto-off", at: ago(0, 7, 31), unread: true },
@@ -127,11 +216,66 @@ export const mockCar: CarService = {
   async trips() {
     await wait(500);
     if (scenario === "error") throw new Error("mock: trips failed");
-    if (scenario === "empty") return { trips: [], driving: null };
+    // Like live: places come only from trip detail (PIN); the mock PIN is 1234.
+    return scenario === "empty" ? [] : TRIPS.map(asLive);
+  },
+  async summary() {
+    await wait(400);
+    if (scenario === "error") throw new Error("mock: summary failed");
+    return scenario === "empty" ? { day: [], month: [], year: [] } : summaryRows();
+  },
+  async dayTrips(day) {
+    await wait(300);
+    const next = new Date(day);
+    next.setDate(next.getDate() + 1);
+    const known = TRIPS.filter((t) => t.startedAt >= day && t.startedAt < next.getTime());
+    if (known.length) return known.map(asLive);
+    const row = summaryRows().day.find((r) => r.date === day);
+    if (!row) return [];
+    // Older mock days have no saved places, like live trips before the PIN.
+    return Array.from({ length: row.trips }, (_, i): Trip => {
+      const startedAt = day + (8 + i * 9) * 3_600_000;
+      const minutes = Math.round(row.seconds / 60 / row.trips);
+      return {
+        id: `m${day}-${i}`,
+        startedAt,
+        endedAt: startedAt + minutes * 60_000,
+        km: Math.round((row.km / row.trips) * 10) / 10,
+        minutes,
+        from: null,
+        to: null,
+        avgKmh: row.avgKmh,
+        kmPerL: row.kmPerL,
+      };
+    }).reverse();
+  },
+  // Mock PINs: 1234 works, 0000 is locked by Honda, anything else is wrong.
+  async verifyPin(pin) {
+    await wait(700);
+    if (pin === "1234") {
+      mockPin = true;
+      return { ok: true, token: "mock" };
+    }
+    return { ok: false, error: pin === "0000" ? "locked" : "wrong" };
+  },
+  async tripDetail(id) {
+    await wait(500);
+    if (!mockPin) throw new NoPin();
+    const seed = [...id].reduce((n, ch) => n + ch.charCodeAt(0), 0);
+    const route = Array.from({ length: 24 }, (_, i) => ({
+      lat: 10.79 + i * 0.0012 + Math.sin(i / 3 + seed) * 0.0008,
+      lng: 106.7 + i * 0.0015 + Math.cos(i / 4 + seed) * 0.0008,
+    }));
+    const known = TRIPS.find((t) => t.id === id);
+    const names = ["Thảo Điền", "Nguyễn Huệ", "Landmark 81", "Phú Mỹ Hưng", "Bến Thành"];
     return {
-      trips: TRIPS,
-      driving: { score: 86, scoreDelta: 4, accel: 0.84, hardBrakes: 2, speed: 0.92 },
+      route,
+      from: known?.from ?? names[seed % names.length] ?? null,
+      to: known?.to ?? names[(seed + 2) % names.length] ?? null,
     };
+  },
+  forgetPin() {
+    mockPin = false;
   },
   async alerts() {
     await wait(400);
