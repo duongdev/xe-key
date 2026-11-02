@@ -70,7 +70,7 @@ export function Landing({ lang, contactEmail }: { lang: Lang; contactEmail: stri
           />
         </div>
         <HoldDemo t={t} />
-        <Tour t={t} />
+        <Tour t={t} lang={lang} />
         <Features t={t} />
         <CarShapes t={t} />
         <StraightTalk t={t} />

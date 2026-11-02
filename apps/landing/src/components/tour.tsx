@@ -9,22 +9,29 @@ import {
   PathIcon,
   SnowflakeIcon,
 } from "@phosphor-icons/react";
-import { type PointerEvent, useEffect, useRef, useState } from "react";
-import type { Copy } from "../copy";
+import { type ComponentType, type PointerEvent, useEffect, useRef, useState } from "react";
+import type { Copy, Lang } from "../copy";
 import { slideAt, swipeStep } from "../lib/carousel";
 import { useReducedMotion } from "../lib/use-reduced-motion";
+import { AlertsScreen } from "./screens/alerts";
+import { EngineScreen } from "./screens/engine";
+import { FindScreen } from "./screens/find";
+import { MainScreen } from "./screens/main";
+import type { ScreenProps } from "./screens/phone";
+import { StatusScreen } from "./screens/status";
+import { TripsScreen } from "./screens/trips";
 import s from "./tour.module.css";
 
 const AUTOPLAY_MS = 6000;
 
-/** Same order as `t.tour`. */
-const SLIDES: { icon: Icon; color: string; src: string }[] = [
-  { icon: LockIcon, color: "var(--fg)", src: "/tour/main.webp" },
-  { icon: SnowflakeIcon, color: "var(--acc)", src: "/tour/engine.webp" },
-  { icon: MapPinIcon, color: "var(--fg)", src: "/tour/find.webp" },
-  { icon: GaugeIcon, color: "var(--fg)", src: "/tour/status.webp" },
-  { icon: PathIcon, color: "var(--fg)", src: "/tour/trips.webp" },
-  { icon: BellIcon, color: "var(--warn)", src: "/tour/notifications.webp" },
+/** Same order as `t.tour`. Each screen is drawn in code with the app's words for the page language. */
+const SLIDES: { icon: Icon; color: string; Screen: ComponentType<ScreenProps> }[] = [
+  { icon: LockIcon, color: "var(--fg)", Screen: MainScreen },
+  { icon: SnowflakeIcon, color: "var(--acc)", Screen: EngineScreen },
+  { icon: MapPinIcon, color: "var(--fg)", Screen: FindScreen },
+  { icon: GaugeIcon, color: "var(--fg)", Screen: StatusScreen },
+  { icon: PathIcon, color: "var(--fg)", Screen: TripsScreen },
+  { icon: BellIcon, color: "var(--warn)", Screen: AlertsScreen },
 ];
 const N = SLIDES.length;
 
@@ -55,7 +62,7 @@ function Detail({
   );
 }
 
-export function Tour({ t }: { t: Copy }) {
+export function Tour({ t, lang }: { t: Copy; lang: Lang }) {
   const [index, setIndex] = useState(0);
   const [auto, setAuto] = useState(true);
   const reduced = useReducedMotion();
@@ -126,12 +133,14 @@ export function Tour({ t }: { t: Copy }) {
               aria-label={t.k5}
             >
               <div className={s.screen}>
-                {SLIDES.map((slide, i) => {
+                {SLIDES.map(({ Screen }, i) => {
                   const d = i - index;
                   return (
                     <div
-                      key={slide.src}
+                      key={t.tour[i]?.[0] ?? i}
                       className={s.slide}
+                      role="img"
+                      aria-label={t.tour[i]?.[0] ?? ""}
                       aria-hidden={d !== 0}
                       style={{
                         opacity: d === 0 ? 1 : 0,
@@ -141,15 +150,9 @@ export function Tour({ t }: { t: Copy }) {
                             : `translateX(${d > 0 ? 48 : -48}px) scale(.98)`,
                       }}
                     >
-                      <img
-                        src={slide.src}
-                        alt={t.tour[i]?.[0] ?? ""}
-                        width={390}
-                        height={844}
-                        loading={i === 0 ? "eager" : "lazy"}
-                        decoding="async"
-                        draggable={false}
-                      />
+                      <div className={s.scaled}>
+                        <Screen lang={lang} />
+                      </div>
                     </div>
                   );
                 })}

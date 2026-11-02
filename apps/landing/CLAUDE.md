@@ -10,7 +10,9 @@ Pre-launch waitlist site for Xe Key. Next.js, prerendered pages served by a stan
 - `src/db/` — Drizzle `schema.ts` and `client.ts` (`database()` migrates once, lazily); SQL migrations in `drizzle/` (`pnpm --filter @xekey/landing db:generate` after a schema change). `src/instrumentation.ts` tries them at start.
 - `src/server/` — server-only: `payload.ts` (validation, CSV, summary), `survey-token.ts`, `rate-limit.ts` (pure, tested); `turnstile.ts` (siteverify), `env.ts`, `http.ts`.
 - `src/app/robots.ts`, `sitemap.ts` — both from `SITE_URL`; the sitemap lists each URL with its hreflang pair.
-- `src/app/icon.png`, `apple-icon.png`, `favicon.ico`; `public/og-vi.jpg`, `og-en.jpg` (share cards), `logo.png` (JSON-LD), `tour/` (app screenshots for the feature tour). Sources: `apps/mobile/design/web-assets/`.
+- `src/app/icon.png`, `apple-icon.png`, `favicon.ico`; `public/og-vi.jpg`, `og-en.jpg` (share cards), `logo.png` (JSON-LD). Sources: `apps/mobile/design/web-assets/`.
+- `src/components/screens/` — the feature tour's six app screens drawn in code (`main`, `engine`, `find`, `status`, `trips`, `alerts`), each 390 × 870 pt inside `phone.tsx` (`Phone`, status bar, `GlassCircle`, `appStrings(lang)`). Static, sample data from the app's mock car; the tour scales them into the frame.
+- `src/app-i18n/` — exact copies of `apps/mobile/src/i18n/en.ts` and `vi.ts`, so the screens use the app's own words per page language. `app-i18n.test.ts` fails when they drift: copy the two files again.
 - `src/copy.ts` — all copy, `vi` and `en`: the board's `C` dictionary plus `meta` (title, description, OG), privacy and 404 text.
 - `src/components/` — `home.tsx` (server: JSON-LD + build config around the client page), `landing.tsx` (client page shell, sign-up state, final form), `chrome.tsx` (nav with VI/EN links, footer), `privacy.tsx`; sections: `hero`, `hold-demo`, `tour`, `features`, `car-shapes`, `straight-talk`, `signup-form`, `registered`, `car` (DOM port of the app's `<Car>`). One CSS Module each.
 - `src/lib/` — pure and tested: `email.ts`, `carousel.ts`, `locale.ts` (`localePath`, `languageAlternates`), `seo.ts` (server only: `SITE_URL`, `CONTACT_EMAIL`, `pageMetadata`, JSON-LD). `survey-options.ts` (survey choices shared with the server). Glue: `signup.ts` (fetch to the API), `turnstile.ts` (widget), `use-reduced-motion.ts`.
@@ -23,6 +25,7 @@ Pre-launch waitlist site for Xe Key. Next.js, prerendered pages served by a stan
 - Every page gets its metadata from `pageMetadata(lang, path)`: self canonical, hreflang `vi`/`en`/`x-default`, OG with the language's share card.
 - Links between languages are plain `<a href>` from `localePath`. Never redirect by `Accept-Language`; never store the language in the browser.
 - Car geometry comes from `@xekey/car`; never copy paths into this app.
+- Tour screens follow the app source and the boards; every UI word comes from `appStrings(lang)`, never typed in the screen. Sample data only.
 - Every loop or float stops under Reduce Motion (CSS `prefers-reduced-motion` + `useReducedMotion`). The hold fill stays.
 - Sign-up runs a Turnstile check first and sends the token with the data. The page never holds a secret.
 - Env: see `.env.example`. Build args (Docker `--build-arg`, or env for `pnpm build`): `SITE_URL` (origin, e.g. `https://xekey.app`) and `CONTACT_EMAIL` are required — a production build fails without them. `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is optional; unset = Cloudflare's always-pass invisible test key. Runtime secrets on Dokploy: `DATABASE_URL`, `TURNSTILE_SECRET_KEY`, `SIGNING_SECRET`, `ADMIN_TOKEN` (unset disables the export). Dev falls back to Cloudflare's test secret and a dev signing secret.
@@ -35,6 +38,7 @@ Pre-launch waitlist site for Xe Key. Next.js, prerendered pages served by a stan
 - `SITE_URL` and `CONTACT_EMAIL` are inlined at build (`next.config.ts` › `env`), so dynamic routes see the same values as the prerendered pages.
 - `seo.ts` reads env at module load and throws in production: import it only from server files (`app/*`, `home.tsx`, `privacy.tsx`), never from a `"use client"` tree. Client code uses `locale.ts`.
 - Page `openGraph` replaces the parent's, so file-based `opengraph-image` does not reach every route; the share cards are set explicitly in `pageMetadata`.
+- The Docker build only gets this app and its packages (`turbo prune`), so nothing here may import from `apps/mobile`; that is why `src/app-i18n/` is a copy. `turbo.json` › `@xekey/landing#test` lists the app's i18n files as inputs so the drift test is not cached away.
 - Switching language is a full page load (different root layout).
 - Security headers and the CSP live in `next.config.ts`. A new third-party script or frame needs a CSP entry. `'unsafe-inline'` scripts are needed: prerendered pages cannot carry a nonce.
 - The standalone output does not include `public/` or `.next/static`; the Dockerfile copies them. Turbo passes the build args through (`turbo.json` › `@xekey/landing#build`).

@@ -166,12 +166,11 @@
   transition: opacity 520ms var(--settle), transform 520ms var(--settle);
 }
 
-.slide img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
+/* Screens are drawn at 390 pt wide; scale to the screen width (322 px here, 266 px on mobile). */
+.scaled {
+  width: 390px;
+  transform-origin: 0 0;
+  transform: scale(calc(322 / 390));
   pointer-events: none;
 }
 
@@ -267,6 +266,9 @@
   }
   .screen {
     border-radius: 39px;
+  }
+  .scaled {
+    transform: scale(calc(266 / 390));
   }
   .mdet {
     display: block;
