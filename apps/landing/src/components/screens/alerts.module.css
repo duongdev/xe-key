@@ -1,0 +1,159 @@
+.screen {
+  padding: 56px 20px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+}
+
+.back {
+  margin-left: -4px;
+  color: var(--fg);
+}
+
+.check {
+  color: var(--acc);
+}
+
+.h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 600;
+  letter-spacing: -0.68px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section {
+  margin: 0;
+  padding: 14px 0 6px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--fg2);
+}
+
+.row {
+  position: relative;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.row::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: #1f1f23;
+}
+
+.badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acc {
+  color: var(--acc);
+  background: rgb(124 199 255 / 0.14);
+}
+
+.warn {
+  color: var(--warn);
+  background: rgb(255 181 71 / 0.14);
+}
+
+.fg2 {
+  color: var(--fg2);
+  background: var(--s1);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--warn);
+  margin-right: -6px;
+  flex: none;
+}
+
+.when {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--fg2);
+  white-space: nowrap;
+}
+
+.dock {
+  position: absolute;
+  inset: auto 0 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.tabs {
+  height: 48px;
+  border-radius: 24px;
+}
+
+.tab {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--fg2);
+  white-space: nowrap;
+}
+
+.on {
+  font-weight: 600;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--warn);
+  color: #1a1000;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

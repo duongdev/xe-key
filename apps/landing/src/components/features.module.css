@@ -1,0 +1,76 @@
+.grid {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border-radius: 20px;
+  background: var(--s1);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+.ib {
+  grid-row: span 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--s2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card b {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  text-wrap: balance;
+}
+
+.card > span:last-child {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fg2);
+}
+
+@media (max-width: 1099px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .ib {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .card b {
+    font-size: 15px;
+  }
+  .card > span:last-child {
+    font-size: 13px;
+    line-height: 18px;
+  }
+}

@@ -1,0 +1,39 @@
+.car {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 720 / 280;
+  overflow: visible;
+}
+
+/* Two blinks over 1.6 s; the mirror lamp then stays lit, the corners go dark. */
+.mirror {
+  animation: blinkStay 1600ms linear forwards;
+}
+
+.corner {
+  opacity: 0;
+  animation: blinkOut 1600ms linear forwards;
+}
+
+@keyframes blinkStay {
+  0%, 30%, 60% { opacity: 0; }
+  15%, 45% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes blinkOut {
+  0%, 30%, 60%, 100% { opacity: 0; }
+  15%, 45% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mirror {
+    animation: none;
+    opacity: 0.7;
+  }
+  .corner {
+    animation: none;
+    opacity: 0;
+  }
+}

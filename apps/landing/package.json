@@ -1,0 +1,29 @@
+{
+  "name": "@xekey/landing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node .next/standalone/apps/landing/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "2.1.10",
+    "@xekey/car": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "next": "16.4.3",
+    "postgres": "3.4.9",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "drizzle-kit": "0.31.11"
+  }
+}

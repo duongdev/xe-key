@@ -25,7 +25,7 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - `src/services/auth.ts` — `AuthService` + `mockAuth`. Force errors: password `wrong`; phone ending `0000` (Honda down) / `1111` (app blocked); code `000000` (wrong) / `111111` (expired).
 - `src/theme/` — tokens (colors, type scale, space, radii), `useTheme`, motion curves, haptics.
 - `src/ui/` — shared primitives (`Text`, `Button`).
-- `src/car/` — `<Car>` illustration: `geometry.ts` (pure: body paths, wheel arches, contrast assist), `frame.ts` (pure: viewBox that centres the body) + `car.tsx` (SVG, unlocked/engine effects, vapor puffs as gradient sprites).
+- `src/car/` — `<Car>` illustration: `geometry.ts` / `paints.ts` (re-exports of [`@xekey/car`](../../packages/car/CLAUDE.md): body paths, wheel arches, contrast assist), `frame.ts` (pure: viewBox that centres the body) + `car.tsx` (SVG, unlocked/engine effects, vapor puffs as gradient sprites).
 - `src/kitchen-sink.tsx` — dev screen showing every token, icon and button.
 - `docs/review/` — visual review screenshots per task.
 

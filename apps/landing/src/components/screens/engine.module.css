@@ -1,0 +1,206 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  padding: 56px 20px 42px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back {
+  margin-left: -4px;
+}
+
+.title {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.spacer {
+  width: 44px;
+}
+
+.ring {
+  position: relative;
+  margin-top: 28px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ringSvg {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.big {
+  display: flex;
+  font-size: 64px;
+  line-height: 66px;
+  font-weight: 600;
+}
+
+.digit {
+  width: 39.68px;
+  text-align: center;
+}
+
+.sep {
+  width: 19.2px;
+  text-align: center;
+}
+
+.sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--fg2);
+}
+
+.msg {
+  margin-top: 18px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--acc);
+}
+
+.ac {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--fg2);
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+}
+
+.bar,
+.barOn {
+  width: 5px;
+  border-radius: 2px;
+  background: var(--s2);
+}
+
+.barOn {
+  background: var(--acc);
+}
+
+.slider {
+  height: 56px;
+  border-radius: 28px;
+  background: var(--s1);
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.opt,
+.knob {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--fg2);
+}
+
+.knob {
+  border-radius: 24px;
+  background: var(--acc);
+  color: var(--onacc);
+  font-weight: 600;
+}
+
+.starts {
+  margin-top: 16px;
+}
+
+.pills {
+  display: flex;
+  gap: 6px;
+}
+
+.pill,
+.pillOn {
+  width: 24px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--s2);
+}
+
+.pillOn {
+  background: var(--acc);
+}
+
+.actions {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.stop,
+.extend {
+  height: 68px;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stop {
+  flex: 1;
+  background: var(--s1);
+}
+
+.extend {
+  flex: 1.6;
+  background: var(--acc);
+  color: var(--onacc);
+}

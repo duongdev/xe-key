@@ -10,6 +10,15 @@
     },
     "test": {
       "dependsOn": ["^build"]
+    },
+    "@xekey/landing#build": {
+      "dependsOn": ["^build"],
+      "env": ["SITE_URL", "CONTACT_EMAIL", "NEXT_PUBLIC_TURNSTILE_SITE_KEY"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+    },
+    "@xekey/landing#test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "../mobile/src/i18n/en.ts", "../mobile/src/i18n/vi.ts"]
     }
   }
 }

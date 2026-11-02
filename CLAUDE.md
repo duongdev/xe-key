@@ -20,6 +20,8 @@ TypeScript API client, a CLI, and (soon) an Expo app.
 | API client (auth, session, endpoints) | [packages/core](packages/core/CLAUDE.md) |
 | CLI (login, commands) | [apps/cli](apps/cli/CLAUDE.md) |
 | Expo app | [apps/mobile](apps/mobile/CLAUDE.md) |
+| Landing page (waitlist) | [apps/landing](apps/landing/CLAUDE.md) |
+| Car illustration geometry | [packages/car](packages/car/CLAUDE.md) |
 | How the API was mapped | [research/FINDINGS.md](research/FINDINGS.md) |
 | RE process + sandbox | [research/RESEARCH.md](research/RESEARCH.md) |
 | How we work | [docs/conventions/](docs/conventions/) |

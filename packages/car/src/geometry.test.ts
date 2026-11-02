@@ -1,4 +1,5 @@
-import { BODIES, bodyGeometry, luminance, needsAssist, wheelArch } from "./geometry";
+import { describe, expect, it } from "vitest";
+import { BODIES, bodyGeometry, luminance, needsAssist, wheelArch } from "./geometry.js";
 
 const nums = (d: string) => (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
 
