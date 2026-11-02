@@ -11,7 +11,7 @@
 <style>body{margin:0}</style>
 </helmet>
 <div style="width:100%;line-height:0">
-<svg viewBox="0 0 720 280" width="100%" role="img" aria-label="{{label}}">
+<svg viewBox="{{vb}}" width="100%" role="img" aria-label="{{label}}" style="overflow:visible">
 <defs>
 <linearGradient id="hcShade" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0" stop-color="#FFFFFF" stop-opacity=".42"></stop>
@@ -56,6 +56,16 @@
 <stop offset="0" stop-color="#FFB547" stop-opacity="1"></stop>
 <stop offset="1" stop-color="#FFB547" stop-opacity="0"></stop>
 </radialGradient>
+<radialGradient id="hcSmoke" cx=".5" cy=".5" r=".5">
+<stop offset="0" stop-color="#E4E8EC" stop-opacity=".7"></stop>
+<stop offset=".5" stop-color="#C9CED4" stop-opacity=".3"></stop>
+<stop offset="1" stop-color="#C9CED4" stop-opacity="0"></stop>
+</radialGradient>
+<filter id="hcSmokeF" filterUnits="userSpaceOnUse" x="-160" y="60" width="460" height="220">
+<feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7" result="n"><animate attributeName="baseFrequency" values="0.018;0.028;0.018" dur="7s" repeatCount="indefinite"></animate></feTurbulence>
+<feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"></feDisplacementMap>
+<feGaussianBlur in="d" stdDeviation="3.6"></feGaussianBlur>
+</filter>
 <radialGradient id="hcFloor" cx=".5" cy=".5" r=".5">
 <stop offset="0" stop-color="#000000" stop-opacity=".7"></stop>
 <stop offset="1" stop-color="#000000" stop-opacity="0"></stop>
@@ -115,14 +125,16 @@
 <ellipse cx="{{st.hx}}" cy="{{st.hy}}" rx="44" ry="20" fill="url(#hcHeadGlow)"></ellipse>
 <ellipse cx="{{st.tx}}" cy="{{st.ty}}" rx="30" ry="15" fill="url(#hcTailGlow)"></ellipse>
 <ellipse cx="{{st.ex}}" cy="{{st.ey}}" rx="5" ry="3.5" fill="#050506"></ellipse>
-<sc-for list="{{puffs}}" as="p" hint-placeholder-count="3">
-<circle cx="{{st.ex}}" cy="{{st.ey}}" r="5" fill="#C9CED4" opacity="0">
-<animate attributeName="cx" values="{{p.x}}" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
-<animate attributeName="cy" values="{{p.y}}" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
-<animate attributeName="r" values="4;12;22" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
-<animate attributeName="opacity" values="0;.42;0" dur="2.7s" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<g filter="url(#hcSmokeF)">
+<sc-for list="{{puffs}}" as="p" hint-placeholder-count="6">
+<circle cx="{{st.ex}}" cy="{{st.ey}}" r="3" fill="url(#hcSmoke)" opacity="0">
+<animate attributeName="cx" values="{{p.x}}" keyTimes="0;.2;.6;1" dur="{{p.dur}}" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="cy" values="{{p.y}}" keyTimes="0;.2;.6;1" dur="{{p.dur}}" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="r" values="4;12;22;34" keyTimes="0;.2;.6;1" dur="{{p.dur}}" begin="{{p.begin}}" repeatCount="indefinite"></animate>
+<animate attributeName="opacity" values="0;.85;.5;0" keyTimes="0;.12;.5;1" dur="{{p.dur}}" begin="{{p.begin}}" repeatCount="indefinite"></animate>
 </circle>
 </sc-for>
+</g>
 </g>
 </sc-if>
 </g>
@@ -273,10 +285,17 @@ class Component extends DCLogic {
         const h = n(s.head), t = n(s.tail), m = n(s.mirror), o = n(s.top);
         return { hx: h[h.length - 2], hy: h[h.length - 1], tx: t[0] + 4, ty: t[1], mx: m[0] + 12, my: m[1] + 6, ex: o[0] + 16, ey: s.yb - 4 };
       })(),
-      puffs: ['0s', '0.9s', '1.8s'].map((begin, k) => {
-        const x0 = Number(s.top.match(/-?\d+/g)[0]) + 16, y0 = s.yb - 4;
-        return { begin, x: x0 + ';' + (x0 - 30 - k * 4) + ';' + (x0 - 70 - k * 6), y: y0 + ';' + (y0 - 14) + ';' + (y0 - 40 - k * 4) };
+      // Soft wisps: staggered, varied speed, drift back and up while they spread and fade.
+      puffs: [0, 1, 2, 3, 4, 5].map((k) => {
+        const x0 = Number(s.top.match(/-?\d+/g)[0]) + 16, y0 = s.yb - 4, j = (k * 7) % 5;
+        return {
+          begin: (k * 0.45).toFixed(2) + 's', dur: (2.8 + (k % 3) * 0.35).toFixed(2) + 's',
+          x: [x0, x0 - 10 - j, x0 - 32 - j * 3, x0 - 58 - j * 4].join(';'),
+          y: [y0, y0 - 6, y0 - 30 - j * 3, y0 - 64 - j * 4].join(';'),
+        };
       }),
+      // Center the body in the 720-wide frame so every board can wrap it symmetrically.
+      vb: (() => { const xs = s.top.match(/-?\d+(\.\d+)?/g).map(Number).filter((_, i) => i % 2 === 0); const c = (Math.min(...xs) + Math.max(...xs)) / 2; return (c - 360).toFixed(1) + ' 0 720 280'; })(),
       edge: assist ? (lightGround ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.34)') : 'none',
       glowOp: assist && !lightGround ? 1 : 0,
       floorOp: lightGround ? (assist ? 0.75 : 0.45) : 1,

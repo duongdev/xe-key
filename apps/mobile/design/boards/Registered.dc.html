@@ -381,7 +381,7 @@ class Component extends DCLogic {
       this.tm = setTimeout(() => {
         set({ hold: 'sending' });
         this.tm = setTimeout(() => set({ hold: 'done' }), 1400);
-      }, 600);
+      }, 1500);
     };
     const up = () => { if (this.state.hold === 'holding') { clear(); set({ hold: 'idle' }); } };
     const key = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); down(); } };
@@ -433,7 +433,7 @@ class Component extends DCLogic {
       holdIcon: isOpen ? P['lock'] : P['lock-open'],
       holdBg: isOpen ? '#232327' : '#F2F2F3', holdFg: isOpen ? '#F2F2F3' : '#0B0B0C',
       fillW: hold === 'holding' || hold === 'sending' ? '100%' : '0%',
-      fillT: hold === 'holding' ? 'width 600ms linear' : 'width 150ms ease-out',
+      fillT: hold === 'holding' ? 'width 1500ms linear' : 'width 150ms ease-out',
       fillO: hold === 'sending' ? '.35' : '.9',
       stateText: isOpen ? t.sOpen : hold === 'sending' ? t.sSend : t.sLocked,
       stateColor: isOpen ? '#FFB547' : '#F2F2F3',

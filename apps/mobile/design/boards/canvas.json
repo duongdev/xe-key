@@ -1,8 +1,14 @@
 {
   "v": 3,
-  "createdOnFiles": { "v": 1, "at": "2026-11-01T09:00:00Z" },
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-01T09:00:00Z"
+  },
   "title": "Honda Connect Redesign",
-  "launch": { "view": "canvas" },
+  "launch": {
+    "view": "focused",
+    "file": "Find.dc.html"
+  },
   "pages": [],
   "boards": {
     "Main.dc.html": {
@@ -40,8 +46,22 @@
       "title": "Lock / unlock",
       "radius": 44
     },
-    "Engine-states.dc.html": { "x": 0, "y": 1444, "w": 1800, "h": 560, "title": "Command states" },
-    "Find.dc.html": { "x": 0, "y": 2604, "w": 390, "h": 844, "title": "Find my car", "radius": 44 },
+    "Engine-states.dc.html": {
+      "x": 0,
+      "y": 1444,
+      "w": 1800,
+      "h": 560,
+      "title": "Command states"
+    },
+    "Find.dc.html": {
+      "x": 0,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Find my car (live: flash lights, hold to honk)",
+      "radius": 44,
+      "is_interactive": true
+    },
     "Status.dc.html": {
       "x": 470,
       "y": 2604,
@@ -50,7 +70,14 @@
       "title": "Status detail",
       "radius": 44
     },
-    "Trips.dc.html": { "x": 940, "y": 2604, "w": 390, "h": 844, "title": "Trips", "radius": 44 },
+    "Trips.dc.html": {
+      "x": 940,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Trips",
+      "radius": 44
+    },
     "Notifications.dc.html": {
       "x": 1410,
       "y": 2604,
@@ -67,6 +94,22 @@
       "title": "Settings",
       "radius": 44
     },
+    "Car-edit.dc.html": {
+      "x": 2350,
+      "y": 2604,
+      "w": 390,
+      "h": 844,
+      "title": "Your car (edit)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Car-edit-flow.dc.html": {
+      "x": 2820,
+      "y": 2604,
+      "w": 1500,
+      "h": 660,
+      "title": "Edit car flow"
+    },
     "Siri.dc.html": {
       "x": 0,
       "y": 3972,
@@ -74,7 +117,13 @@
       "h": 900,
       "title": "Siri, widgets, quick actions"
     },
-    "System.dc.html": { "x": 1480, "y": 3972, "w": 1400, "h": 1240, "title": "Visual language" },
+    "System.dc.html": {
+      "x": 1480,
+      "y": 3972,
+      "w": 1400,
+      "h": 1240,
+      "title": "Visual language"
+    },
     "Onb-welcome.dc.html": {
       "x": 0,
       "y": 5672,
@@ -156,8 +205,20 @@
       "h": 620,
       "title": "Same-tone contrast"
     },
-    "Car-states.dc.html": { "x": 5440, "y": 7116, "w": 1500, "h": 560, "title": "Car states" },
-    "Logo.dc.html": { "x": 0, "y": 7116, "w": 1400, "h": 900, "title": "Logo & name ideas" },
+    "Car-states.dc.html": {
+      "x": 5440,
+      "y": 7116,
+      "w": 1500,
+      "h": 560,
+      "title": "Car states"
+    },
+    "Logo.dc.html": {
+      "x": 0,
+      "y": 7116,
+      "w": 1400,
+      "h": 900,
+      "title": "Logo & name ideas"
+    },
     "Car.dc.html": {
       "x": 1480,
       "y": 7116,
@@ -221,7 +282,13 @@
       "title": "Home · package expired",
       "radius": 44
     },
-    "Empty-states.dc.html": { "x": 1880, "y": 10060, "w": 1350, "h": 844, "title": "Empty states" },
+    "Empty-states.dc.html": {
+      "x": 1880,
+      "y": 10060,
+      "w": 1350,
+      "h": 844,
+      "title": "Empty states"
+    },
     "Signin-errors.dc.html": {
       "x": 3310,
       "y": 10060,
@@ -229,8 +296,36 @@
       "h": 844,
       "title": "Sign-in errors"
     },
-    "Toasts.dc.html": { "x": 4740, "y": 10060, "w": 1350, "h": 844, "title": "Toasts & banners" },
-    "Motion.dc.html": { "x": 0, "y": 11504, "w": 1600, "h": 1000, "title": "Motion (live)" },
+    "Toasts.dc.html": {
+      "x": 4740,
+      "y": 10060,
+      "w": 1350,
+      "h": 844,
+      "title": "Toasts & banners"
+    },
+    "Motion.dc.html": {
+      "x": 0,
+      "y": 11504,
+      "w": 1600,
+      "h": 1000,
+      "title": "Motion (live)"
+    },
+    "Splash.dc.html": {
+      "x": 1680,
+      "y": 11504,
+      "w": 390,
+      "h": 844,
+      "title": "Splash → Home (live, tap to replay)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Splash-frames.dc.html": {
+      "x": 2150,
+      "y": 11504,
+      "w": 1340,
+      "h": 560,
+      "title": "Splash storyboard"
+    },
     "Landing.dc.html": {
       "x": 0,
       "y": 12904,
@@ -254,6 +349,126 @@
       "h": 780,
       "title": "Waitlist · registered",
       "is_interactive": true
+    },
+    "OG-vi.dc.html": {
+      "x": 2470,
+      "y": 13764,
+      "w": 1200,
+      "h": 630,
+      "title": "Share image · VI"
+    },
+    "OG-en.dc.html": {
+      "x": 3750,
+      "y": 13764,
+      "w": 1200,
+      "h": 630,
+      "title": "Share image · EN"
+    },
+    "Icons-web.dc.html": {
+      "x": 2470,
+      "y": 14474,
+      "w": 1100,
+      "h": 640,
+      "title": "Web icons"
+    },
+    "Glass-alerts.dc.html": {
+      "x": 0,
+      "y": 20421,
+      "w": 390,
+      "h": 844,
+      "title": "Alerts · glass filter (tap or drag)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Glass.dc.html": {
+      "x": 470,
+      "y": 20421,
+      "w": 1800,
+      "h": 1420,
+      "title": "Liquid Glass system"
+    },
+    "Glass-slider.dc.html": {
+      "x": 2350,
+      "y": 20421,
+      "w": 1420,
+      "h": 620,
+      "title": "Bubble drag (live)",
+      "is_interactive": true
+    },
+    "Glass-press.dc.html": {
+      "x": 2350,
+      "y": 21161,
+      "w": 1500,
+      "h": 700,
+      "title": "Glass press on buttons (live)",
+      "is_interactive": true
+    },
+    "Trips-pin.dc.html": {
+      "x": 0,
+      "y": 22461,
+      "w": 390,
+      "h": 844,
+      "title": "Trips · PIN (live: Show places, type a PIN)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Trip-detail.dc.html": {
+      "x": 470,
+      "y": 22461,
+      "w": 1322,
+      "h": 1000,
+      "title": "Trip detail · page sheet"
+    },
+    "Pin-states.dc.html": {
+      "x": 1872,
+      "y": 22461,
+      "w": 2600,
+      "h": 1300,
+      "title": "Honda PIN states, rules, copy"
+    },
+    "Trips-summary.dc.html": {
+      "x": 4552,
+      "y": 22461,
+      "w": 1600,
+      "h": 1480,
+      "title": "Driving summary (Week / Month / Year)"
+    },
+    "Trips-loading.dc.html": {
+      "x": 0,
+      "y": 24041,
+      "w": 2158,
+      "h": 1360,
+      "title": "Trips · loading and refresh"
+    },
+    "Trips-days.dc.html": {
+      "x": 0,
+      "y": 25601,
+      "w": 390,
+      "h": 2400,
+      "title": "Trips by day (live: tap a day)",
+      "is_interactive": true,
+      "radius": 44
+    },
+    "Trips-days-spec.dc.html": {
+      "x": 470,
+      "y": 25601,
+      "w": 2000,
+      "h": 1160,
+      "title": "Trips by day · driving behaviour spec"
+    },
+    "Select-sheets.dc.html": {
+      "x": 4400,
+      "y": 2604,
+      "w": 1898,
+      "h": 1000,
+      "title": "Select sheets (Settings pickers)"
+    },
+    "Service.dc.html": {
+      "x": 0,
+      "y": 27121,
+      "w": 2158,
+      "h": 1420,
+      "title": "Service reminder"
     }
   },
   "order": [
@@ -267,6 +482,8 @@
     "Trips.dc.html",
     "Notifications.dc.html",
     "Settings.dc.html",
+    "Car-edit.dc.html",
+    "Car-edit-flow.dc.html",
     "Siri.dc.html",
     "System.dc.html",
     "Onb-welcome.dc.html",
@@ -293,9 +510,27 @@
     "Signin-errors.dc.html",
     "Toasts.dc.html",
     "Motion.dc.html",
+    "Splash.dc.html",
+    "Splash-frames.dc.html",
     "Landing.dc.html",
     "Landing-mobile.dc.html",
-    "Registered.dc.html"
+    "Registered.dc.html",
+    "OG-vi.dc.html",
+    "OG-en.dc.html",
+    "Icons-web.dc.html",
+    "Glass-alerts.dc.html",
+    "Glass.dc.html",
+    "Glass-slider.dc.html",
+    "Glass-press.dc.html",
+    "Trips-pin.dc.html",
+    "Trip-detail.dc.html",
+    "Pin-states.dc.html",
+    "Trips-summary.dc.html",
+    "Trips-loading.dc.html",
+    "Trips-days.dc.html",
+    "Trips-days-spec.dc.html",
+    "Select-sheets.dc.html",
+    "Service.dc.html"
   ],
   "notes": {
     "t1": {
@@ -305,8 +540,20 @@
       "kind": "title1",
       "maxW": 1800
     },
-    "t2": { "x": 0, "y": 1144, "text": "Async command states", "kind": "title1", "maxW": 1800 },
-    "t3": { "x": 0, "y": 2304, "text": "Secondary screens", "kind": "title1", "maxW": 2270 },
+    "t2": {
+      "x": 0,
+      "y": 1144,
+      "text": "Async command states",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "t3": {
+      "x": 0,
+      "y": 2304,
+      "text": "Secondary screens",
+      "kind": "title1",
+      "maxW": 4320
+    },
     "t4": {
       "x": 0,
       "y": 3672,
@@ -314,8 +561,20 @@
       "kind": "title1",
       "maxW": 2880
     },
-    "t5": { "x": 0, "y": 5372, "text": "First launch & sign-in", "kind": "title1", "maxW": 3680 },
-    "t6": { "x": 0, "y": 6816, "text": "Brand: logo & car art", "kind": "title1", "maxW": 6940 },
+    "t5": {
+      "x": 0,
+      "y": 5372,
+      "text": "First launch & sign-in",
+      "kind": "title1",
+      "maxW": 3680
+    },
+    "t6": {
+      "x": 0,
+      "y": 6816,
+      "text": "Brand: logo & car art",
+      "kind": "title1",
+      "maxW": 6940
+    },
     "t7": {
       "x": 0,
       "y": 8316,
@@ -323,8 +582,20 @@
       "kind": "title1",
       "maxW": 1800
     },
-    "t9": { "x": 0, "y": 11204, "text": "Motion", "kind": "title1", "maxW": 1600 },
-    "t10": { "x": 0, "y": 12604, "text": "Website: landing page", "kind": "title1", "maxW": 2390 },
+    "t9": {
+      "x": 0,
+      "y": 11204,
+      "text": "Motion & launch",
+      "kind": "title1",
+      "maxW": 3490
+    },
+    "t10": {
+      "x": 0,
+      "y": 12604,
+      "text": "Website: landing page",
+      "kind": "title1",
+      "maxW": 2390
+    },
     "g7": {
       "x": 1990,
       "y": 12904,
@@ -380,6 +651,27 @@
       "w": 380,
       "fill": "purple",
       "text": "Siri flows\n\nEvery intent answers in one spoken sentence + a compact snippet, no app launch.\nRead intents (Is it locked? Where is it?) run at once.\nPhysical intents (Unlock, Start) ask \"Unlock your HR-V?\" — Siri confirmation is the voice version of long-press.\nLock needs no confirm.\nSlow car: Siri says \"Sent. I'll notify you when it's done.\" and a push confirms later."
+    },
+    "t11": {
+      "x": 0,
+      "y": 20121,
+      "text": "Liquid Glass (iOS 26+)",
+      "kind": "title1",
+      "maxW": 3770
+    },
+    "t12": {
+      "x": 0,
+      "y": 22161,
+      "text": "Trips · Honda PIN, places and trip detail",
+      "kind": "title1",
+      "maxW": 6152
+    },
+    "t13": {
+      "x": 0,
+      "y": 26821,
+      "text": "Service reminder",
+      "kind": "title1",
+      "maxW": 2158
     }
   },
   "designSystems": []

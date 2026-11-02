@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Web icons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0}
+.ib{width:1100px;height:640px;box-sizing:border-box;padding:48px 60px;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',system-ui,sans-serif;display:flex;flex-direction:column;gap:28px}
+.ib h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-0.02em}
+.row{display:flex;align-items:flex-end;gap:40px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:12px;font-size:13px;color:#A1A1A8}
+.t{background:#F2F2F3;color:#0B0B0C;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:-0.06em;line-height:1}
+.t i{font-style:normal;color:#0A6FC2}
+.tab{display:flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:10px 10px 0 0;background:#F4F4F6;color:#0B0B0C;font-size:13px;width:220px;box-sizing:border-box}
+.tab.d{background:#232327;color:#F2F2F3}
+</style>
+</helmet>
+<div class="ib">
+<h2>Web icons</h2>
+<div class="row">
+<div class="cell"><div id="icon" class="t" style="width:256px;height:256px;border-radius:56px;font-size:112px">xe<i>.</i></div><span>icon.png · 512 (shown at 256)</span></div>
+<div class="cell"><div id="apple" class="t" style="width:180px;height:180px;border-radius:0px;font-size:80px">xe<i>.</i></div><span>apple-icon.png · 180, square (iOS rounds it)</span></div>
+<div class="cell"><div class="t" style="width:48px;height:48px;border-radius:11px;font-size:22px">xe<i>.</i></div><span>48</span></div>
+<div class="cell"><div class="t" style="width:32px;height:32px;border-radius:7px;font-size:15px">xe<i>.</i></div><span>32</span></div>
+<div class="cell"><div class="t" style="width:16px;height:16px;border-radius:4px;font-size:8px">xe<i>.</i></div><span>16</span></div>
+</div>
+<div class="row" style="gap:16px">
+<div class="tab"><div class="t" style="width:16px;height:16px;border-radius:4px;font-size:8px">xe<i>.</i></div>Xe Key · Điều khiển xe…</div>
+<div class="tab d"><div class="t" style="width:16px;height:16px;border-radius:4px;font-size:8px">xe<i>.</i></div>Xe Key · Remote control…</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1100,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.sp{position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0C;--t:0ms}
+.frozen>*{animation-play-state:paused!important}
+.home{position:absolute;inset:0;animation:reveal 450ms cubic-bezier(.22,1,.36,1);animation-delay:calc(1250ms - var(--t))}
+.floor{position:absolute;left:-60px;top:200px;width:510px;height:260px;background:radial-gradient(closest-side,rgba(124,199,255,.16),rgba(124,199,255,0));animation:floor 1400ms linear;animation-delay:calc(350ms - var(--t))}
+.tile{position:absolute;left:143px;top:370px;width:104px;height:104px;border-radius:26px;background:#F2F2F3;color:#0B0B0C;display:flex;align-items:center;justify-content:center;font-family:'Be Vietnam Pro',system-ui,sans-serif;font-size:48px;font-weight:800;letter-spacing:-0.06em;line-height:1;animation:tileOut 320ms cubic-bezier(.22,1,.36,1);animation-delay:calc(250ms - var(--t))}
+.idot{display:inline-block;width:11px;height:11px;border-radius:6px;background:#0A6FC2;margin-left:2px;align-self:flex-end;margin-bottom:31px;visibility:hidden}
+.fdot{position:absolute;left:216.7px;top:432.0px;width:11px;height:11px;border-radius:6px;background:#0A6FC2;animation:fly 820ms cubic-bezier(.45,0,.2,1),dotOut 200ms ease-out;animation-delay:calc(230ms - var(--t)),calc(1060ms - var(--t))}
+.ocar{position:absolute;left:4px;top:230px;width:382px;animation:driveIn 680ms cubic-bezier(.22,1,.36,1),carOut 160ms linear;animation-delay:calc(400ms - var(--t)),calc(1760ms - var(--t))}
+.hl{position:absolute;left:298px;top:285px;width:92px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(234,246,255,.95),rgba(234,246,255,0));animation:wink 860ms linear;animation-delay:calc(1040ms - var(--t))}
+@keyframes tileOut{0%{transform:scale(1);opacity:1}100%{transform:scale(.72);opacity:0}}
+@keyframes fly{0%{transform:translate(0,0) scale(1);background:#0A6FC2;box-shadow:0 0 0 0 rgba(124,199,255,0)}35%{background:#7CC7FF;box-shadow:0 0 18px 6px rgba(124,199,255,.45)}50%{transform:translate(54.8px,-135.2px) scale(1.25)}100%{transform:translate(121.8px,-130.5px) scale(.8);background:#EAF6FF;box-shadow:0 0 22px 10px rgba(234,246,255,.55)}}
+@keyframes dotOut{0%{opacity:1}100%{opacity:0}}
+@keyframes driveIn{0%{transform:translateX(-470px)}100%{transform:translateX(0)}}
+@keyframes carOut{0%{opacity:1}100%{opacity:0}}
+@keyframes wink{0%{opacity:0}12%{opacity:1}24%{opacity:.2}37%{opacity:1}62%{opacity:.7}100%{opacity:0}}
+@keyframes floor{0%{opacity:0}30%{opacity:1}70%{opacity:1}100%{opacity:0}}
+@keyframes reveal{0%{opacity:0}100%{opacity:1}}
+.sp>*{animation-fill-mode:both}
+@media (prefers-reduced-motion: reduce){.home,.floor,.tile,.fdot,.ocar,.hl{animation:none}.tile,.fdot,.ocar,.hl,.floor{display:none}}
+.sb{width:1340px;height:560px;box-sizing:border-box;padding:40px 48px;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',system-ui,sans-serif;display:flex;flex-direction:column;gap:22px}
+.sb h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-0.02em}
+.sb h2>span{margin-left:12px;font-size:15px;font-weight:400;color:#A1A1A8}
+.frames{display:flex;gap:24px}
+.fr{display:flex;flex-direction:column;gap:10px;width:176px}
+.fr .ph{width:176px;height:381px;border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px #2E2E33}
+.fr .ph>div{transform:scale(.4513);transform-origin:0 0}
+.fr>b{font-size:14px;font-variant-numeric:tabular-nums}
+.fr>span{font-size:13px;line-height:18px;color:#A1A1A8}
+</style>
+</helmet>
+<div onClick="{{replay}}" style="cursor:pointer"><sc-if value="{{run}}" hint-placeholder-val="{{true}}"><div class="sp">
+<div class="home"><dc-import name="Main" hint-size="390px,844px"></dc-import></div>
+<div class="floor"></div>
+<div class="ocar"><dc-import name="Car" paint="#6B7078" hint-size="382px,149px"></dc-import></div>
+<div class="hl"></div>
+<div class="tile">xe<i class="idot"></i></div>
+<div class="fdot"></div>
+</div></sc-if></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { run: true }; }
+  renderVals() {
+    // Replays every 4 s on the canvas; tap to replay now.
+    const replay = () => { clearTimeout(this._t); this.setState({ run: false }); setTimeout(() => this.setState({ run: true }), 30); };
+    if (this.state.run && !this._t) this._t = setTimeout(() => { this._t = null; replay(); }, 4000);
+    return { run: this.state.run, replay };
+  }
+}
+</script>
+</body>
+</html>

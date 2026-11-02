@@ -111,8 +111,8 @@ class Component extends DCLogic {
       ].map(([spec, size, w, ls, sample], i) => ({ spec, size, w, ls, sample, sep: sep(i) })),
       space: [4, 8, 12, 16, 20, 32].map((n) => ({ px: n + 'px', label: String(n) })),
       motion: [
-        ['Press', 'Scale 0.97, 90 ms. Haptic: light impact.'],
-        ['Hold to arm', 'Linear fill 600 ms. Release springs back in 150 ms.'],
+        ['Press', 'Scale 1.03 + glass rim and finger light while down. Haptic: light impact.'],
+        ['Hold to arm', 'Linear fill 1.5 s, tick every 0.5 s. Release springs back in 150 ms.'],
         ['State change', 'Spring (response 0.35, damping 0.85). Headline cross-fades.'],
         ['Pending', 'Ring rotates 1.4 s / turn. Never a full-screen spinner.'],
         ['Success', 'Check scales 0.8 → 1. Haptic: success.'],

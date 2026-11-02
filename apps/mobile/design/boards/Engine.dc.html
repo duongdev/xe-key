@@ -194,11 +194,11 @@ class Component extends DCLogic {
       extendIcon: s.note ? D.check : capped ? D.bell : D.plus,
       extendAria: s.note ? 'Reminder set' : capped ? 'Remind me 1 minute before auto-off' : 'Extend 10 minutes. Uses 1 remote start',
       fillW: s.holding ? '100%' : '0%',
-      fillT: s.holding ? 'width 600ms linear' : 'width 150ms ease-out',
+      fillT: s.holding ? 'width 1500ms linear' : 'width 150ms ease-out',
       press: () => {
         if (this.state.phase !== 'idle') return;
         this.setState({ holding: true });
-        this.holdT = setTimeout(() => { this.setState({ holding: false }); this.fire(); }, 600);
+        this.holdT = setTimeout(() => { this.setState({ holding: false }); this.fire(); }, 1500);
       },
       release: () => { clearTimeout(this.holdT); if (this.state.holding) this.setState({ holding: false }); },
       cancel: () => { this.clear(); this.setState({ phase: 'idle', starts: this.state.starts + 1, msg: 'No start used', msgKind: 'check' }); },

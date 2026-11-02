@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Alerts glass</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.g{background:rgba(38,38,44,.52);-webkit-backdrop-filter:blur(18px) saturate(1.8);backdrop-filter:blur(18px) saturate(1.8);box-shadow:inset 0 .75px 0 rgba(255,255,255,.22),inset 0 0 0 .75px rgba(255,255,255,.09),0 8px 28px rgba(0,0,0,.38)}
+.gl{background:rgba(255,255,255,.58);-webkit-backdrop-filter:blur(18px) saturate(1.8);backdrop-filter:blur(18px) saturate(1.8);box-shadow:inset 0 .75px 0 rgba(255,255,255,.95),inset 0 0 0 .75px rgba(0,0,0,.06),0 6px 22px rgba(0,0,0,.12)}
+.gm{background:rgba(28,28,32,.46);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);box-shadow:inset 0 .75px 0 rgba(255,255,255,.24),inset 0 0 0 .75px rgba(255,255,255,.10),0 6px 20px rgba(0,0,0,.45)}
+.gf{background:#232327;box-shadow:inset 0 0 0 .75px rgba(255,255,255,.06),0 8px 24px rgba(0,0,0,.45)}
+.ttl{font-size:22px;font-weight:600;letter-spacing:-0.02em}
+.cap{font-size:12px;color:#A1A1A8}
+.seg{position:relative;z-index:1;height:40px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:500;border-radius:20px;transition:color 150ms,transform 120ms cubic-bezier(.22,1,.36,1);white-space:nowrap}
+.seg:active{transform:scale(.94)}
+.badge{min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:#FFB547;color:#1A1000;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.lens{position:absolute;top:4px;height:40px;border-radius:20px}
+.row{min-height:64px;padding:0 20px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 0 #1F1F23}
+.chip{width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.circ{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.noscroll::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0B0B0C;color:#F2F2F3;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;position:relative;overflow:hidden">
+<div class="noscroll" style="position:absolute;inset:0;overflow-y:auto;padding:112px 0 120px">
+<sc-for list="{{groups}}" as="grp" hint-placeholder-count="2">
+<span style="display:block;padding:14px 20px 6px;font-size:13px;color:#A1A1A8">{{grp.name}}</span>
+<sc-for list="{{grp.items}}" as="n" hint-placeholder-count="3">
+<div class="row">
+<span class="chip" style="background:{{n.bg}};color:{{n.c}}"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:15px;font-weight:{{n.w}};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{n.t}}</span>
+<sc-if value="{{n.hasSub}}" hint-placeholder-val="{true}"><span style="font-size:13px;color:#A1A1A8">{{n.sub}}</span></sc-if>
+</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:13px;color:#A1A1A8;font-variant-numeric:tabular-nums;white-space:nowrap">
+<sc-if value="{{n.dot}}" hint-placeholder-val="{false}"><span aria-label="Unread" style="width:8px;height:8px;border-radius:4px;background:#FFB547"></span></sc-if>
+{{n.time}}</span>
+</div>
+</sc-for>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{false}">
+<div style="height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 48px;text-align:center">
+<span class="chip" style="width:64px;height:64px;border-radius:32px;background:#17171A;color:{{emptyC}}"><svg width="28" height="28" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="{{emptyD}}"></path></svg></span>
+<span style="font-size:17px;font-weight:600">{{emptyT}}</span>
+<span style="font-size:15px;color:#A1A1A8;line-height:21px">{{emptyB}}</span>
+</div>
+</sc-if>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:0;height:112px;background:linear-gradient(#0B0B0C 62%,rgba(11,11,12,0));pointer-events:none"></div>
+<div style="position:absolute;left:16px;right:16px;top:56px;display:flex;align-items:center;gap:12px">
+<a href="Main.dc.html" aria-label="Back to car" class="circ g" style="color:#F2F2F3"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" style="flex:none"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg></a>
+<h1 style="flex:1;margin:0;font-size:28px;font-weight:600;letter-spacing:-0.02em">Alerts</h1>
+<button onClick="{{markRead}}" aria-label="Mark all read" class="circ g" style="border:0;color:{{markC}};cursor:pointer;transition:color 200ms"><svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" style="flex:none"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg></button>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(rgba(11,11,12,0),rgba(11,11,12,.7));pointer-events:none"></div>
+<div role="tablist" aria-label="Filter alerts" onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" class="g" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%) scale({{barScale}});transition:transform 220ms cubic-bezier(.34,1.56,.64,1);height:48px;box-sizing:border-box;padding:4px;border-radius:24px;display:flex;touch-action:none;user-select:none;cursor:pointer">
+<span class="lens" style="left:{{lensX}};width:{{lensW}};background:{{lensBg}};transition:left 320ms cubic-bezier(.34,1.56,.64,1),width 320ms cubic-bezier(.34,1.56,.64,1),background 150ms"></span>
+<sc-for list="{{segs}}" as="s" hint-placeholder-count="3">
+<span role="tab" aria-selected="{{s.sel}}" class="seg" style="width:{{s.w}};color:{{s.c}};font-weight:{{s.fw}}">{{s.label}}<sc-if value="{{s.hasBadge}}" hint-placeholder-val="{false}"><span class="badge" style="transform:scale({{s.bs}});transition:transform 200ms cubic-bezier(.34,1.56,.64,1)">{{s.n}}</span></sc-if></span>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
+const ROWS = [{"k": "w", "t": "Tyre pressure low", "sub": "Front left", "time": "08:12", "d": "M149.26,159.26C155.09,173.82,163.5,176,168,176s12.91-2.18,18.74-16.74c3.39-8.48,5.26-19.58,5.26-31.26s-1.87-22.78-5.26-31.26C180.91,82.18,172.5,80,168,80s-12.91,2.18-18.74,16.74C145.87,105.22,144,116.32,144,128S145.87,150.78,149.26,159.26ZM168,96.2c2.62,2.06,8,13,8,31.8s-5.38,29.74-8,31.8c-2.62-2.06-8-13-8-31.8S165.38,98.26,168,96.2ZM232,216H196.41C213.12,197.73,224,165.47,224,128c0-58.32-26.35-104-60-104H92C58.35,24,32,69.68,32,128S58.35,232,92,232H232a8,8,0,0,0,0-16ZM193.74,63.93C202.93,80.91,208,103.67,208,128s-5.07,47.09-14.26,64.07C185.38,207.5,174.82,216,164,216s-21.38-8.5-29.74-23.93C125.07,175.09,120,152.33,120,128s5.07-47.09,14.26-64.07C142.62,48.5,153.18,40,164,40S185.38,48.5,193.74,63.93ZM48,128c0-2.5.07-5,.17-7.44L80,97.83l24.43,17.45c-.28,4.16-.43,8.41-.43,12.72a179.89,179.89,0,0,0,3.07,33.5l-22.42-16a8,8,0,0,0-9.3,0l-23.74,17A161,161,0,0,1,48,128ZM62.26,63.93C70.62,48.5,81.18,40,92,40h39.59c-11.9,13-20.84,33.12-25,57.16L84.65,81.49a8,8,0,0,0-9.3,0L50.49,99.25C52.85,86,56.83,74,62.26,63.93Zm0,128.14a100.08,100.08,0,0,1-5.94-13.32L80,161.83l33.94,24.24c4.6,12,10.6,22.22,17.65,29.93H92C81.18,216,70.62,207.5,62.26,192.07Z", "bg": "rgba(255,181,71,.16)", "c": "#FFB547", "unread": true, "grp": "Today"}, {"k": "c", "t": "Locked", "sub": "", "time": "08:30", "d": "M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z", "bg": "#1C1C20", "c": "#A1A1A8", "unread": false, "grp": "Today"}, {"k": "w", "t": "Check engine light", "sub": "See a Honda dealer", "time": "07:55", "d": "M240,104H227.31L192,68.69A15.86,15.86,0,0,0,180.69,64H140V40h24a8,8,0,0,0,0-16H100a8,8,0,0,0,0,16h24V64H64A16,16,0,0,0,48,80v52H24V108a8,8,0,0,0-16,0v64a8,8,0,0,0,16,0V148H48v20.69A15.86,15.86,0,0,0,52.69,180L92,219.31A15.86,15.86,0,0,0,103.31,224h77.38A15.86,15.86,0,0,0,192,219.31L227.31,184H240a16,16,0,0,0,16-16V120A16,16,0,0,0,240,104Zm0,64H224a8,8,0,0,0-5.66,2.34L180.69,208H103.31L64,168.69V80H180.69l37.65,37.66A8,8,0,0,0,224,120h16Z", "bg": "rgba(255,181,71,.16)", "c": "#FFB547", "unread": true, "grp": "Today"}, {"k": "c", "t": "Engine started", "sub": "Auto-off 07:50", "time": "07:40", "d": "M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z", "bg": "rgba(124,199,255,.14)", "c": "#7CC7FF", "unread": false, "grp": "Today"}, {"k": "c", "t": "Couldn't unlock", "sub": "Car asleep after 3 tries", "time": "Yest. 22:10", "d": "M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z", "bg": "#1C1C20", "c": "#A1A1A8", "unread": false, "grp": "Earlier"}, {"k": "w", "t": "Brake fluid low", "sub": "Seen by Honda", "time": "Yest. 18:02", "d": "M174,47.75a254.19,254.19,0,0,0-41.45-38.3,8,8,0,0,0-9.18,0A254.19,254.19,0,0,0,82,47.75C54.51,79.32,40,112.6,40,144a88,88,0,0,0,176,0C216,112.6,201.49,79.32,174,47.75ZM128,216a72.08,72.08,0,0,1-72-72c0-57.23,55.47-105,72-118,16.53,13,72,60.75,72,118A72.08,72.08,0,0,1,128,216Zm55.89-62.66a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68Z", "bg": "rgba(255,181,71,.16)", "c": "#FFB547", "unread": false, "grp": "Earlier"}, {"k": "c", "t": "Unlocked", "sub": "", "time": "Yest. 17:44", "d": "M208,80H96V56a32,32,0,0,1,32-32c15.37,0,29.2,11,32.16,25.59a8,8,0,0,0,15.68-3.18C171.32,24.15,151.2,8,128,8A48.05,48.05,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm0,128H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z", "bg": "rgba(255,181,71,.16)", "c": "#FFB547", "unread": false, "grp": "Earlier"}, {"k": "c", "t": "Locked", "sub": "", "time": "Sun 21:05", "d": "M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z", "bg": "#1C1C20", "c": "#A1A1A8", "unread": false, "grp": "Earlier"}, {"k": "c", "t": "Engine started", "sub": "Auto-off 07:42", "time": "Sun 07:32", "d": "M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z", "bg": "rgba(124,199,255,.14)", "c": "#7CC7FF", "unread": false, "grp": "Earlier"}];
+const EMPTY = {"0": ["M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z", "#A1A1A8", "No alerts", "Warning lights and command results show here."], "1": ["M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z", "#7CC7FF", "No warning lights", "Honda reports all clear."], "2": ["M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z", "#A1A1A8", "No commands yet", "Lock, unlock and engine results show here."]};
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { f: 0, read: false, held: false };
+  }
+  widths() { return [64, this.state.read ? 108 : 134, 118]; }
+  pick(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / (r.width / (8 + this.widths().reduce((a, b) => a + b, 0))) - 4;
+    let acc = 0;
+    const w = this.widths();
+    for (let i = 0; i < w.length; i++) { acc += w[i]; if (x < acc) return i; }
+    return w.length - 1;
+  }
+  renderVals() {
+    const s = this.state;
+    const all = ROWS;
+    const kind = s.f === 1 ? 'w' : s.f === 2 ? 'c' : null;
+    const list = all.filter((r) => !kind || r.k === kind);
+    const unread = s.read ? 0 : all.filter((r) => r.unread).length;
+    const groups = ['Today', 'Earlier'].map((name) => ({
+      name,
+      items: list.filter((r) => r.grp === name).map((r) => ({
+        ...r, hasSub: !!r.sub, dot: r.unread && !s.read, w: r.unread && !s.read ? '600' : '500',
+      })),
+    })).filter((g) => g.items.length);
+    const w = this.widths();
+    const e = EMPTY[s.f];
+    return {
+      groups,
+      empty: groups.length === 0,
+      emptyD: e[0], emptyC: e[1], emptyT: e[2], emptyB: e[3],
+      lensX: (4 + w.slice(0, s.f).reduce((a, b) => a + b, 0)) + 'px',
+      lensW: w[s.f] + 'px',
+      lensBg: s.held ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.14)',
+      barScale: s.held ? 1.04 : 1,
+      markC: unread ? '#7CC7FF' : '#5C5C63',
+      segs: ['All', 'Warnings', 'Commands'].map((label, i) => ({
+        label, w: w[i] + 'px', sel: i === s.f ? 'true' : 'false',
+        c: i === s.f ? '#F2F2F3' : '#A1A1A8', fw: i === s.f ? 600 : 500,
+        hasBadge: i === 1 && unread > 0, n: unread > 9 ? '9+' : unread, bs: 1,
+      })),
+      markRead: () => this.setState({ read: true }),
+      down: (e) => { e.currentTarget.setPointerCapture(e.pointerId); this.setState({ held: true, f: this.pick(e) }); },
+      move: (e) => { if (this.state.held) { const f = this.pick(e); if (f !== this.state.f) this.setState({ f }); } },
+      up: () => this.setState({ held: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>
