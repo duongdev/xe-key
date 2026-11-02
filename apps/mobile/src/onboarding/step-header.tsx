@@ -15,7 +15,7 @@ export function StepHeader({ step, canGoBack = true }: { step: Step; canGoBack?:
   const t = useT();
   const filled = progress(step);
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, zIndex: 1 }}>
       {canGoBack ? (
         <GlassButton
           label={t.back}

@@ -1,12 +1,11 @@
-import { Button, type ButtonProps, Host } from "@expo/ui/swift-ui";
+import { Button, type ButtonProps, Host, Image } from "@expo/ui/swift-ui";
 import {
+  accessibilityLabel,
   buttonBorderShape,
   buttonStyle,
   controlSize,
   disabled as disabledModifier,
-  foregroundStyle,
-  labelStyle,
-  padding,
+  frame,
 } from "@expo/ui/swift-ui/modifiers";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import type { ReactNode } from "react";
@@ -14,7 +13,7 @@ import { Pressable, View, type ViewStyle } from "react-native";
 import { useTheme } from "../theme/use-theme";
 
 const liquid = isLiquidGlassAvailable();
-const PRESS_ROOM = 16;
+const ICON = 14;
 
 /**
  * A floating surface (toast, floating tabs, buttons over content or the map). Native Liquid Glass
@@ -89,25 +88,33 @@ export function GlassButton({
   const { c, scheme } = useTheme();
   if (liquid)
     return (
-      // The native press grows the glass past its frame; the Host pads for it so it isn't clipped.
-      <View style={style}>
-        <Host matchContents colorScheme={scheme} style={{ margin: -PRESS_ROOM }}>
-          <Button
-            label={label}
-            systemImage={symbol}
-            onPress={onPress}
-            modifiers={[
-              buttonStyle("glass"),
-              buttonBorderShape("circle"),
-              labelStyle("iconOnly"),
-              controlSize("large"),
-              foregroundStyle(color ?? c.fg),
-              disabledModifier(!!disabled),
-              padding({ all: PRESS_ROOM }),
-            ]}
+      // A fixed 44 pt box (matchContents reports 42.7 x 47.3 and sits the circle low). The native
+      // press grows ~7 pt past the box: no parent may clip it (scroll views, overflow) and the
+      // header row needs zIndex: 1 so content drawn after it can't cover it (glass-room test).
+      <Host
+        colorScheme={scheme}
+        alignment="center"
+        style={{ width: 44, height: 44, overflow: "visible", zIndex: 1, ...style }}
+      >
+        <Button
+          onPress={onPress}
+          modifiers={[
+            buttonStyle("glass"),
+            buttonBorderShape("circle"),
+            controlSize("large"),
+            disabledModifier(!!disabled),
+            accessibilityLabel(label),
+          ]}
+        >
+          {/* A fixed icon box keeps every circle the same size, whatever the symbol's width. */}
+          <Image
+            systemName={symbol}
+            size={17}
+            color={color ?? c.fg}
+            modifiers={[frame({ width: ICON, height: ICON })]}
           />
-        </Host>
-      </View>
+        </Button>
+      </Host>
     );
   return (
     <Glass style={{ width: 44, height: 44, borderRadius: 22, ...style }}>

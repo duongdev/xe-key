@@ -71,7 +71,14 @@ export default function Doors() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 1,
+        }}
+      >
         <GlassButton
           label={t.backToCar}
           symbol="chevron.left"

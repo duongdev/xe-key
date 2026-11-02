@@ -59,3 +59,4 @@ Xe Key — Expo (React Native) client for Honda CONNECT One. iOS-first, dark-fir
 - Physical commands (unlock, start) are never resent by a tap (e.g. "Try again"); the user holds again.
 - `jest.setup.ts` hand-mocks Reanimated (its own Jest setup needs a DOM); add to it when a test uses more of the API.
 - `Path` from phosphor clashes with the SVG primitive — use `PathIcon`.
+- `GlassButton` (iOS 26+) is a fixed 44 pt SwiftUI box whose native press grows ~7 pt past it. Its header row needs `zIndex: 1` (or use `PageHeader`) so later content can't cover the growth, and no scroll view or `overflow: hidden` may sit flush against it (Home gives its scroll view 16 pt top room). `src/glass-room.test.ts` checks the row rule. Native views keep their old props across Fast Refresh: reload the app to see `Host` changes.

@@ -361,9 +361,10 @@ export default function Home() {
     <>
       {offlineBanner ? <View style={{ marginBottom: 12 }}>{offlineBanner}</View> : null}
 
+      {/* The scroll view clips; 16 pt of top room lets the settings button's native press grow. */}
       <ScrollView
-        style={{ flex: 1, marginHorizontal: -space.gutter }}
-        contentContainerStyle={{ paddingHorizontal: space.gutter }}
+        style={{ flex: 1, marginHorizontal: -space.gutter, marginTop: -16 }}
+        contentContainerStyle={{ paddingHorizontal: space.gutter, paddingTop: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -374,7 +375,12 @@ export default function Home() {
         }
       >
         <View
-          style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            zIndex: 1,
+          }}
         >
           <View style={{ minHeight: 44, justifyContent: "center", gap: 2 }}>
             <Text variant="label" weight={600}>

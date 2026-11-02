@@ -13,7 +13,7 @@ export function PageHeader({ title, right }: { title: string; right?: ReactNode 
   const { c } = useTheme();
   const t = useT();
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, minHeight: 56 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, minHeight: 56, zIndex: 1 }}>
       <GlassButton
         label={t.backToCar}
         symbol="chevron.left"

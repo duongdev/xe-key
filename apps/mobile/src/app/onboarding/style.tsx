@@ -96,7 +96,14 @@ export default function Style() {
   return (
     <Screen>
       <Glow color={c.fg} opacity={0.09} style={{ left: -80, right: -80, top: 120, height: 300 }} />
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 1,
+        }}
+      >
         <GlassButton
           label={t.back}
           symbol="chevron.left"
