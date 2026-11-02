@@ -15,6 +15,7 @@ import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLang, useT } from "../../i18n";
 import { useFormatTime } from "../../i18n/format";
+import { useFuel } from "../../i18n/fuel";
 import { NoPin } from "../../services/car";
 import { carService } from "../../services/query";
 import { tripCache, useSavedTrips } from "../../services/trip-cache";
@@ -75,6 +76,7 @@ export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { c, scheme } = useTheme();
   const t = useT();
+  const fuel = useFuel();
   const lang = useLang();
   const time = useFormatTime();
   const insets = useSafeAreaInsets();
@@ -134,11 +136,17 @@ export default function TripDetail() {
   const from = saved?.from ?? trip.from;
   const to = saved?.to ?? trip.to;
   // Tiles Honda doesn't send are dropped (it sends no idle time).
+  const fuelText = fuel(trip.kmPerL);
   const tiles = [
     { key: "km", icon: RoadHorizonIcon, label: t.statDistance, value: `${n(trip.km, 1)} km` },
     { key: "time", icon: TimerIcon, label: t.statTime, value: t.minShort(trip.minutes) },
-    trip.kmPerL != null
-      ? { key: "fuel", icon: GasPumpIcon, label: t.statFuel, value: `${n(trip.kmPerL, 1)} km/l` }
+    fuelText
+      ? {
+          key: "fuel",
+          icon: GasPumpIcon,
+          label: t.statFuel,
+          value: `${fuelText.value} ${fuelText.unit}`,
+        }
       : null,
     trip.avgKmh != null
       ? { key: "avg", icon: GaugeIcon, label: t.statAvgSpeed, value: `${n(trip.avgKmh)} km/h` }

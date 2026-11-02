@@ -87,6 +87,16 @@ export default function RootLayout() {
                     options={{ presentation: "modal", contentStyle: { backgroundColor: c.s1 } }}
                   />
                   <Stack.Screen
+                    name="select"
+                    options={{
+                      presentation: "formSheet",
+                      sheetAllowedDetents: "fitToContents",
+                      sheetGrabberVisible: true,
+                      sheetCornerRadius: 24,
+                      contentStyle: { backgroundColor: c.s1 },
+                    }}
+                  />
+                  <Stack.Screen
                     name="pin"
                     options={{
                       presentation: "formSheet",

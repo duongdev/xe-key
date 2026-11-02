@@ -30,6 +30,7 @@ import {
   stepPeriod,
 } from "../car/summary";
 import { useLang, useT } from "../i18n";
+import { useFuel } from "../i18n/fuel";
 import type { Summary } from "../services/car";
 import { haptics } from "../theme/haptics";
 import { settle, useReducedMotion } from "../theme/motion";
@@ -157,6 +158,7 @@ function Page({
 }) {
   const { c } = useTheme();
   const t = useT();
+  const fuel = useFuel();
   const lang = useLang();
   const locale = lang === "vi" ? "vi-VN" : "en-US";
   const n = (v: number, digits = 0) =>
@@ -286,8 +288,8 @@ function Page({
             <Stat
               icon={<GasPumpIcon size={14} color={c.fg2} />}
               label={t.statFuel}
-              value={stats.kmPerL !== null ? n(stats.kmPerL, 1) : null}
-              unit="km/l"
+              value={fuel(stats.kmPerL)?.value ?? null}
+              unit={fuel(stats.kmPerL)?.unit}
             />
             <View
               accessible

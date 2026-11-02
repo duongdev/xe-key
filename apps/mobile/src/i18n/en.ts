@@ -295,6 +295,11 @@ export const en = {
   ) =>
     `${when}, ${from} to ${to}, ${km} km in ${min} min, top speed ${max}, average ${avg}, fuel ${fuel}`,
   metricLabels: ["Max speed", "Avg speed", "Fuel"],
+  fuelUse: "Fuel use",
+  fuelUnits: { kml: "km/l", l100: "L/100 km" },
+  hondasUnit: "Honda's unit",
+  fuelUseNote: "Changes every fuel number. The meter colour stays the same.",
+  followsPhone: "Follows iPhone",
   noTrips: "No trips yet",
   weekdays: ["S", "M", "T", "W", "T", "F", "S"],
   weekdaysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],

@@ -1,6 +1,7 @@
 import { Pressable, View } from "react-native";
 import { useLang, useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
+import { useFuel } from "../i18n/fuel";
 import type { Trip } from "../services/car";
 import { useTheme } from "../theme/use-theme";
 import { Shimmer } from "./appear";
@@ -59,6 +60,7 @@ export function TripRow({
 }) {
   const { c } = useTheme();
   const t = useT();
+  const fuel = useFuel();
   const time = useFormatTime();
   const lang = useLang();
   const now = new Date();
@@ -77,10 +79,11 @@ export function TripRow({
   const from = timed ? time(trip.startedAt) : trip.from;
   const to = timed ? (trip.endedAt ? time(trip.endedAt) : "") : trip.to;
   const n = (v: number) => v.toLocaleString(lang === "vi" ? "vi-VN" : "en-US");
+  const fuelText = fuel(trip.kmPerL);
   const stats = [
     !timed && trip.endedAt ? `${time(trip.startedAt)}–${time(trip.endedAt)}` : null,
     trip.avgKmh != null ? `${n(Math.round(trip.avgKmh))} km/h` : null,
-    trip.kmPerL != null ? `${n(trip.kmPerL)} km/l` : null,
+    fuelText ? `${fuelText.value} ${fuelText.unit}` : null,
   ]
     .filter(Boolean)
     .join(" · ");

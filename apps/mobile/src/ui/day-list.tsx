@@ -7,6 +7,7 @@ import { type FuelAverage, fuelFill, fuelTone, speedBand } from "../car/behaviou
 import type { SummaryRow } from "../car/summary";
 import { useLang, useT } from "../i18n";
 import { useFormatTime } from "../i18n/format";
+import { useFuel } from "../i18n/fuel";
 import type { Trip } from "../services/car";
 import { carService } from "../services/query";
 import type { SavedTrips } from "../services/trip-places";
@@ -88,6 +89,8 @@ function DayTrip({
   const max = trip.maxKmh ?? null;
   const avgKmh = trip.avgKmh ?? null;
   const fuel = trip.kmPerL ?? null;
+  // The number follows the unit setting; the meter fill and colour stay km/l-based.
+  const fuelText = useFuel()(fuel);
   const tone = c[fuelTone(fuel, avg)];
   const dash = "–";
   const line = { height: LINE, lineHeight: LINE } as const;
@@ -103,7 +106,7 @@ function DayTrip({
         trip.minutes,
         max === null ? dash : `${n(max)} km/h`,
         avgKmh === null ? dash : `${n(avgKmh)} km/h`,
-        fuel === null ? dash : `${n(fuel, 1)} km/l`,
+        fuelText ? `${fuelText.value} ${fuelText.unit}` : dash,
       )}
       onPress={onPress}
       style={{
@@ -206,7 +209,7 @@ function DayTrip({
                 }}
               />
             </View>
-            <Value value={fuel === null ? null : n(fuel, 1)} unit="km/l" />
+            <Value value={fuelText?.value ?? null} unit={fuelText?.unit ?? ""} />
           </Metric>
         </View>
       </View>
