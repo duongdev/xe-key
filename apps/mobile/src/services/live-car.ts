@@ -2,7 +2,7 @@ import type { HondaHttp } from "@xekey/core";
 import { isSuccess, parseEnvelope, pullRemote, type RemoteKind, sendRemote } from "@xekey/core";
 import { randomUUID } from "expo-crypto";
 import * as Location from "expo-location";
-import { toSummaryRows } from "../car/summary";
+import { recentDays, toSummaryRows } from "../car/summary";
 import { type CarLocation, type CarService, type CarStatus, NoPin } from "./car";
 import { call } from "./honda";
 import {
@@ -125,6 +125,13 @@ async function remote(
   return status();
 }
 
+async function summaryRows(type: "Day" | "Month" | "Year") {
+  const res = await call((h) => h.get(`/car/trip/summary?summaryType=${type}`));
+  const env = parseEnvelope(res.json as never);
+  if (!isSuccess(env.status)) throw new Error(`honda: summary ${env.error.code}`);
+  return toSummaryRows(env.data);
+}
+
 async function dayTrips(day: number) {
   const d = new Date(day);
   const q = `day=${d.getDate()}&month=${d.getMonth() + 1}&year=${d.getFullYear()}`;
@@ -146,23 +153,21 @@ export const liveCar: CarService = {
   },
   // No PIN needed for any of these (FINDINGS Rounds 8–9); places need it (t023).
   async trips() {
-    const days = await Promise.allSettled(
-      lastDays(new Date()).map(({ day, month, year }) =>
-        dayTrips(new Date(year, month - 1, day).getTime()),
-      ),
-    );
+    // The latest days that had drives (from the summary), not just this week: ~20 trips.
+    const driven = await summaryRows("Day")
+      .then((rows) => recentDays(rows))
+      .catch(() => null);
+    const pick =
+      driven ??
+      lastDays(new Date()).map(({ day, month, year }) => new Date(year, month - 1, day).getTime());
+    const days = await Promise.allSettled(pick.map(dayTrips));
     if (days.every((d) => d.status === "rejected")) throw new Error("honda: trips failed");
     const trips = days.flatMap((d) => (d.status === "fulfilled" ? d.value : []));
     return trips.sort((a, b) => b.startedAt - a.startedAt);
   },
   async summary() {
     const [day, month, year] = await Promise.all(
-      (["Day", "Month", "Year"] as const).map(async (type) => {
-        const res = await call((h) => h.get(`/car/trip/summary?summaryType=${type}`));
-        const env = parseEnvelope(res.json as never);
-        if (!isSuccess(env.status)) throw new Error(`honda: summary ${env.error.code}`);
-        return toSummaryRows(env.data);
-      }),
+      (["Day", "Month", "Year"] as const).map(summaryRows),
     );
     return { day: day ?? [], month: month ?? [], year: year ?? [] };
   },

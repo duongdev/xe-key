@@ -180,3 +180,18 @@ export function periodBars(p: Period, rows: SummaryRow[], today: Date): Bar[] {
     };
   });
 }
+
+/**
+ * Days to read for "Recent trips" without the PIN: the latest days Honda says had drives, newest
+ * first, until about `trips` trips (`/car/trip` reads one day per call, so `maxDays` caps calls).
+ */
+export function recentDays(dayRows: SummaryRow[], trips = 20, maxDays = 10): number[] {
+  const out: number[] = [];
+  let n = 0;
+  for (const r of [...dayRows].filter((r) => r.trips > 0).sort((a, b) => b.date - a.date)) {
+    if (n >= trips || out.length >= maxDays) break;
+    out.push(r.date);
+    n += r.trips;
+  }
+  return out;
+}

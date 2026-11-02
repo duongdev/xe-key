@@ -5,6 +5,7 @@ import {
   periodOf,
   periodRange,
   periodStats,
+  recentDays,
   type SummaryRow,
   stepPeriod,
   toSummaryRows,
@@ -200,5 +201,34 @@ describe("periodIndex", () => {
     expect(periodIndex(periodOf("week", new Date(2026, 4, 12)), today)).toBe(-25);
     expect(periodIndex(periodOf("month", new Date(2025, 11, 3)), today)).toBe(-11);
     expect(periodIndex(periodOf("year", new Date(2024, 1, 1)), today)).toBe(-2);
+  });
+});
+
+describe("recentDays", () => {
+  const day = (d: number, trips: number) => ({
+    date: new Date(2026, 9, d).getTime(),
+    trips,
+    km: 1,
+    seconds: 1,
+    daySeconds: 1,
+    nightSeconds: 0,
+    avgKmh: null,
+    maxKmh: null,
+    kmPerL: null,
+    accelPct: null,
+    brakePct: null,
+  });
+  it("takes the latest driven days until enough trips, newest first", () => {
+    const rows = [day(1, 5), day(31, 2), day(20, 3), day(25, 4)];
+    expect(recentDays(rows, 8)).toEqual([
+      new Date(2026, 9, 31).getTime(),
+      new Date(2026, 9, 25).getTime(),
+      new Date(2026, 9, 20).getTime(),
+    ]);
+  });
+  it("stops at the day cap and skips days without trips", () => {
+    expect(recentDays([day(3, 0), day(2, 1), day(1, 1)], 99, 1)).toEqual([
+      new Date(2026, 9, 2).getTime(),
+    ]);
   });
 });

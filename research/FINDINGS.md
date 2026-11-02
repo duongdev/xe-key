@@ -371,3 +371,14 @@ success, engine started/stopped, and these failures:
   `warningMessage` is empty, so the bars would always be empty for us.
 - `/car/topPage` `lastDrive` is the latest `Day` summary row (same shape).
 
+## Round 10 — PIN and trip detail replies (live, 2026-11-02)
+
+Captured as shapes only (key names and value types) from Xe Key in Expo Go on the user's phone; the
+user typed the PIN.
+- `POST /auth/pin/verify` form `pin` → `{status, results: {data: {pinToken: string}, error: null}}`.
+- `GET /car/trip/detail?oid=&pinToken=` → `{status, results: {data: {oid, tripStartTime: number,
+  tripEndTime: number, tripRoute: string (encoded polyline), duration: {unit, value: string
+  "h:mm"}, mileage: {unit, value: number}, favorite: boolean}, error: null}}`. No speeds, fuel,
+  idle or place names: those come from the `/car/trip` day row and the geocoder.
+- The app loaded detail for several trips in a row on one token (no rate error seen).
+

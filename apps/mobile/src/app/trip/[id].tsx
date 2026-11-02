@@ -40,7 +40,14 @@ function Tile({ icon, label, value }: { icon: ReactNode; label: string; value: s
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           {icon}
-          <Text variant="caption" color="fg2" numberOfLines={1} style={{ fontSize: 13 }}>
+          <Text
+            variant="caption"
+            color="fg2"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+            style={{ fontSize: 13, flexShrink: 1 }}
+          >
             {label}
           </Text>
         </View>
@@ -140,7 +147,12 @@ export default function TripDetail() {
       ? { key: "max", icon: GaugeIcon, label: t.statMaxSpeed, value: `${n(trip.maxKmh)} km/h` }
       : null,
   ].filter((x) => x !== null);
-  const rows = [tiles.slice(0, 3), tiles.slice(3)].filter((r) => r.length);
+  // Even rows: 4 tiles as 2 × 2, otherwise up to 3 per row (5 = 3 + 2); a short last row stretches
+  // so every row spans the full width.
+  const cols = tiles.length === 4 ? 2 : Math.min(3, tiles.length);
+  const rows = Array.from({ length: Math.ceil(tiles.length / cols) }, (_, i) =>
+    tiles.slice(i * cols, i * cols + cols),
+  );
   const daySec = trip.daySeconds ?? null;
   const nightSec = trip.nightSeconds ?? null;
   const lit = (daySec ?? 0) + (nightSec ?? 0);
@@ -295,12 +307,6 @@ export default function TripDetail() {
             {row.map(({ key, icon: Icon, label, value }) => (
               <Tile key={key} icon={<Icon size={14} color={c.fg2} />} label={label} value={value} />
             ))}
-            {row.length < 3
-              ? Array.from({ length: 3 - row.length }, (_, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: spacer cells keep tile widths
-                  <View key={i} style={{ flex: 1, minWidth: 0 }} />
-                ))
-              : null}
           </View>
         ))}
         {lit ? (

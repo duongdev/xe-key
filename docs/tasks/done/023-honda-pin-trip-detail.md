@@ -1,6 +1,6 @@
 # 023 — honda pin, trip places and trip detail
 
-- **Status:** in-progress
+- **Status:** done
 - **Mode:** HITL (the user types the real PIN; no wrong-PIN tests on the real account)
 - **Estimate:** 1.5d
 - **Depends on:** 022
@@ -36,7 +36,7 @@ With the Honda PIN, Trips shows place names and opens a trip detail screen with 
 
 ### Layer 2 — Manual smoke (glue/IO)
 
-- [ ] The user enters the real PIN once on the phone: places load, detail opens, reply shapes recorded in FINDINGS.
+- [x] The user enters the real PIN once on the phone (Expo Go, live): places load, detail opens with the route; reply shapes in FINDINGS Round 10.
 
 ### Layer 3 — Visual review
 
@@ -62,11 +62,11 @@ With the Honda PIN, Trips shows place names and opens a trip detail screen with 
 ## Definition of Done
 
 - [x] Layer 1 tests written and green
-- [ ] Layer 2 smoke checklist completed
-- [ ] Layer 3 screenshots captured
+- [x] Layer 2 smoke checklist completed
+- [x] Layer 3 screenshots captured (simulator)
 - [x] Lint + format clean
 - [x] Typecheck clean
 - [x] Tests green
 - [x] Per-area docs updated; ADR if PIN storage differs from ADR 0005
 - [x] No commented-out code, no debug-log debris, no AI attribution
-- [ ] Task closed: status → done, file moved to `docs/tasks/done/`, t023 in commit
+- [x] Task closed: status → done, file moved to `docs/tasks/done/`, t023 in commit
