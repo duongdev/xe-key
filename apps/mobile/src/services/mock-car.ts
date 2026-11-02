@@ -245,6 +245,7 @@ export const mockCar: CarService = {
         from: null,
         to: null,
         avgKmh: row.avgKmh,
+        maxKmh: row.maxKmh,
         kmPerL: row.kmPerL,
       };
     }).reverse();

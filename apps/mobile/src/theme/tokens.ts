@@ -9,6 +9,8 @@ const dark = {
   sep: "#1F1F23",
   fg: "#F2F2F3",
   fg2: "#A1A1A8",
+  /** Small grey labels (Trips metric labels, time line above places). */
+  fg3: "#6E6E76",
   acc: "#7CC7FF",
   onacc: "#06121C",
   warn: "#FFB547",
@@ -29,6 +31,7 @@ const light: Colors = {
   sep: "#E3E3E8",
   fg: "#0B0B0C",
   fg2: "#5C5C63",
+  fg3: "#8E8E94",
   acc: "#0A6FC2",
   onacc: "#FFFFFF",
   warn: "#9A5200",

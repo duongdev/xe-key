@@ -20,7 +20,7 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import { useCar } from "../services/query";
 import { useDistance, usePhonePosition } from "../services/use-distance";
-import { iconSize, radius, space, textStyle } from "../theme/tokens";
+import { colors, iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
 import { GlassButton } from "../ui/glass";
@@ -29,6 +29,9 @@ import { SolidPressable } from "../ui/press-glass";
 import { Screen } from "../ui/screen";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
+
+/** Icons on map glass: always the dark-theme foreground (the glass is dark over satellite). */
+const MAP_FG = colors("dark").fg;
 
 const SPAN = 0.012;
 /** Apple adds its own margin above the padding; tuck the label so its bottom gap equals its left inset. */
@@ -144,6 +147,8 @@ export default function Find() {
             bottom: Math.max(0, sheetH - LEGAL_TUCK),
             left: 0,
           }}
+          // Satellite with road labels: car parks, rooftops and gates show (HANDOFF › Find).
+          mapType="hybrid"
           userInterfaceStyle={scheme}
           showsPointsOfInterests={false}
           // Your own position; shows once location is allowed (asked on this screen).
@@ -158,12 +163,20 @@ export default function Find() {
           initialRegion={regionFor(loc)}
         >
           {me ? (
-            <Polyline
-              coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
-              strokeColor={c.acc}
-              strokeWidth={2}
-              lineDashPattern={[4, 6]}
-            />
+            <>
+              {/* White casing keeps the walking line readable on satellite imagery. */}
+              <Polyline
+                coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
+                strokeColor="#FFFFFF"
+                strokeWidth={6}
+              />
+              <Polyline
+                coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
+                strokeColor={c.acc}
+                strokeWidth={3}
+                lineDashPattern={[4, 6]}
+              />
+            </>
           ) : null}
           <Marker
             coordinate={{ latitude: loc.lat, longitude: loc.lng }}
@@ -185,8 +198,8 @@ export default function Find() {
                   height: 40,
                   borderRadius: 20,
                   backgroundColor: c.acc,
-                  borderWidth: 4,
-                  borderColor: c.bg,
+                  borderWidth: 3,
+                  borderColor: "#FFFFFF",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -205,15 +218,17 @@ export default function Find() {
 
       {/* Float over the map: Liquid Glass on iOS 26+. Icons stay fg to read on any map colour. */}
       <GlassButton
+        map
         label={t.backToCar}
         symbol="chevron.left"
         onPress={() => router.back()}
         style={{ position: "absolute", top: insets.top + 6, left: space.gutter - 4 }}
       >
-        <CaretLeftIcon size={iconSize.md} color={c.fg} />
+        <CaretLeftIcon size={iconSize.md} color={MAP_FG} />
       </GlassButton>
       {loc && sheetH ? (
         <GlassButton
+          map
           label={t.recenter}
           symbol="location"
           onPress={() => {
@@ -221,7 +236,7 @@ export default function Find() {
           }}
           style={{ position: "absolute", bottom: sheetH + 12, right: space.gutter - 4 }}
         >
-          <NavigationArrowIcon size={iconSize.md} color={c.fg} />
+          <NavigationArrowIcon size={iconSize.md} color={MAP_FG} />
         </GlassButton>
       ) : null}
 

@@ -281,6 +281,11 @@ export const vi: Dict = {
   refreshFailed: "Không làm mới được",
   fitRoute: "Xem cả lộ trình",
   closeSheet: "Đóng",
+  daysCount: (n) => `${n} ngày`,
+  byMonth: "theo tháng",
+  tripSentence: (when, from, to, km, min, max, avg, fuel) =>
+    `${when}, từ ${from} đến ${to}, ${km} km trong ${min} phút, nhanh nhất ${max}, trung bình ${avg}, tiêu hao ${fuel}`,
+  metricLabels: ["Tối đa", "Trung bình", "Nhiên liệu"],
   noTrips: "Chưa có chuyến đi",
   weekdays: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
   weekdaysShort: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],

@@ -1,15 +1,9 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import {
-  LockKeyIcon,
-  MapPinIcon,
-  PathIcon,
-  SparkleIcon,
-  WarningIcon,
-  XIcon,
-} from "phosphor-react-native";
+import { LockKeyIcon, MapPinIcon, PathIcon, SparkleIcon, WarningIcon } from "phosphor-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, type ScrollViewInstance, View } from "react-native";
+import { fuelAverage, periodDays } from "../car/behaviour";
 import { type PeriodKind, periodOf } from "../car/summary";
 import { useLang, useT } from "../i18n";
 import type { Trip } from "../services/car";
@@ -22,42 +16,55 @@ import {
   openedTrip,
   usePinSession,
 } from "../services/trip-pin";
-import { lacking, withPlaces } from "../services/trip-places";
+import { lacking } from "../services/trip-places";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { DayRow } from "../ui/day-list";
 import { EmptyState } from "../ui/empty-state";
 import { PageHeader } from "../ui/page-header";
 import { askPin } from "../ui/pin-sheet";
 import { SolidPressable } from "../ui/press-glass";
 import { Screen, useBottomPad } from "../ui/screen";
-import { SummaryCard } from "../ui/summary-card";
+import { SummaryCard, usePeriodTitle } from "../ui/summary-card";
 import { Text } from "../ui/text";
 import { useToast } from "../ui/toast";
-import { TripRow, TripRowSkeleton } from "../ui/trip-row";
+import { TripRowSkeleton } from "../ui/trip-row";
 import { usePullRefresh } from "../ui/use-pull-refresh";
+
+/** Days you closed, kept for the app session. */
+const closedDays = new Set<number>();
 
 export default function Trips() {
   const bottomPad = useBottomPad();
   const { c } = useTheme();
   const t = useT();
-  const lang = useLang();
+  const _lang = useLang();
   const [today] = useState(() => new Date());
   const [kind, setKind] = useState<PeriodKind>("week");
   const [period, setPeriod] = useState(() => periodOf("week", today));
   const [picked, setPicked] = useState<number | null>(null);
   const recent = useQuery({ queryKey: ["trips"], queryFn: () => carService.trips() });
   const summary = useQuery({ queryKey: ["summary"], queryFn: () => carService.summary() });
-  const day = useQuery({
-    queryKey: ["dayTrips", picked],
-    queryFn: () => carService.dayTrips(picked ?? 0),
-    enabled: picked !== null,
-    placeholderData: keepPreviousData,
-  });
+  const qc = useQueryClient();
+  // The list under the card: days of the shown period (Year: months). The newest starts open.
+  const days = summary.data ? periodDays(summary.data, period) : [];
+  const avg = summary.data ? fuelAverage(summary.data.day, today) : { kmPerL: null, trips: 0 };
+  // Every day starts open; the ones you close stay closed for this app session.
+  const [closed, setClosed] = useState(() => new Set(closedDays));
+  const setDay = (date: number, isOpen: boolean) => {
+    if (isOpen) closedDays.delete(date);
+    else closedDays.add(date);
+    setClosed(new Set(closedDays));
+  };
+  const scroll = useRef<ScrollViewInstance>(null);
+  const listY = useRef(0);
+  const rowY = useRef(new Map<number, number>());
+  const periodTitle = usePeriodTitle(period, today);
 
   const saved = useSavedTrips();
   const pin = usePinSession();
   const toast = useToast();
-  const listed = picked === null ? (recent.data ?? []) : (day.data ?? []);
+  const listed = recent.data ?? [];
   const missing = lacking(listed, saved);
 
   // Face ID by itself, once per app session, only when listed trips lack places (HANDOFF).
@@ -98,7 +105,7 @@ export default function Trips() {
     const res = await Promise.all([
       recent.refetch(),
       summary.refetch(),
-      picked !== null ? day.refetch() : null,
+      qc.refetchQueries({ queryKey: ["dayTrips"], type: "active" }).then(() => null),
     ]);
     // Values stay; say so instead of dropping them.
     if (res.some((r) => r?.isError)) toast.show({ kind: "error", text: t.refreshFailed });
@@ -133,16 +140,13 @@ export default function Trips() {
         />
       );
 
-    const list = withPlaces(listed, saved);
-    const pickedDate = picked === null ? null : new Date(picked);
-    const header = pickedDate
-      ? `${t.weekdaysShort[pickedDate.getDay()] ?? ""} ${pickedDate.toLocaleDateString(
-          lang === "vi" ? "vi-VN" : "en-GB",
-          { day: "numeric", month: "short" },
-        )}${day.data && !day.isPlaceholderData ? ` · ${t.tripCount(day.data.length)}` : ""}`
-      : t.recentTrips;
+    const header =
+      period.kind === "year"
+        ? `${periodTitle} · ${t.byMonth}`
+        : `${periodTitle} · ${t.daysCount(days.length)}`;
     return (
       <ScrollView
+        ref={scroll}
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 12, paddingTop: 12, paddingBottom: bottomPad }}
         showsVerticalScrollIndicator={false}
@@ -170,7 +174,16 @@ export default function Trips() {
               setPeriod(p);
               setPicked(null);
             }}
-            onPick={setPicked}
+            onPick={(start) => {
+              setPicked(start);
+              if (start === null) return;
+              // A bar opens that day (others stay as they are) and brings it under the card.
+              setDay(start, true);
+              setTimeout(() => {
+                const y = rowY.current.get(start);
+                if (y !== undefined) scroll.current?.scrollTo({ y: listY.current + y - 120 });
+              }, 260);
+            }}
           />
         ) : null}
 
@@ -221,45 +234,31 @@ export default function Trips() {
           </View>
         ) : null}
 
-        {/* Always here, so a bar tap swaps its text instead of pushing the rows down. */}
-        <View
-          style={{
-            height: 36,
-            marginTop: 8,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text weight={600} accessibilityRole="header">
-            {header}
-          </Text>
-          {picked !== null ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setPicked(null)}
-              style={{
-                height: 32,
-                paddingHorizontal: 12,
-                borderRadius: 16,
-                backgroundColor: c.s1,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <XIcon size={12} color={c.fg2} />
-              <Text variant="caption" weight={600} color="fg2">
-                {t.showRecent}
-              </Text>
-            </Pressable>
-          ) : null}
-        </View>
-        <View style={{ opacity: picked !== null && day.isFetching && day.data ? 0.5 : 1 }}>
-          {(picked === null ? recent.isPending : !day.data)
+        <Text weight={600} accessibilityRole="header" style={{ marginTop: 8, height: 28 }}>
+          {header}
+        </Text>
+        <View onLayout={(e) => (listY.current = e.nativeEvent.layout.y)}>
+          {!summary.data
             ? [0, 1, 2, 3].map((i) => <TripRowSkeleton key={i} first={i === 0} />)
-            : list.map((trip, i) => (
-                <TripRow key={trip.id} trip={trip} first={i === 0} onPress={() => openTrip(trip)} />
+            : days.map((row, i) => (
+                <DayRow
+                  key={row.date}
+                  row={row}
+                  month={period.kind === "year"}
+                  open={!closed.has(row.date)}
+                  first={i === 0}
+                  saved={saved}
+                  avg={avg}
+                  onLayout={(y) => rowY.current.set(row.date, y)}
+                  onToggle={() => {
+                    if (period.kind !== "year") return setDay(row.date, closed.has(row.date));
+                    // A month in Year: the card switches to that month.
+                    setKind("month");
+                    setPeriod(periodOf("month", new Date(row.date)));
+                    setPicked(null);
+                  }}
+                  onTrip={openTrip}
+                />
               ))}
         </View>
       </ScrollView>

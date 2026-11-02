@@ -10,6 +10,7 @@ import {
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import type { ReactNode } from "react";
 import { Pressable, View, type ViewStyle } from "react-native";
+import { colors } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 
 const liquid = isLiquidGlassAvailable();
@@ -24,13 +25,17 @@ export function Glass({
   style,
   interactive,
   accessibilityRole,
+  map,
 }: {
   children?: ReactNode;
   style?: ViewStyle;
   interactive?: boolean;
   accessibilityRole?: "tablist" | "alert" | "none";
+  /** Over a satellite map: always dark glass (HANDOFF › map glass `.gm`). */
+  map?: boolean;
 }) {
-  const { c, scheme } = useTheme();
+  const { c, scheme: appScheme } = useTheme();
+  const scheme = map ? "dark" : appScheme;
   if (liquid)
     return (
       <GlassView
@@ -44,6 +49,27 @@ export function Glass({
       </GlassView>
     );
   const dark = scheme === "dark";
+  // No blur before iOS 26: map glass is a darker see-through fill with a light rim.
+  if (map)
+    return (
+      <View
+        accessibilityRole={accessibilityRole}
+        style={[
+          {
+            backgroundColor: "rgba(28,28,32,0.72)",
+            borderWidth: 0.75,
+            borderColor: "rgba(255,255,255,0.14)",
+            shadowColor: "#000",
+            shadowOpacity: 0.45,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 6 },
+          },
+          style,
+        ]}
+      >
+        {children}
+      </View>
+    );
   return (
     <View
       accessibilityRole={accessibilityRole}
@@ -76,6 +102,7 @@ export function GlassButton({
   color,
   children,
   style,
+  map,
 }: {
   label: string;
   symbol: NonNullable<ButtonProps["systemImage"]>;
@@ -84,8 +111,12 @@ export function GlassButton({
   color?: string;
   children: ReactNode;
   style?: ViewStyle;
+  /** Over a satellite map: dark map glass, white icon. */
+  map?: boolean;
 }) {
-  const { c, scheme } = useTheme();
+  const { c: appColors, scheme: appScheme } = useTheme();
+  const scheme = map ? "dark" : appScheme;
+  const c = map ? colors("dark") : appColors;
   if (liquid)
     return (
       // A fixed 44 pt box (matchContents reports 42.7 x 47.3 and sits the circle low). The native
@@ -117,7 +148,7 @@ export function GlassButton({
       </Host>
     );
   return (
-    <Glass style={{ width: 44, height: 44, borderRadius: 22, ...style }}>
+    <Glass map={map} style={{ width: 44, height: 44, borderRadius: 22, ...style }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}

@@ -62,7 +62,7 @@ function periodData(s: Summary, p: Period) {
   return { stats: periodStats(year.length ? year : months), bars: months };
 }
 
-function usePeriodTitle(p: Period, today: Date) {
+export function usePeriodTitle(p: Period, today: Date) {
   const t = useT();
   const locale = useLang() === "vi" ? "vi-VN" : "en-US";
   const month = (ms: number) => new Date(ms).toLocaleDateString(locale, { month: "short" });
