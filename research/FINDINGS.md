@@ -238,6 +238,16 @@ emergencyCall, locationSearch, tripRecent, tripSummary`.
 **Remote commands (POST, command = enum toString):**
 - `/remote/doorLock` form `command=allLock | doorUnlock`
 - `/remote/hornLight` form `command=horn-lights | lights | horn` (no "off" — lights auto-off on a timeout)
+  _APK (2026-11-02): result via `GET /remote/pullHornLightResult?carOid&clientUUID&timeStampSpecified`
+  (same params as door lock). The app waits `timeOutInterval` (raised to 30 s when under 10 s) + 3 s,
+  then pulls once; `SUCCESS` = done._
+  _Live (2026-11-02): Honda logs each horn / lights result in `/car/alertMessages` as a command
+  message ("Đèn đã bật" lights, horn+lights likewise) about 5–10 s after the POST, while the pull
+  wait is minutes. Xe Key reads that log every 5 s and confirms on the first command message after
+  the send._
+  _Failures can carry no code: "Bật đèn thất bại" / "Bật đèn và còi thất bại" with description
+  "Thao tác này không thể thực hiện khi xe đang nổ máy." — horn and lights are refused while the
+  engine runs. Successes repeat the name ("Đèn đã bật")._
 - `/remote/engine` json `command=start | stop | extend` + `vehicleControl.acSetting{acTempVal,acDefSetting}`
 - `/car/finder/location` json (POST) pings the TCU for live location (_the app never calls it;
   Find My Car only GETs the last position_)

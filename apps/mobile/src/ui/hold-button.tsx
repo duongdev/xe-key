@@ -33,6 +33,8 @@ type Props = {
   accessibilityHint?: string;
   /** Finger down/up during a hold, e.g. to show "Keep holding". */
   onHoldChange?: (holding: boolean) => void;
+  /** 68 for primary car controls; smaller for secondary rows (Find: 52). */
+  height?: number;
 };
 
 /**
@@ -52,6 +54,7 @@ export function HoldButton({
   accessibilityLabel,
   accessibilityHint,
   onHoldChange,
+  height = 68,
 }: Props) {
   const { c } = useTheme();
   const progress = useSharedValue(0);
@@ -111,8 +114,8 @@ export function HoldButton({
       <Animated.View
         style={[
           {
-            height: 68,
-            borderRadius: 34,
+            height,
+            borderRadius: height / 2,
             backgroundColor: c[bg],
             opacity: disabled ? 0.5 : 1,
             alignItems: "center",
@@ -125,7 +128,7 @@ export function HoldButton({
         {/* Clip only the fill: a clipped button would also clip its press shadow. */}
         <View
           pointerEvents="none"
-          style={{ position: "absolute", inset: 0, borderRadius: 34, overflow: "hidden" }}
+          style={{ position: "absolute", inset: 0, borderRadius: height / 2, overflow: "hidden" }}
         >
           <Animated.View
             style={[

@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useT } from "../i18n";
 import type { AcLevel, CancelToken } from "../services/car";
+import { CommandError } from "../services/honda-command";
 import { CAR_KEY, carService } from "../services/query";
 import { haptics } from "../theme/haptics";
 import { useToast } from "../ui/toast";
@@ -15,6 +16,8 @@ export function useCommand() {
   const toast = useToast();
   const t = useT();
   const resend = useRef<(kind: CommandKind) => void>(() => {});
+  // Honda's own reason for the last failure ("…khi xe đang nổ máy"), shown instead of the generic text.
+  const reason = useRef<string | null>(null);
 
   // Results go to a toast; screens show only the pending steps.
   useEffect(() => {
@@ -26,11 +29,12 @@ export function useCommand() {
     if (state.status === "failed") {
       haptics.warning();
       const kind = state.kind;
-      // Physical commands (unlock, start, extend) are never resent by a tap; the user holds again.
-      const safe = kind === "lock" || kind === "stop" || kind === "find";
+      // Physical or loud commands (unlock, start, extend, horn) are never resent by a tap; the user
+      // holds again.
+      const safe = kind === "lock" || kind === "stop" || kind === "find" || kind === "lights";
       toast.show({
         kind: "error",
-        text: t.notReached,
+        text: reason.current ?? t.notReached,
         action: safe ? { label: t.retry, onPress: () => resend.current(kind) } : undefined,
       });
       dispatch({ type: "reset" });
@@ -46,6 +50,7 @@ export function useCommand() {
       const report: typeof dispatch = (e) => {
         if (!mine.cancelled) dispatch(e);
       };
+      reason.current = null;
       dispatch({ type: "send", kind });
       try {
         const car = await carService.command(kind, report, { ...opts, cancel: mine });
@@ -58,6 +63,7 @@ export function useCommand() {
       } catch (e) {
         if (mine.cancelled) return;
         console.warn("command failed", kind, e);
+        if (e instanceof CommandError) reason.current = e.reason;
         dispatch({ type: "failed" });
       }
     },

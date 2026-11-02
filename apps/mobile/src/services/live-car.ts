@@ -22,7 +22,7 @@ import {
   toTripRoute,
   toTrips,
 } from "./honda-car";
-import { done, pullDelayMs } from "./honda-command";
+import { CommandError, done, logged, pullDelayMs, reasonText } from "./honda-command";
 import { loadCookies } from "./secret";
 
 type Obj = Record<string, unknown>;
@@ -115,15 +115,37 @@ async function remote(
   );
   if (!isSuccess(accepted.status)) {
     console.warn("command refused", kind, accepted.error.code, accepted.error.message);
-    return null;
+    throw new CommandError(reasonText(accepted.error.message));
   }
   onEvent({ type: "accepted" });
-  const deadline = Date.now() + pullDelayMs(accepted.data);
+  const deadline = Date.now() + pullDelayMs(accepted.data, kind);
+  // Horn and lights leave no trace in any status read: only Honda's result tells.
   const statusPath =
-    kind === "lock" || kind === "unlock" ? "/car/status/door" : "/car/status/engine";
+    kind === "lights" || kind === "horn"
+      ? null
+      : kind === "lock" || kind === "unlock"
+        ? "/car/status/door"
+        : "/car/status/engine";
   while (Date.now() < deadline) {
     await sleep(POLL_MS);
     if (opts?.cancel?.cancelled) return null;
+    if (!statusPath) {
+      const hit = logged(
+        toAlerts(
+          await data((h) => h.get(`/car/alertMessages?carOid=${encodeURIComponent(oid)}`)).catch(
+            () => ({}),
+          ),
+        ),
+        sentAt,
+      );
+      if (!hit) continue;
+      if (hit.ok === false) {
+        console.warn("command failed (log)", kind, hit.title, hit.text);
+        throw new CommandError(reasonText(hit.text));
+      }
+      onEvent({ type: "confirmed" });
+      return status();
+    }
     const reply = await data((h) => h.get(`${statusPath}?carOid=${encodeURIComponent(oid)}`)).catch(
       () => ({}),
     );
@@ -135,7 +157,7 @@ async function remote(
   const pulled = parseEnvelope((await call((h) => pullRemote(h, oid, kind, uuid, sentAt))).json);
   if (!isSuccess(pulled.status)) {
     console.warn("command failed", kind, pulled.error.code, pulled.error.message);
-    return null;
+    throw new CommandError(reasonText(pulled.error.message));
   }
   onEvent({ type: "confirmed" });
   return status();

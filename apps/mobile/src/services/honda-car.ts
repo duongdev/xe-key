@@ -75,6 +75,8 @@ export function toCarStatus(raw: HondaRaw): CarStatus {
 
 /** Failed command results start with a Honda code like `W001(0):` or `RTS02(29):`. */
 const FAILED = /^[A-Z]+\d+(\(\d+\))?:/;
+/** Some failures carry only a reason, no code; their name says so ("Bật đèn thất bại", live). */
+const FAILED_NAME = /thất bại|fail/i;
 
 export function toAlerts(raw: Obj): CarAlert[] {
   const list = Array.isArray(raw.messages) ? raw.messages : [];
@@ -90,7 +92,7 @@ export function toAlerts(raw: Obj): CarAlert[] {
       unread: kind === "diagnosis" && a.read !== true,
       title: str(a.name).replace(/_/g, " ").replace(/\s+/g, " ").trim(),
       text,
-      ok: kind === "command" ? !FAILED.test(text) : undefined,
+      ok: kind === "command" ? !FAILED.test(text) && !FAILED_NAME.test(str(a.name)) : undefined,
     };
   });
 }
