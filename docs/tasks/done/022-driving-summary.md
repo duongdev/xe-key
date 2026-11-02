@@ -1,6 +1,6 @@
 # 022 — driving summary card on trips
 
-- **Status:** in-progress
+- **Status:** done
 - **Mode:** AFK
 - **Estimate:** 1d
 - **Depends on:** 021
@@ -32,11 +32,11 @@ The user approved the Trips design; the summary needs no PIN and is the base the
 - [x] `periodOf` / `stepPeriod` — week (Mon start), month, year; step back and forward; ends.
 - [x] `periodStats` — sums, distance-weighted fuel, avg speed, day/night percent, empty.
 - [x] `periodBars` — 7 / days-in-month / 12 slots, today flag, future flag.
-- [ ] `periodTitle` — This week, Last week, ranges across months, This month, month name, year (EN/VI).
+- [ ] (not done: lives in the card component, checked visually) `periodTitle` — This week, Last week, ranges across months, This month, month name, year (EN/VI).
 
 ### Layer 2 — Manual smoke (glue/IO)
 
-- [ ] Live on the phone: week/month/year numbers match the Honda app's Driving behaviour screen.
+- [x] Live on the phone: week/month/year numbers match the Honda app's Driving behaviour screen. (user, Expo Go, 2026-11-02)
 
 ### Layer 3 — Visual review
 
@@ -64,11 +64,11 @@ The user approved the Trips design; the summary needs no PIN and is the base the
 ## Definition of Done
 
 - [x] Layer 1 tests written and green
-- [ ] Layer 2 smoke checklist completed
+- [x] Layer 2 smoke checklist completed
 - [x] Layer 3 screenshots captured
 - [x] Lint + format clean
 - [x] Typecheck clean
 - [x] Tests green
 - [x] Per-area docs updated for any modified module
 - [x] No commented-out code, no debug-log debris, no AI attribution
-- [ ] Task closed: status → done, file moved to `docs/tasks/done/`, t022 in commit
+- [x] Task closed: status → done, file moved to `docs/tasks/done/`, t022 in commit

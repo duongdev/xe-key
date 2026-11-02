@@ -1,6 +1,6 @@
 # 024 — trips by day (driving behaviour)
 
-- **Status:** in-progress
+- **Status:** done
 - **Mode:** AFK
 - **Estimate:** 1d
 - **Depends on:** 022, 023
@@ -32,7 +32,7 @@ The list under the Trips summary card becomes the days of the card's period, lik
 
 ### Layer 2 — Manual smoke
 
-- [ ] Live on the phone: day totals match the Honda app's Driving behaviour list.
+- [x] Live on the phone: day totals match the Honda app's Driving behaviour list. (user, Expo Go, 2026-11-02)
 
 ### Layer 3 — Visual review
 
