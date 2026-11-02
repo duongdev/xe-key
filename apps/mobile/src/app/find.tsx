@@ -1,10 +1,12 @@
 import { router } from "expo-router";
 import {
   ArrowsClockwiseIcon,
+  BellRingingIcon,
   CaretLeftIcon,
   CarProfileIcon,
   ClockIcon,
   CrosshairIcon,
+  HeadlightsIcon,
   MapPinIcon,
   NavigationArrowIcon,
   QuestionIcon,
@@ -12,9 +14,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { inFlight } from "../car/command";
+import { type CommandKind, inFlight, MAX_RETRIES } from "../car/command";
 import { freshness } from "../car/freshness";
 import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
@@ -24,6 +26,7 @@ import { colors, iconSize, radius, space, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { EmptyState } from "../ui/empty-state";
 import { GlassButton } from "../ui/glass";
+import { HoldButton } from "../ui/hold-button";
 import { PageHeader } from "../ui/page-header";
 import { SolidPressable } from "../ui/press-glass";
 import { Screen } from "../ui/screen";
@@ -50,7 +53,9 @@ export default function Find() {
   const insets = useSafeAreaInsets();
   const { data: car } = useCar();
   const { state: cmd, send } = useCommand();
-  const locating = inFlight(cmd);
+  const busy = inFlight(cmd) ? cmd : null;
+  const locating = busy?.kind === "find";
+  const [holding, setHolding] = useState(false);
   const loc = car?.location ?? null;
   const km = useDistance(loc, true);
   const name = loc?.name ?? t.carSpot;
@@ -59,7 +64,7 @@ export default function Find() {
   const [sheetH, setSheetH] = useState(0);
   const phone = usePhonePosition(loc, true);
   const me = phone ? { latitude: phone.lat, longitude: phone.lng } : null;
-  // Frame you and the car together once your position is known (Find.png: both, joined by a line).
+  // Frame you and the car together once your position is known (Find.png: both in view, no line between).
   const framed = useRef(false);
   const [ready, setReady] = useState(false);
   const edgeBack = usePanGesture({
@@ -103,6 +108,38 @@ export default function Find() {
       </Screen>
     );
   }
+
+  // A running horn / lights command turns its own button into a spinner (Find-horn.png).
+  const pending = (kind: CommandKind) => {
+    if (busy?.kind !== kind) return null;
+    const retrying = busy.status === "retrying";
+    const text = retrying
+      ? t.retryingCount(busy.attempt, MAX_RETRIES)
+      : kind === "horn"
+        ? t.honking
+        : t.flashing;
+    return (
+      <View
+        accessible
+        accessibilityLabel={text}
+        style={{
+          flex: 1,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: c.s2,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+        }}
+      >
+        <ActivityIndicator color={retrying ? c.warn : c.fg2} />
+        <Text weight={600} color={retrying ? "warn" : "fg"}>
+          {text}
+        </Text>
+      </View>
+    );
+  };
 
   const age = loc ? freshness(loc.at, now) : null;
   const ageText =
@@ -162,22 +199,6 @@ export default function Find() {
           }}
           initialRegion={regionFor(loc)}
         >
-          {me ? (
-            <>
-              {/* White casing keeps the walking line readable on satellite imagery. */}
-              <Polyline
-                coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
-                strokeColor="#FFFFFF"
-                strokeWidth={6}
-              />
-              <Polyline
-                coordinates={[me, { latitude: loc.lat, longitude: loc.lng }]}
-                strokeColor={c.acc}
-                strokeWidth={3}
-                lineDashPattern={[4, 6]}
-              />
-            </>
-          ) : null}
           <Marker
             coordinate={{ latitude: loc.lat, longitude: loc.lng }}
             anchor={{ x: 0.5, y: 0.5 }}
@@ -288,10 +309,47 @@ export default function Find() {
             ))}
           </View>
         ) : null}
+        {/* Horn and lights (HANDOFF › Find): a tap is quiet, the horn is loud so it needs a hold. */}
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          {pending("lights") ?? (
+            <SolidPressable
+              accessibilityRole="button"
+              disabled={!!busy}
+              onPress={() => send("lights")}
+              style={{
+                flex: 1,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: c.s2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                opacity: busy ? 0.5 : 1,
+              }}
+            >
+              <HeadlightsIcon size={18} color={c.fg} />
+              <Text weight={600}>{t.flashLights}</Text>
+            </SolidPressable>
+          )}
+          {pending("horn") ?? (
+            <HoldButton
+              mode="hold"
+              height={52}
+              bg="s2"
+              disabled={!!busy}
+              label={holding ? t.keepHolding : t.holdToHonk}
+              accessibilityLabel={t.holdToHonk}
+              icon={<BellRingingIcon size={18} color={c.fg} />}
+              onHoldChange={setHolding}
+              onAction={() => send("horn")}
+            />
+          )}
+        </View>
         <View style={{ flexDirection: "row", gap: 12 }}>
           <SolidPressable
             accessibilityRole="button"
-            disabled={locating}
+            disabled={!!busy}
             onPress={() => {
               send("find");
             }}

@@ -1,5 +1,14 @@
 /** Remote commands and their lifecycle. Vocabulary: CONTEXT.md › Commands. */
-export type CommandKind = "lock" | "unlock" | "start" | "stop" | "extend" | "find";
+/** `horn` = Honda horn-lights (the horn always comes with the lights). */
+export type CommandKind =
+  | "lock"
+  | "unlock"
+  | "start"
+  | "stop"
+  | "extend"
+  | "find"
+  | "lights"
+  | "horn";
 
 export type Command =
   | { status: "idle" }

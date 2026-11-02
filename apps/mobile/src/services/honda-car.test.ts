@@ -175,6 +175,20 @@ describe("toAlerts", () => {
   it("is empty when Honda sends nothing", () => {
     expect(toAlerts({})).toEqual([]);
   });
+
+  it("reads a reason without a code as failed (live: horn while the engine runs)", () => {
+    const [failed, ok] = toAlerts({
+      messages: [
+        {
+          category: "command",
+          name: "Bật đèn thất bại",
+          description: "Thao tác này không thể thực hiện khi xe đang nổ máy.",
+        },
+        { category: "command", name: "Đèn đã bật", description: "Đèn đã bật" },
+      ],
+    });
+    expect([failed?.ok, ok?.ok]).toEqual([false, true]);
+  });
 });
 
 describe("toTrips", () => {
