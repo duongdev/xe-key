@@ -45,7 +45,7 @@ const vi = {
       "Khóa & mở khóa",
       "Chạm để khóa.\nNhấn giữ để mở.",
       [
-        "Nhấn giữ 0,6 giây, không lo bấm nhầm.",
+        "Nhấn giữ 1,5 giây, không lo bấm nhầm.",
         "Màn hình chỉ đổi khi xe đã xác nhận.",
         "Kéo xuống để đánh thức xe và cập nhật.",
       ],
@@ -117,7 +117,7 @@ const vi = {
   st1: "Mở app",
   st1t: "Sinh trắc học",
   st2: "Nhấn giữ",
-  st2t: "0,6 giây",
+  st2t: "1,5 giây",
   st3: "Xe xác nhận",
   st3t: "Tự cập nhật",
   tryIt: "Thử nhấn giữ nút bên dưới",
@@ -165,7 +165,7 @@ const vi = {
     ],
     [
       "Mở khóa từ xa có an toàn không?",
-      "Mở khóa và nổ máy phải nhấn giữ 0,6 giây để tránh bấm nhầm. Bạn có thể bật thêm xác thực sinh trắc học.",
+      "Mở khóa và nổ máy phải nhấn giữ 1,5 giây để tránh bấm nhầm. Bạn có thể bật thêm xác thực sinh trắc học.",
     ],
   ] satisfies Pair[],
   h2e: "Trở thành người\ndùng đầu tiên.",
@@ -252,7 +252,7 @@ const en: Copy = {
       "Lock & unlock",
       "Tap to lock.\nHold to unlock.",
       [
-        "Hold 0.6 s, so a slip does nothing.",
+        "Hold 1.5 s, so a slip does nothing.",
         "The screen changes only when the car confirms.",
         "Pull down to wake the car and refresh.",
       ],
@@ -320,7 +320,7 @@ const en: Copy = {
   st1: "Open",
   st1t: "Biometrics",
   st2: "Hold",
-  st2t: "0.6 s",
+  st2t: "1.5 s",
   st3: "Car confirms",
   st3t: "Auto update",
   tryIt: "Try it: hold the button",
@@ -368,7 +368,7 @@ const en: Copy = {
     ],
     [
       "Is remote unlock safe?",
-      "Unlock and engine start need a 0.6 s hold, so a slip does nothing. You can also turn on a biometric check.",
+      "Unlock and engine start need a 1.5 s hold, so a slip does nothing. You can also turn on a biometric check.",
     ],
   ] satisfies Pair[],
   h2e: "Be one of\nthe first.",

@@ -10,8 +10,8 @@ import type { Copy } from "../copy";
 import { Car } from "./car";
 import s from "./hold-demo.module.css";
 
-/** Same rule as the app: 600 ms hold arms it, then a fake send before the car confirms. */
-const HOLD_MS = 600;
+/** Same rule as the app: 1.5 s hold arms it, then a fake send before the car confirms. */
+const HOLD_MS = 1500;
 const SEND_MS = 1400;
 
 type Hold = "idle" | "holding" | "sending" | "done";
