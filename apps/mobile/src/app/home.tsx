@@ -382,14 +382,26 @@ export default function Home() {
             zIndex: 1,
           }}
         >
-          <View style={{ minHeight: 44, justifyContent: "center", gap: 2 }}>
+          {/* The car name opens "Your car" (task 018). */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityHint={t.yourCar}
+            onPress={() => router.push("/car")}
+            hitSlop={6}
+            style={({ pressed }) => ({
+              minHeight: 44,
+              justifyContent: "center",
+              gap: 2,
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
             <Text variant="label" weight={600}>
               {name}
             </Text>
             <Text variant="caption" color="fg2">
               {car?.plate ?? ""}
             </Text>
-          </View>
+          </Pressable>
           <GlassButton
             label={t.settings}
             symbol="slider.horizontal.3"

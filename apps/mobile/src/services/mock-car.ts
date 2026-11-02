@@ -278,6 +278,18 @@ export const mockCar: CarService = {
   forgetPin() {
     mockPin = false;
   },
+  async hondaCar() {
+    await wait(300);
+    // No photo: shows the "No photo from Honda" path.
+    return {
+      model: car.model,
+      year: "2024",
+      vin: "MRHRV1850RP004821",
+      plate: car.plate,
+      color: "NH-883P Meteoroid Gray",
+      photo: null,
+    };
+  },
   async alerts() {
     await wait(400);
     if (scenario === "error") throw new Error("mock: alerts failed");

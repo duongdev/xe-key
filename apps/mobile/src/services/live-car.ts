@@ -1,5 +1,12 @@
 import type { HondaHttp } from "@xekey/core";
-import { isSuccess, parseEnvelope, pullRemote, type RemoteKind, sendRemote } from "@xekey/core";
+import {
+  cookieHeader,
+  isSuccess,
+  parseEnvelope,
+  pullRemote,
+  type RemoteKind,
+  sendRemote,
+} from "@xekey/core";
 import { randomUUID } from "expo-crypto";
 import * as Location from "expo-location";
 import { recentDays, toSummaryRows } from "../car/summary";
@@ -15,8 +22,10 @@ import {
   toTrips,
 } from "./honda-car";
 import { done, pullDelayMs } from "./honda-command";
+import { loadCookies } from "./secret";
 
 type Obj = Record<string, unknown>;
+const obj = (v: unknown): Obj => (v && typeof v === "object" ? (v as Obj) : {});
 
 async function data(run: (h: HondaHttp) => ReturnType<HondaHttp["get"]>): Promise<Obj> {
   const res = await call(run);
@@ -200,6 +209,23 @@ export const liveCar: CarService = {
   },
   forgetPin() {
     pinToken = null;
+  },
+  async hondaCar() {
+    const c = await car();
+    const model = obj(c.carModel);
+    const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+    const image = text(c.carImage);
+    const cookie = cookieHeader(await loadCookies());
+    return {
+      model: text(c.name) ?? "Honda",
+      year: text(model.year),
+      vin: text(c.VIN),
+      plate: null,
+      color: text(c.color),
+      photo: image
+        ? { uri: image, headers: cookie ? { Cookie: cookie } : ({} as Record<string, string>) }
+        : null,
+    };
   },
   async alerts() {
     await car();

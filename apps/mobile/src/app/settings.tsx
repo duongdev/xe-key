@@ -233,15 +233,7 @@ export default function Settings() {
                   tint="acc"
                   label={prefs.carName ?? car?.model ?? ""}
                   value={car?.plate ?? undefined}
-                  onPress={() =>
-                    Alert.prompt(
-                      t.rename,
-                      undefined,
-                      (v) => update({ carName: v.trim() || null }),
-                      "plain-text",
-                      prefs.carName ?? car?.model,
-                    )
-                  }
+                  onPress={() => router.push("/car")}
                 />,
               ]}
             </Group>

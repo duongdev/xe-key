@@ -102,6 +102,7 @@ export const carService: CarService = {
   verifyPin: (pin) => impl.verifyPin(pin),
   tripDetail: (id) => impl.tripDetail(id),
   forgetPin: () => impl.forgetPin(),
+  hondaCar: () => impl.hondaCar(),
   alerts: () => impl.alerts(),
   deleteAlert: (id) => impl.deleteAlert(id),
 };

@@ -52,6 +52,14 @@ const mockService: CarService = {
   verifyPin: async () => ({ ok: false, error: "other" }),
   tripDetail: async () => ({ route: [], from: null, to: null }),
   forgetPin: () => {},
+  hondaCar: async () => ({
+    model: "HR-V",
+    year: null,
+    vin: null,
+    plate: null,
+    color: null,
+    photo: null,
+  }),
   alerts: async () => [],
   deleteAlert: async () => {},
   command: (_kind, onEvent, opts) =>

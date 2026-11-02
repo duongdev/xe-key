@@ -91,6 +91,18 @@ export type CarAlert = {
   ok?: boolean;
 };
 
+/** What Honda says about the car itself ("Your car" › From Honda; Reset). */
+export type HondaCar = {
+  model: string;
+  year: string | null;
+  vin: string | null;
+  plate: string | null;
+  /** Honda's paint text, e.g. "NH-883P Trắng ngà". */
+  color: string | null;
+  /** Honda's car photo; needs the session cookie. Null when Honda has none. */
+  photo: { uri: string; headers: Record<string, string> } | null;
+};
+
 export interface CarService {
   /** Last snapshot Honda holds; may be old. */
   status(): Promise<CarStatus>;
@@ -111,6 +123,7 @@ export interface CarService {
   tripDetail(id: string): Promise<SavedTrip>;
   /** Drops this session's PIN token. */
   forgetPin(): void;
+  hondaCar(): Promise<HondaCar>;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }
