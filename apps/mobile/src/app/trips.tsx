@@ -124,16 +124,38 @@ function TripRow({ trip, first }: { trip: Trip; first: boolean }) {
   const time = useFormatTime();
   const now = new Date();
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const lang = useLang();
+  // Live trips have no place names (needs the Honda PIN), so their lines show start and end time.
+  const timed = trip.from === null || trip.to === null;
   const when =
     trip.startedAt >= dayStart
-      ? time(trip.startedAt)
+      ? timed
+        ? t.today
+        : time(trip.startedAt)
       : trip.startedAt >= dayStart - DAY
         ? t.yesterday
         : (t.weekdaysShort[new Date(trip.startedAt).getDay()] ?? "");
+  const from = timed ? time(trip.startedAt) : trip.from;
+  const to = timed ? (trip.endedAt ? time(trip.endedAt) : "") : trip.to;
+  const n = (v: number) => v.toLocaleString(lang === "vi" ? "vi-VN" : "en-US");
+  const stats = [
+    trip.avgKmh != null ? `${n(Math.round(trip.avgKmh))} km/h` : null,
+    trip.kmPerL != null ? `${n(trip.kmPerL)} km/l` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <View
       accessible
-      accessibilityLabel={`${when}, ${trip.from} → ${trip.to}, ${trip.km} km, ${t.minShort(trip.minutes)}`}
+      accessibilityLabel={[
+        when,
+        `${from} → ${to}`,
+        `${trip.km} km`,
+        t.minShort(trip.minutes),
+        stats,
+      ]
+        .filter(Boolean)
+        .join(", ")}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -163,11 +185,16 @@ function TripRow({ trip, first }: { trip: Trip; first: boolean }) {
       </View>
       <View style={{ flex: 1 }}>
         <Text variant="label" weight={400} color="fg2">
-          {trip.from}
+          {from}
         </Text>
         <Text variant="label" weight={600}>
-          {trip.to}
+          {to}
         </Text>
+        {stats ? (
+          <Text variant="caption" color="fg2" style={{ marginTop: 2 }}>
+            {stats}
+          </Text>
+        ) : null}
       </View>
       <View style={{ alignItems: "flex-end", gap: 4 }}>
         <View
@@ -221,7 +248,7 @@ export default function Trips() {
           icon={<PathIcon size={56} color={c.fg2} />}
           badge={<SparkleIcon size={20} color={c.acc} />}
           badgeTone="acc"
-          title={data.soon ? t.tripsSoon : t.noTrips}
+          title={t.noTrips}
         />
       );
 

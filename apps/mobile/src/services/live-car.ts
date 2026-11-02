@@ -4,7 +4,7 @@ import { randomUUID } from "expo-crypto";
 import * as Location from "expo-location";
 import type { CarLocation, CarService, CarStatus } from "./car";
 import { call } from "./honda";
-import { type HondaRaw, toAlerts, toCarStatus } from "./honda-car";
+import { type HondaRaw, lastDays, toAlerts, toCarStatus, toTrips } from "./honda-car";
 import { done, pullDelayMs } from "./honda-command";
 
 type Obj = Record<string, unknown>;
@@ -124,8 +124,19 @@ export const liveCar: CarService = {
     onEvent({ type: "confirmed" });
     return s;
   },
+  // No-PIN reads only: one /car/trip call per day. Driving score and places need the PIN (t021).
   async trips() {
-    return { trips: [], driving: null, soon: true };
+    const days = await Promise.allSettled(
+      lastDays(new Date()).map(async ({ day, month, year }) => {
+        const res = await call((h) => h.get(`/car/trip?day=${day}&month=${month}&year=${year}`));
+        const env = parseEnvelope(res.json as never);
+        if (!isSuccess(env.status)) throw new Error(`honda: trips ${env.error.code}`);
+        return toTrips(env.data);
+      }),
+    );
+    if (days.every((d) => d.status === "rejected")) throw new Error("honda: trips failed");
+    const trips = days.flatMap((d) => (d.status === "fulfilled" ? d.value : []));
+    return { trips: trips.sort((a, b) => b.startedAt - a.startedAt), driving: null };
   },
   async alerts() {
     await car();

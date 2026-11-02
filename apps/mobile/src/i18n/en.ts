@@ -190,7 +190,6 @@ export const en = {
   loading: "Loading",
   noGps: "No GPS signal",
   carSpot: "Car's last spot",
-  tripsSoon: "Trips are coming soon",
   askAgain: "Ask again",
   distanceFromYou: "Distance from you",
   sinceUpdate: "Since last update",

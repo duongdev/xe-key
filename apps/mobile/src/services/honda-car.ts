@@ -1,5 +1,5 @@
 import { RUN_S } from "../car/engine";
-import type { CarAlert, CarStatus } from "./car";
+import type { CarAlert, CarStatus, Trip } from "./car";
 
 // Honda replies are loosely typed (FINDINGS Round 7); everything is read null-safe.
 type Obj = Record<string, unknown>;
@@ -92,5 +92,37 @@ export function toAlerts(raw: Obj): CarAlert[] {
       text,
       ok: kind === "command" ? !FAILED.test(text) : undefined,
     };
+  });
+}
+
+/** `/car/trip` day replies → trips. Honda labels `mileage` "Km/h" but it is km (whole numbers). */
+export function toTrips(rows: unknown): Trip[] {
+  if (!Array.isArray(rows)) return [];
+  return rows.flatMap((r): Trip[] => {
+    const o = obj(r);
+    const startedAt = num(o.tripStartTime);
+    if (startedAt === null) return [];
+    const seconds = num(o.duration);
+    return [
+      {
+        id: str(o.oid) || String(startedAt),
+        startedAt,
+        endedAt: num(o.tripEndTime),
+        km: num(obj(o.mileage).value) ?? 0,
+        minutes: seconds === null ? 0 : Math.round(seconds / 60),
+        avgKmh: num(obj(o.avgSpeed).value),
+        kmPerL: num(obj(o.fuelConsumption).value),
+        from: null,
+        to: null,
+      },
+    ];
+  });
+}
+
+/** The 7 calendar days `/car/trip` is asked for, today first. */
+export function lastDays(today: Date) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    return { day: d.getDate(), month: d.getMonth() + 1, year: d.getFullYear() };
   });
 }
