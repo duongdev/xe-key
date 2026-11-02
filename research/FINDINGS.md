@@ -337,3 +337,14 @@ success, engine started/stopped, and these failures:
 - `resStartCounter` = remote starts used since the last drive (1 → 2 on this start; cap 2). `resStatus` `"ENGINE START IG RUN"`, `resRequester` `"TCU"` while running.
 - `resTime` = whole minutes left, updated only with the car's reports (`lastTimeCall`, ~1/min while running) and unevenly (10, 8, 6, 5, 4, 3, 3, 1). The run ended ~10 min 20 s after the start alert; the car's report flips `engine` to `false`.
 
+## Round 8 — trips without the PIN
+
+- `GET /car/trip?day=D&month=M&year=Y` returns that day's trips with the session alone (the
+  Android app also sends `uoid`; the server ignores it). Each row: `oid`, `tripStartTime`,
+  `tripEndTime` (ms), `duration` (s), `mileage.value` (whole km, unit mislabelled "Km/h"),
+  `avgSpeed`, `maxSpeed`, `fuelConsumption` (km/l), `dayDuration`/`nightDuration` (s),
+  `accelPercentage`/`brakePercentage` (value null on our car).
+- No place names or route here. The route (`tripRoute`, an encoded polyline) is only in
+  `/car/trip/detail?oid=&pinToken=`; `/car/trip/recent` and `/car/trip/favorite` also need the PIN token.
+- `/car/trip/summary?sumDay=1|7` → `INVALID_ARGUMENT`; the valid `sumDay` values are still unknown.
+

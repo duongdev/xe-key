@@ -1,3 +1,6 @@
+import { Host, Picker, Text as SwiftText } from "@expo/ui/swift-ui";
+import { accessibilityLabel, controlSize, pickerStyle, tag } from "@expo/ui/swift-ui/modifiers";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { type ReactNode, useEffect, useState } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -23,8 +26,35 @@ type Props = {
   knobIcon?: ReactNode;
 };
 
-/** A few named stops; drag or tap, knob springs to the stop (Pop, 320 ms). */
-export function SegmentedSlider({
+/**
+ * iOS 26+: the system segmented control. It brings the glass bubble drag (lift on press,
+ * magnified labels, snap) itself, so nothing here imitates it. The system draws the selection
+ * grey: SwiftUI ignores `tint` on a segmented picker.
+ */
+function NativeSlider({ options, value, onChange, label }: Props) {
+  const { scheme } = useTheme();
+  return (
+    <Host matchContents={{ vertical: true }} colorScheme={scheme}>
+      <Picker
+        selection={value}
+        onSelectionChange={(i) => onChange(i as number)}
+        modifiers={[pickerStyle("segmented"), controlSize("extraLarge"), accessibilityLabel(label)]}
+      >
+        {options.map((o, i) => (
+          <SwiftText key={o} modifiers={[tag(i)]}>
+            {o}
+          </SwiftText>
+        ))}
+      </Picker>
+    </Host>
+  );
+}
+
+/**
+ * Before iOS 26: a few named stops; drag or tap, knob springs to the stop (Pop, 320 ms) and
+ * grows a little while held.
+ */
+function SolidSlider({
   options,
   value,
   onChange,
@@ -39,7 +69,10 @@ export function SegmentedSlider({
   const reduced = useReducedMotion();
   const [w, setW] = useState(0);
   const x = useSharedValue(0);
-  const knobStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  const held = useSharedValue(1);
+  const knobStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value }, { scale: held.value }],
+  }));
   const seg = (w - 8) / options.length;
   const fontSize = height >= 56 ? 15 : 14;
 
@@ -57,6 +90,9 @@ export function SegmentedSlider({
         onChange={onChange}
         label={label}
         valueText={options[value] ?? ""}
+        onScrub={(on) => {
+          if (!reduced) held.value = withTiming(on ? 1.08 : 1, timing(on ? 160 : 180));
+        }}
         style={{ height, borderRadius: height / 2, backgroundColor: c.s1 }}
       >
         {() => (
@@ -99,3 +135,5 @@ export function SegmentedSlider({
     </View>
   );
 }
+
+export const SegmentedSlider = isLiquidGlassAvailable() ? NativeSlider : SolidSlider;

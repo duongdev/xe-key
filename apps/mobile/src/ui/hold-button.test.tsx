@@ -9,18 +9,18 @@ async function hold(mode: "hold" | "tap", ms: number) {
   const onAction = jest.fn();
   await render(<HoldButton mode={mode} label="Hold to unlock" onAction={onAction} />);
   const button = screen.getByRole("button", { name: "Hold to unlock" });
-  await fireEvent(button, "pressIn");
+  await fireEvent(button, "pressIn", { nativeEvent: { locationX: 0, locationY: 0 } });
   await act(() => new Promise((r) => setTimeout(r, ms)));
   await fireEvent(button, "pressOut");
   return onAction;
 }
 
 describe("HoldButton", () => {
-  it("sends nothing when released before 0.6 s", async () => {
+  it("sends nothing when released before 1.5 s", async () => {
     expect(await hold("hold", HOLD_MS - 50)).not.toHaveBeenCalled();
   });
 
-  it("fires once when held for 0.6 s, even if held longer", async () => {
+  it("fires once when held for 1.5 s, even if held longer", async () => {
     expect(await hold("hold", HOLD_MS + 200)).toHaveBeenCalledTimes(1);
   });
 

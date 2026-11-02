@@ -6,14 +6,15 @@ import { Text } from "./text";
 
 type Props = {
   icon: ReactNode;
-  badge: ReactNode;
-  badgeTone: "acc" | "warn";
+  badge?: ReactNode;
+  badgeTone?: "acc" | "warn";
   title: string;
+  text?: string;
   action?: { label: string; onPress: () => void };
 };
 
-/** Centered disc with a small badge, one line of text, and an optional action. */
-export function EmptyState({ icon, badge, badgeTone, title, action }: Props) {
+/** Centered disc with an optional small badge, a title, optional text, and an optional action. */
+export function EmptyState({ icon, badge, badgeTone = "acc", title, text, action }: Props) {
   const { c } = useTheme();
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 14 }}>
@@ -31,27 +32,38 @@ export function EmptyState({ icon, badge, badgeTone, title, action }: Props) {
         }}
       >
         {icon}
-        <View
-          style={{
-            position: "absolute",
-            right: 2,
-            top: 6,
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: c.bg,
-            borderWidth: 2,
-            borderColor: c[badgeTone],
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {badge}
-        </View>
+        {badge ? (
+          <View
+            style={{
+              position: "absolute",
+              right: 2,
+              top: 6,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: c.bg,
+              borderWidth: 2,
+              borderColor: c[badgeTone],
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {badge}
+          </View>
+        ) : null}
       </View>
       <Text weight={600} accessibilityRole="header">
         {title}
       </Text>
+      {text ? (
+        <Text
+          variant="caption"
+          color="fg2"
+          style={{ fontSize: 14, textAlign: "center", maxWidth: 260, marginTop: -8 }}
+        >
+          {text}
+        </Text>
+      ) : null}
       {action ? (
         <Pressable
           accessibilityRole="button"

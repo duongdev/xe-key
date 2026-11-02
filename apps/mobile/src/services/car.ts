@@ -49,7 +49,16 @@ export type CarLocation = {
   at: number;
 };
 
-export type Trip = TripSummary & { id: string; minutes: number; from: string; to: string };
+export type Trip = TripSummary & {
+  id: string;
+  minutes: number;
+  /** Place names need the Honda PIN (trip detail), so live trips have none. */
+  from: string | null;
+  to: string | null;
+  endedAt?: number | null;
+  avgKmh?: number | null;
+  kmPerL?: number | null;
+};
 export type Driving = {
   score: number;
   scoreDelta: number;
@@ -90,8 +99,7 @@ export interface CarService {
     onEvent: (e: CommandEvent) => void,
     opts?: { ac?: AcLevel; cancel?: CancelToken },
   ): Promise<CarStatus | null>;
-  /** `soon`: this service cannot read trips yet (live: needs the Honda PIN token). */
-  trips(): Promise<{ trips: Trip[]; driving: Driving | null; soon?: boolean }>;
+  trips(): Promise<{ trips: Trip[]; driving: Driving | null }>;
   alerts(): Promise<CarAlert[]>;
   deleteAlert(id: string): Promise<void>;
 }

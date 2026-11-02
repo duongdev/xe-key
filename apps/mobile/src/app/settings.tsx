@@ -21,7 +21,6 @@ import { resetLiveCar } from "../services/live-car";
 import { useCar, wipeCache } from "../services/query";
 import { password, secret } from "../services/secret";
 import { useAuth } from "../services/use-auth";
-import { haptics } from "../theme/haptics";
 import { radius } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { PageHeader } from "../ui/page-header";
@@ -145,7 +144,6 @@ export default function Settings() {
       value={prefs[key]}
       trackColor={{ true: c.acc, false: c.s2 }}
       onValueChange={async (on) => {
-        haptics.selection();
         // The setting also puts the stored Honda password behind Face ID (ADR 0005).
         if (key === "faceId" && on) {
           const res = await LocalAuthentication.authenticateAsync({

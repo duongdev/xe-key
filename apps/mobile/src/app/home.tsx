@@ -51,8 +51,10 @@ import { Appear, Shimmer } from "../ui/appear";
 import { Banner } from "../ui/banner";
 import { Button } from "../ui/button";
 import { Digits } from "../ui/digits";
+import { GlassButton } from "../ui/glass";
 import { HoldButton } from "../ui/hold-button";
 import { setLaunchTarget } from "../ui/launch-target";
+import { SolidPressable } from "../ui/press-glass";
 import { Text } from "../ui/text";
 import { useNow } from "../ui/use-now";
 import { usePullRefresh } from "../ui/use-pull-refresh";
@@ -118,6 +120,8 @@ function Chip({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      // haptics: the wake chip is a solid tap target that no shared button covers (HANDOFF › Haptics).
+      onPressIn={() => haptics.light()}
       onPress={onPress}
       hitSlop={5}
       style={{ minHeight: 44, justifyContent: "center" }}
@@ -357,9 +361,10 @@ export default function Home() {
     <>
       {offlineBanner ? <View style={{ marginBottom: 12 }}>{offlineBanner}</View> : null}
 
+      {/* The scroll view clips; 16 pt of top room lets the settings button's native press grow. */}
       <ScrollView
-        style={{ flex: 1, marginHorizontal: -space.gutter }}
-        contentContainerStyle={{ paddingHorizontal: space.gutter }}
+        style={{ flex: 1, marginHorizontal: -space.gutter, marginTop: -16 }}
+        contentContainerStyle={{ paddingHorizontal: space.gutter, paddingTop: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -370,7 +375,12 @@ export default function Home() {
         }
       >
         <View
-          style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            zIndex: 1,
+          }}
         >
           <View style={{ minHeight: 44, justifyContent: "center", gap: 2 }}>
             <Text variant="label" weight={600}>
@@ -380,21 +390,13 @@ export default function Home() {
               {car?.plate ?? ""}
             </Text>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t.settings}
+          <GlassButton
+            label={t.settings}
+            symbol="slider.horizontal.3"
             onPress={() => router.push("/settings")}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: c.s1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
           >
             <SlidersHorizontalIcon size={20} color={c.fg} />
-          </Pressable>
+          </GlassButton>
         </View>
 
         <View style={{ marginTop: 24, gap: 10 }}>
@@ -457,14 +459,7 @@ export default function Home() {
                       color={age?.unit === "live" && !wake.isPending ? c.acc : c.fg2}
                     />
                   }
-                  onPress={
-                    online && !expired && !wake.isPending
-                      ? () => {
-                          haptics.light();
-                          wake.mutate();
-                        }
-                      : undefined
-                  }
+                  onPress={online && !expired && !wake.isPending ? () => wake.mutate() : undefined}
                   text={freshText}
                 />
               </>
@@ -682,12 +677,12 @@ export default function Home() {
             />
           )}
           {car && !car.can.engine ? null : (
-            <Pressable
+            <SolidPressable
               accessibilityRole="button"
               accessibilityLabel={engineOn ? clock : t.start}
               disabled={controlsOff}
               onPress={() => router.push("/engine")}
-              style={({ pressed }) => ({
+              style={{
                 flex: 1,
                 height: 68,
                 borderRadius: 34,
@@ -698,8 +693,8 @@ export default function Home() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 10,
-                opacity: controlsOff ? 0.5 : pressed ? 0.8 : 1,
-              })}
+                opacity: controlsOff ? 0.5 : 1,
+              }}
             >
               {!online ? (
                 <WifiSlashIcon size={iconSize.md} color={c.fg2} />
@@ -716,7 +711,7 @@ export default function Home() {
                   {t.start}
                 </Text>
               )}
-            </Pressable>
+            </SolidPressable>
           )}
         </View>
       )}

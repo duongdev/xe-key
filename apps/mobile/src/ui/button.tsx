@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { ActivityIndicator, Pressable, type ViewStyle } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { ActivityIndicator, Pressable, View, type ViewStyle } from "react-native";
+import Animated from "react-native-reanimated";
 import { haptics } from "../theme/haptics";
-import { useTiming } from "../theme/motion";
 import type { Colors } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { usePressGlass } from "./press-glass";
 import { Text } from "./text";
 
 type Tone = "primary" | "neutral" | "secondary" | "warn";
@@ -38,9 +38,7 @@ export function Button({
   style,
 }: Props) {
   const { c } = useTheme();
-  const timing = useTiming();
-  const scale = useSharedValue(1);
-  const pressed = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const press = usePressGlass();
   const t = tones[tone];
 
   return (
@@ -50,12 +48,11 @@ export function Button({
       disabled={disabled || loading}
       accessibilityState={{ disabled: !!disabled, busy: !!loading }}
       onPress={onPress}
-      onPressIn={() => {
+      onTouchMove={press.handlers.onTouchMove}
+      onPressOut={press.handlers.onPressOut}
+      onPressIn={(e) => {
         haptics.light();
-        scale.value = withTiming(0.97, timing(90));
-      }}
-      onPressOut={() => {
-        scale.value = withTiming(1, timing(90));
+        press.handlers.onPressIn(e);
       }}
     >
       <Animated.View
@@ -71,19 +68,24 @@ export function Button({
             gap: 10,
             paddingHorizontal: 24,
           },
-          pressed,
+          press.lift,
           style,
         ]}
+        onLayout={press.handlers.onLayout}
       >
+        {press.layer}
         {loading ? (
           <ActivityIndicator color={c[t.fg]} />
         ) : (
-          <>
+          <View
+            pointerEvents="none"
+            style={{ flexDirection: "row", alignItems: "center", gap: 10, flexShrink: 1 }}
+          >
             {icon}
             <Text weight={600} color={t.fg} style={{ textAlign: "center", flexShrink: 1 }}>
               {label}
             </Text>
-          </>
+          </View>
         )}
       </Animated.View>
     </Pressable>

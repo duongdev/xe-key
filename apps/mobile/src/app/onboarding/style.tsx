@@ -26,6 +26,7 @@ import { pop, useTiming } from "../../theme/motion";
 import { iconSize, radius, space, textStyle } from "../../theme/tokens";
 import { useTheme } from "../../theme/use-theme";
 import { Button } from "../../ui/button";
+import { GlassButton } from "../../ui/glass";
 import { Glow } from "../../ui/glow";
 import { Screen } from "../../ui/screen";
 import { ScrubRail } from "../../ui/scrub-rail";
@@ -86,6 +87,7 @@ export default function Style() {
   // Programmatic scrolls skip onMomentumScrollEnd, so update the index here.
   const goTo = (i: number) => {
     if (i === bodyIndex) return;
+    // haptics: body carousel step; no shared carousel (HANDOFF › Haptics).
     haptics.selection();
     setBodyIndex(i);
     carousel.current?.scrollTo({ x: i * width, animated: true });
@@ -94,21 +96,22 @@ export default function Style() {
   return (
     <Screen>
       <Glow color={c.fg} opacity={0.09} style={{ left: -80, right: -80, top: 120, height: 300 }} />
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.back}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 1,
+        }}
+      >
+        <GlassButton
+          label={t.back}
+          symbol="chevron.left"
           onPress={() => router.back()}
-          style={{
-            width: 44,
-            height: 44,
-            alignItems: "center",
-            justifyContent: "center",
-            marginLeft: -10,
-          }}
+          style={{ marginLeft: -4 }}
         >
           <CaretLeftIcon size={iconSize.md} color={c.fg} />
-        </Pressable>
+        </GlassButton>
         <TextButton label={t.skip} onPress={() => done(false)} />
       </View>
       <Text style={{ ...textStyle("large"), fontSize: 30, lineHeight: 36, marginTop: 8 }}>
@@ -145,6 +148,7 @@ export default function Style() {
           contentOffset={{ x: bodyIndex * width, y: 0 }}
           onMomentumScrollEnd={(e) => {
             const i = Math.round(e.nativeEvent.contentOffset.x / width);
+            // haptics: body carousel step (see goTo).
             if (i !== bodyIndex) haptics.selection();
             setBodyIndex(i);
           }}

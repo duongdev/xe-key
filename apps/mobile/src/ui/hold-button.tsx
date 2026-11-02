@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useRef } from "react";
-import { Pressable, View } from "react-native";
+import { type GestureResponderEvent, Pressable, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,15 +10,18 @@ import Animated, {
 import { haptics } from "../theme/haptics";
 import type { Colors } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
+import { usePressGlass } from "./press-glass";
 import { Text } from "./text";
 
-export const HOLD_MS = 600;
+export const HOLD_MS = 1500;
 const RELEASE_MS = 150;
+/** Progress ticks while holding, before the armed impact at HOLD_MS. */
+const TICKS_MS = [500, 1000];
 
 type Props = {
   label: string;
   icon?: ReactNode;
-  /** `hold` arms after 0.6 s (physical/risky); `tap` acts at once (safe). */
+  /** `hold` arms after 1.5 s (physical/risky); `tap` acts at once (safe). */
   mode: "hold" | "tap";
   onAction: () => void;
   bg?: keyof Colors;
@@ -33,8 +36,8 @@ type Props = {
 };
 
 /**
- * Primary car control. Hold: linear fill 600 ms, selection tick at start, medium impact when
- * armed; releasing early springs back and sends nothing. The fill stays under Reduce Motion
+ * Primary car control. Hold: linear fill 1.5 s, selection ticks at start, 0.5 s and 1.0 s, medium
+ * impact when armed; releasing early springs back and sends nothing. The fill stays under Reduce Motion
  * (it is feedback). VoiceOver double-tap acts directly.
  */
 export function HoldButton({
@@ -52,13 +55,16 @@ export function HoldButton({
 }: Props) {
   const { c } = useTheme();
   const progress = useSharedValue(0);
-  const scale = useSharedValue(1);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const press = usePressGlass();
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clear = () => {
+    for (const id of timers.current) clearTimeout(id);
+    timers.current = [];
+  };
   const fillStyle = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
-  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const start = () => {
-    scale.value = withTiming(0.97, { duration: 90 });
+  const start = (e: GestureResponderEvent) => {
+    press.handlers.onPressIn(e);
     if (mode === "tap") {
       haptics.light();
       return;
@@ -66,21 +72,23 @@ export function HoldButton({
     haptics.selection();
     onHoldChange?.(true);
     progress.value = withTiming(1, { duration: HOLD_MS, easing: Easing.linear });
-    timer.current = setTimeout(() => {
-      timer.current = null;
-      onHoldChange?.(false);
-      haptics.medium();
-      progress.value = withTiming(0, { duration: RELEASE_MS });
-      onAction();
-    }, HOLD_MS);
+    timers.current = [
+      ...TICKS_MS.map((ms) => setTimeout(() => haptics.selection(), ms)),
+      setTimeout(() => {
+        timers.current = [];
+        onHoldChange?.(false);
+        haptics.medium();
+        progress.value = withTiming(0, { duration: RELEASE_MS });
+        onAction();
+      }, HOLD_MS),
+    ];
   };
 
   const end = () => {
-    scale.value = withTiming(1, { duration: 90 });
-    if (timer.current) {
+    press.handlers.onPressOut();
+    if (timers.current.length) {
       onHoldChange?.(false);
-      clearTimeout(timer.current);
-      timer.current = null;
+      clear();
       progress.value = withTiming(0, { duration: RELEASE_MS, easing: Easing.out(Easing.quad) });
     }
   };
@@ -94,6 +102,7 @@ export function HoldButton({
       accessibilityActions={[{ name: "activate" }]}
       onAccessibilityAction={() => !disabled && onAction()}
       disabled={disabled}
+      onTouchMove={press.handlers.onTouchMove}
       onPressIn={start}
       onPressOut={end}
       onPress={mode === "tap" ? onAction : undefined}
@@ -104,31 +113,36 @@ export function HoldButton({
           {
             height: 68,
             borderRadius: 34,
-            overflow: "hidden",
             backgroundColor: c[bg],
             opacity: disabled ? 0.5 : 1,
-            flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            gap: 10,
           },
-          pressStyle,
+          press.lift,
         ]}
+        onLayout={press.handlers.onLayout}
       >
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              backgroundColor: c[fill],
-              opacity: 0.35,
-            },
-            fillStyle,
-          ]}
-        />
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        {/* Clip only the fill: a clipped button would also clip its press shadow. */}
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", inset: 0, borderRadius: 34, overflow: "hidden" }}
+        >
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: c[fill],
+                opacity: 0.35,
+              },
+              fillStyle,
+            ]}
+          />
+        </View>
+        {press.layer}
+        <View pointerEvents="none" style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           {icon}
           <Text weight={600} color={fg} style={{ fontSize: 16 }}>
             {label}

@@ -14,7 +14,7 @@ import {
   WarningIcon,
 } from "phosphor-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -29,14 +29,15 @@ import { useCommand } from "../car/use-command";
 import { useT } from "../i18n";
 import type { AcLevel } from "../services/car";
 import { useCar } from "../services/query";
-import { haptics } from "../theme/haptics";
 import { settle, useReducedMotion } from "../theme/motion";
 import { iconSize, textStyle } from "../theme/tokens";
 import { useTheme } from "../theme/use-theme";
 import { Appear, Spin } from "../ui/appear";
 import { BusyRing } from "../ui/busy-ring";
 import { Digits } from "../ui/digits";
+import { GlassButton } from "../ui/glass";
 import { HoldButton } from "../ui/hold-button";
+import { SolidPressable } from "../ui/press-glass";
 import { Screen } from "../ui/screen";
 import { SegmentedSlider } from "../ui/segmented-slider";
 import { Text } from "../ui/text";
@@ -146,21 +147,22 @@ export default function Engine() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t.backToCar}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 1,
+        }}
+      >
+        <GlassButton
+          label={t.backToCar}
+          symbol="chevron.left"
           onPress={() => router.back()}
-          style={{
-            width: 44,
-            height: 44,
-            justifyContent: "center",
-            marginLeft: -10,
-            alignItems: "center",
-          }}
+          style={{ marginLeft: -4 }}
         >
           <CaretLeftIcon size={iconSize.md} color={c.fg} />
-        </Pressable>
+        </GlassButton>
         <Text variant="label" weight={600} accessibilityRole="header">
           {t.climate}
         </Text>
@@ -293,35 +295,32 @@ export default function Engine() {
       <View style={{ flex: 1 }} />
 
       {starting ? (
-        <Pressable
+        <SolidPressable
           accessibilityRole="button"
           onPress={() => {
-            haptics.light();
             cancel();
             toast.show({ kind: "info", text: t.noStartUsed });
           }}
-          style={({ pressed }) => ({
+          style={{
             height: 68,
             borderRadius: 34,
             backgroundColor: c.s1,
             alignItems: "center",
             justifyContent: "center",
-            opacity: pressed ? 0.7 : 1,
-          })}
+          }}
         >
           <Text weight={600}>{t.cancel}</Text>
-        </Pressable>
+        </SolidPressable>
       ) : engine.running ? (
         <View style={{ flexDirection: "row", gap: 12 }}>
-          <Pressable
+          <SolidPressable
             accessibilityRole="button"
             disabled={pending}
             onPress={() => {
-              haptics.light();
               send("stop");
             }}
-            style={({ pressed }) => ({
-              opacity: pending ? 0.5 : pressed ? 0.7 : 1,
+            style={{
+              opacity: pending ? 0.5 : 1,
               flex: 1,
               height: 68,
               borderRadius: 34,
@@ -330,12 +329,12 @@ export default function Engine() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-            })}
+            }}
           >
             <PowerIcon size={20} color={c.fg} />
             <Text weight={600}>{t.stop}</Text>
-          </Pressable>
-          <Pressable
+          </SolidPressable>
+          <SolidPressable
             accessibilityRole="button"
             accessibilityLabel={
               extend === "extend"
@@ -346,14 +345,13 @@ export default function Engine() {
             }
             disabled={pending}
             onPress={async () => {
-              haptics.light();
               if (extend === "extend") send("extend");
               else if (extend === "remind" && car?.engine.on)
                 setReminder(
                   await remindBeforeOff(car.engine.endsAt, t.reminderTitle, t.reminderBody),
                 );
             }}
-            style={({ pressed }) => ({
+            style={{
               flex: 1.6,
               height: 68,
               borderRadius: 34,
@@ -362,8 +360,8 @@ export default function Engine() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              opacity: pending ? 0.5 : pressed ? 0.8 : 1,
-            })}
+              opacity: pending ? 0.5 : 1,
+            }}
           >
             {extend === "extend" ? (
               <PlusIcon size={20} color={c.onacc} />
@@ -375,7 +373,7 @@ export default function Engine() {
             <Text weight={600} color="onacc">
               {extend === "extend" ? t.extend : extend === "remind" ? t.remindAt : t.reminderSet}
             </Text>
-          </Pressable>
+          </SolidPressable>
         </View>
       ) : starts > 0 ? (
         <HoldButton

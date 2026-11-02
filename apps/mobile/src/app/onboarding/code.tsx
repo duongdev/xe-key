@@ -64,11 +64,13 @@ export default function Code() {
       forgetCar();
       setCar(res.car);
       setState("ok");
+      // haptics: code verified / rejected; no shared form submit helper yet (HANDOFF › Haptics).
       haptics.success();
       input.current?.blur();
       return;
     }
     setState(res.error);
+    // haptics: rejected code (see above).
     haptics.warning();
     setTimeout(() => setCode(""), CLEAR_MS);
     if (!reduced) {

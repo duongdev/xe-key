@@ -1,4 +1,4 @@
-import { toAlerts, toCarStatus } from "./honda-car";
+import { lastDays, toAlerts, toCarStatus, toTrips } from "./honda-car";
 
 // Values shaped like the live probe (research/FINDINGS.md Round 7); personal data is made up.
 const raw = {
@@ -168,5 +168,51 @@ describe("toAlerts", () => {
   });
   it("is empty when Honda sends nothing", () => {
     expect(toAlerts({})).toEqual([]);
+  });
+});
+
+describe("toTrips", () => {
+  // Shape of a real /car/trip day reply (values changed).
+  const row = {
+    oid: "57752228",
+    tripStartTime: 1793529631000,
+    tripEndTime: 1793531415000,
+    duration: 1784,
+    mileage: { unit: "Km/h", value: 10 },
+    avgSpeed: { unit: "Km/h", value: 19.1 },
+    fuelConsumption: { unit: "km/l", value: 9.5 },
+    brakePercentage: { unit: "%", value: null },
+  };
+
+  it("maps a day reply, keeping missing values null", () => {
+    expect(toTrips([row, { ...row, oid: "2", avgSpeed: {}, fuelConsumption: null }])).toEqual([
+      {
+        id: "57752228",
+        startedAt: 1793529631000,
+        endedAt: 1793531415000,
+        km: 10,
+        minutes: 30,
+        avgKmh: 19.1,
+        kmPerL: 9.5,
+        from: null,
+        to: null,
+      },
+      expect.objectContaining({ id: "2", avgKmh: null, kmPerL: null }),
+    ]);
+  });
+
+  it("drops rows without a start time and tolerates a non-list", () => {
+    expect(toTrips([{ ...row, tripStartTime: null }])).toEqual([]);
+    expect(toTrips(null)).toEqual([]);
+  });
+});
+
+describe("lastDays", () => {
+  it("gives 7 dates, today first, across a month edge", () => {
+    const days = lastDays(new Date(2026, 10, 2, 9, 0));
+    expect(days).toHaveLength(7);
+    expect(days[0]).toEqual({ day: 2, month: 11, year: 2026 });
+    expect(days[2]).toEqual({ day: 31, month: 10, year: 2026 });
+    expect(days[6]).toEqual({ day: 27, month: 10, year: 2026 });
   });
 });
